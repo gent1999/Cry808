@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
@@ -21,7 +23,7 @@ const AdminDashboard = () => {
 
       try {
         // Verify token with backend
-        const response = await fetch('http://localhost:5000/api/admin/dashboard', {
+        const response = await fetch(`${API_URL}/api/admin/dashboard`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -56,7 +58,7 @@ const AdminDashboard = () => {
     setDeleteLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/auth/delete-account', {
+      const response = await fetch(`${API_URL}/api/auth/delete-account`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
