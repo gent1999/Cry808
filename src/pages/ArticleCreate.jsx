@@ -56,20 +56,25 @@ const ArticleCreate = () => {
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      const articleData = {
-        title: formData.title,
-        author: formData.author,
-        content: formData.content,
-        tags: tagsArray
-      };
+      // Create FormData object to handle file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('author', formData.author);
+      formDataToSend.append('content', formData.content);
+      formDataToSend.append('tags', JSON.stringify(tagsArray));
+
+      // Append image file if it exists
+      if (imageFile) {
+        formDataToSend.append('image', imageFile);
+      }
 
       const response = await fetch(`${API_URL}/api/articles`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
+          // Note: Don't set Content-Type header - browser will set it with boundary for FormData
         },
-        body: JSON.stringify(articleData)
+        body: formDataToSend
       });
 
       const data = await response.json();

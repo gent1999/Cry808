@@ -144,66 +144,78 @@ const ArticlesList = () => {
                 key={article.id}
                 className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-purple-500 transition-colors"
               >
-                {/* Image Preview */}
-                {article.image_url ? (
-                  <div className="h-48 overflow-hidden bg-gray-700">
-                    <img
-                      src={article.image_url}
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="h-48 bg-gradient-to-br from-purple-900 to-gray-800 flex items-center justify-center">
-                    <svg className="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
-                    {article.title}
-                  </h3>
-
-                  <p className="text-gray-400 text-sm mb-4">
-                    By {article.author} • {new Date(article.created_at).toLocaleDateString()}
-                  </p>
-
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-3">
-                    {article.content}
-                  </p>
-
-                  {/* Tags */}
-                  {article.tags && article.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {article.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                {/* Clickable Article Preview */}
+                <div
+                  onClick={() => navigate(`/article/${article.id}`)}
+                  className="cursor-pointer"
+                >
+                  {/* Image Preview */}
+                  {article.image_url ? (
+                    <div className="h-48 overflow-hidden bg-gray-700">
+                      <img
+                        src={article.image_url}
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-48 bg-gradient-to-br from-purple-900 to-gray-800 flex items-center justify-center">
+                      <svg className="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
                     </div>
                   )}
 
-                  {/* Actions */}
-                  <div className="flex gap-2 pt-4 border-t border-gray-700">
-                    <button
-                      onClick={() => navigate(`/admin/articles/edit/${article.id}`)}
-                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md transition-colors"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(article.id)}
-                      className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-md transition-colors"
-                    >
-                      Delete
-                    </button>
+                  {/* Content */}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
+                      {article.title}
+                    </h3>
+
+                    <p className="text-gray-400 text-sm mb-4">
+                      By {article.author} • {new Date(article.created_at).toLocaleDateString()}
+                    </p>
+
+                    <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                      {article.content}
+                    </p>
+
+                    {/* Tags */}
+                    {article.tags && article.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {article.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 p-6 pt-0">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/admin/articles/edit/${article.id}`);
+                    }}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(article.id);
+                    }}
+                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-md transition-colors"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
@@ -217,68 +229,80 @@ const ArticlesList = () => {
                 className="bg-gray-800 rounded-lg border border-gray-700 hover:border-purple-500 transition-colors overflow-hidden"
               >
                 <div className="flex flex-col sm:flex-row">
-                  {/* Image Preview */}
-                  {article.image_url ? (
-                    <div className="sm:w-64 h-48 sm:h-auto overflow-hidden bg-gray-700 flex-shrink-0">
-                      <img
-                        src={article.image_url}
-                        alt={article.title}
-                        className="w-full h-full object-cover"
-                      />
+                  {/* Clickable Article Preview */}
+                  <div
+                    onClick={() => navigate(`/article/${article.id}`)}
+                    className="cursor-pointer flex flex-col sm:flex-row flex-1"
+                  >
+                    {/* Image Preview */}
+                    {article.image_url ? (
+                      <div className="sm:w-64 h-48 sm:h-auto overflow-hidden bg-gray-700 flex-shrink-0">
+                        <img
+                          src={article.image_url}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="sm:w-64 h-48 sm:h-auto bg-gradient-to-br from-purple-900 to-gray-800 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Content */}
+                    <div className="flex-1 p-6">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-2">
+                          {article.title}
+                        </h3>
+
+                        <p className="text-gray-400 text-sm mb-3">
+                          By {article.author} • {new Date(article.created_at).toLocaleDateString()}
+                        </p>
+
+                        <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                          {article.content}
+                        </p>
+
+                        {/* Tags */}
+                        {article.tags && article.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {article.tags.map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  ) : (
-                    <div className="sm:w-64 h-48 sm:h-auto bg-gradient-to-br from-purple-900 to-gray-800 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                  )}
+                  </div>
 
-                  {/* Content */}
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        {article.title}
-                      </h3>
-
-                      <p className="text-gray-400 text-sm mb-3">
-                        By {article.author} • {new Date(article.created_at).toLocaleDateString()}
-                      </p>
-
-                      <p className="text-gray-300 text-sm mb-4 line-clamp-2">
-                        {article.content}
-                      </p>
-
-                      {/* Tags */}
-                      {article.tags && article.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {article.tags.map((tag, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2 pt-4 border-t border-gray-700">
-                      <button
-                        onClick={() => navigate(`/admin/articles/edit/${article.id}`)}
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(article.id)}
-                        className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-md transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                  {/* Actions */}
+                  <div className="flex gap-2 p-6 pt-0 sm:pt-6 sm:flex-col sm:justify-center sm:w-auto border-t sm:border-t-0 sm:border-l border-gray-700">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/admin/articles/edit/${article.id}`);
+                      }}
+                      className="flex-1 sm:flex-initial px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(article.id);
+                      }}
+                      className="flex-1 sm:flex-initial px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-md transition-colors"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </div>

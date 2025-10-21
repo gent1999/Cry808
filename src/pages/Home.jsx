@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
+  const navigate = useNavigate();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -55,7 +57,8 @@ export default function Home() {
             {articles.map((article) => (
               <div
                 key={article.id}
-                className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition"
+                onClick={() => navigate(`/article/${article.id}`)}
+                className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
               >
                 {/* Article Image */}
                 {article.image_url && (
