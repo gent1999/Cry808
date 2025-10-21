@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ArticleCreate from "./pages/ArticleCreate";
+import ArticlesList from "./pages/ArticlesList";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           {/* Admin Routes without Navbar */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/articles" element={<ArticlesList />} />
           <Route path="/admin/articles/create" element={<ArticleCreate />} />
         </Routes>
       </div>
