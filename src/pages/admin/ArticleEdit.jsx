@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const ArticleCreate = () => {
+const ArticleEdit = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -17,6 +19,45 @@ const ArticleCreate = () => {
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [existingImageUrl, setExistingImageUrl] = useState(null);
+
+  // Fetch article data when component mounts
+  useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/articles/${id}`);
+
+        if (!response.ok) {
+          throw new Error('Article not found');
+        }
+
+        const data = await response.json();
+        const article = data.article;
+
+        // Populate form with existing article data
+        setFormData({
+          title: article.title || '',
+          author: article.author || '',
+          content: article.content || '',
+          tags: article.tags ? article.tags.join(', ') : '',
+          spotify_url: article.spotify_url || '',
+          youtube_url: article.youtube_url || ''
+        });
+
+        // Set existing image if available
+        if (article.image_url) {
+          setExistingImageUrl(article.image_url);
+          setImagePreview(article.image_url);
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to load article');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticle();
+  }, [id]);
 
   const handleChange = (e) => {
     setFormData({
@@ -41,7 +82,7 @@ const ArticleCreate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     setError('');
 
     try {
@@ -75,13 +116,13 @@ const ArticleCreate = () => {
         formDataToSend.append('youtube_url', formData.youtube_url);
       }
 
-      // Append image file if it exists
+      // Append new image file if it exists
       if (imageFile) {
         formDataToSend.append('image', imageFile);
       }
 
-      const response = await fetch(`${API_URL}/api/articles`, {
-        method: 'POST',
+      const response = await fetch(`${API_URL}/api/articles/${id}`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
           // Note: Don't set Content-Type header - browser will set it with boundary for FormData
@@ -92,21 +133,29 @@ const ArticleCreate = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create article');
+        throw new Error(data.message || 'Failed to update article');
       }
 
-      // Redirect to dashboard on success
-      navigate('/admin/dashboard');
+      // Redirect to articles list on success
+      navigate('/admin/articles');
     } catch (err) {
       setError(err.message || 'Something went wrong');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    navigate('/admin/dashboard');
+    navigate('/admin/articles');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading article...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -114,7 +163,7 @@ const ArticleCreate = () => {
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-white">Create New Article</h1>
+            <h1 className="text-2xl font-bold text-white">Edit Article</h1>
             <div className="flex gap-3">
               <button
                 onClick={() => navigate('/')}
@@ -129,7 +178,7 @@ const ArticleCreate = () => {
                 onClick={handleCancel}
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors"
               >
-                Back to Dashboard
+                Back to Articles
               </button>
             </div>
           </div>
@@ -183,7 +232,7 @@ const ArticleCreate = () => {
             {/* Image Upload */}
             <div>
               <label htmlFor="image" className="block text-sm font-medium text-gray-300 mb-2">
-                Upload Image
+                Upload New Image {existingImageUrl && '(Optional - leave blank to keep current image)'}
               </label>
               <input
                 type="file"
@@ -195,6 +244,9 @@ const ArticleCreate = () => {
               />
               {imagePreview && (
                 <div className="mt-4">
+                  <p className="text-sm text-gray-400 mb-2">
+                    {imageFile ? 'New Image Preview:' : 'Current Image:'}
+                  </p>
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -277,17 +329,17 @@ const ArticleCreate = () => {
               <button
                 type="button"
                 onClick={handleCancel}
-                disabled={loading}
+                disabled={submitting}
                 className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={loading}
-                className="flex-1 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={submitting}
+                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Creating...' : 'Create Article'}
+                {submitting ? 'Updating...' : 'Update Article'}
               </button>
             </div>
           </form>
@@ -297,4 +349,4 @@ const ArticleCreate = () => {
   );
 };
 
-export default ArticleCreate;
+export default ArticleEdit;

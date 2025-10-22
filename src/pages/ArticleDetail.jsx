@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -33,30 +34,36 @@ const ArticleDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-xl">Loading article...</div>
+      <div className="min-h-screen bg-black text-white flex flex-col">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-xl">Loading article...</div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   if (error || !article) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">{error || 'Article not found'}</div>
-          <button
-            onClick={() => navigate('/')}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
-          >
-            Back to Home
-          </button>
+      <div className="min-h-screen bg-black text-white flex flex-col">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-400 text-xl mb-4">{error || 'Article not found'}</div>
+            <button
+              onClick={() => navigate('/')}
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Back Button */}
         <button
@@ -116,7 +123,44 @@ const ArticleDetail = () => {
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Spotify Embed */}
+        {article.spotify_url && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">Listen on Spotify</h2>
+            <div className="rounded-lg overflow-hidden">
+              <iframe
+                src={article.spotify_url.replace('open.spotify.com', 'open.spotify.com/embed')}
+                width="100%"
+                height="352"
+                frameBorder="0"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                className="rounded-lg"
+              ></iframe>
+            </div>
+          </div>
+        )}
+
+        {/* YouTube Embed */}
+        {article.youtube_url && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">Watch on YouTube</h2>
+            <div className="rounded-lg overflow-hidden aspect-video">
+              <iframe
+                src={article.youtube_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                loading="lazy"
+                className="rounded-lg"
+              ></iframe>
+            </div>
+          </div>
+        )}
+
+        {/* Back Button Section */}
         <div className="mt-12 pt-8 border-t border-white/10">
           <button
             onClick={() => navigate('/')}
@@ -126,6 +170,7 @@ const ArticleDetail = () => {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

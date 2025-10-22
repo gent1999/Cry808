@@ -6,6 +6,7 @@ import ArticleDetail from "./pages/ArticleDetail";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ArticleCreate from "./pages/admin/ArticleCreate";
+import ArticleEdit from "./pages/admin/ArticleEdit";
 import ArticlesList from "./pages/admin/ArticlesList";
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/articles" element={<ArticlesList />} />
           <Route path="/admin/articles/create" element={<ArticleCreate />} />
+          <Route path="/admin/articles/edit/:id" element={<ArticleEdit />} />
         </Routes>
       </div>
     </Router>
