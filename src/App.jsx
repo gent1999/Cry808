@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import ArticleDetail from "./pages/ArticleDetail";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import ArticleCreate from "./pages/ArticleCreate";
-import ArticlesList from "./pages/ArticlesList";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ArticleCreate from "./pages/admin/ArticleCreate";
+import ArticlesList from "./pages/admin/ArticlesList";
 
 export default function App() {
   return (
