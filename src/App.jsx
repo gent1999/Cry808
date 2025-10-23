@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
+import News from "./pages/News";
 import ArticleDetail from "./pages/ArticleDetail";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -31,6 +32,15 @@ export default function App() {
               <>
                 <Navbar />
                 <About />
+              </>
+            }
+          />
+          <Route
+            path="/news"
+            element={
+              <>
+                <Navbar />
+                <News />
               </>
             }
           />

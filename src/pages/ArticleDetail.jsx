@@ -8,6 +8,7 @@ const ArticleDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [article, setArticle] = useState(null);
+  const [moreArticles, setMoreArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -29,7 +30,23 @@ const ArticleDetail = () => {
       }
     };
 
+    const fetchMoreArticles = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/articles`);
+        if (response.ok) {
+          const data = await response.json();
+          // Filter out current article and get 3 random articles
+          const otherArticles = data.articles.filter(article => article.id !== parseInt(id));
+          const shuffled = otherArticles.sort(() => 0.5 - Math.random());
+          setMoreArticles(shuffled.slice(0, 3));
+        }
+      } catch (err) {
+        console.error('Failed to fetch more articles:', err);
+      }
+    };
+
     fetchArticle();
+    fetchMoreArticles();
   }, [id]);
 
   if (loading) {
@@ -224,6 +241,63 @@ const ArticleDetail = () => {
         </div>
         </div>
       </div>
+
+      {/* More Articles Section */}
+      {moreArticles.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-white/10">
+          <h2 className="text-3xl font-bold mb-8">More Articles</h2>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {moreArticles.map((article) => (
+              <div
+                key={article.id}
+                onClick={() => navigate(`/article/${article.id}`)}
+                className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
+              >
+                {/* Article Image */}
+                {article.image_url && (
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={article.image_url}
+                      alt={article.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Article Content */}
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-2 line-clamp-2">
+                    {article.title}
+                  </h3>
+
+                  <p className="text-white/50 text-xs mb-3">
+                    By {article.author} • {new Date(article.created_at).toLocaleDateString()}
+                  </p>
+
+                  <p className="text-white/70 text-sm line-clamp-3 mb-4">
+                    {article.content}
+                  </p>
+
+                  {/* Tags */}
+                  {article.tags && article.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {article.tags.slice(0, 3).map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

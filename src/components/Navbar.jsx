@@ -20,12 +20,6 @@ export default function Navbar() {
             <Link to="/news" className="text-white/70 hover:text-white transition">
               News
             </Link>
-            <Link to="/reviews" className="text-white/70 hover:text-white transition">
-              Reviews
-            </Link>
-            <Link to="/videos" className="text-white/70 hover:text-white transition">
-              Videos
-            </Link>
             <Link to="/interviews" className="text-white/70 hover:text-white transition">
               Interviews
             </Link>
