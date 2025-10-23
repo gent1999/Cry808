@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
+import AdSidebar from "../components/AdSidebar";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -52,7 +53,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8 justify-center">
+          <div className="flex-1">
         {loading ? (
           <div className="text-center py-12">
             <div className="text-white/70 text-lg">Loading latest articles...</div>
@@ -177,6 +179,10 @@ export default function Home() {
             )}
           </>
         )}
+          </div>
+
+          {/* Ad Sidebar */}
+          <AdSidebar />
         </div>
       </div>
       <Footer />

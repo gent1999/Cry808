@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
+import AdSidebar from '../components/AdSidebar';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -133,8 +134,9 @@ const ArticleDetail = () => {
           </button>
         </div>
 
-        {/* Main Content */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Main Content with Ad Sidebar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
+          <div className="max-w-4xl flex-1">
             {/* Back Button */}
             <button
               onClick={() => navigate('/')}
@@ -239,6 +241,10 @@ const ArticleDetail = () => {
             Back to Home
           </button>
         </div>
+          </div>
+
+          {/* Ad Sidebar */}
+          <AdSidebar />
         </div>
       </div>
 
