@@ -40,9 +40,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1">
-        <h1 className="text-4xl font-bold mb-8">Latest Hip-Hop News</h1>
+      <div className="flex-1">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-black to-black"></div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              Latest Hip-Hop News
+            </h1>
+            <div className="h-1 w-32 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+          </div>
+        </div>
 
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="text-center py-12">
             <div className="text-white/70 text-lg">Loading latest articles...</div>
@@ -167,6 +177,7 @@ export default function Home() {
             )}
           </>
         )}
+        </div>
       </div>
       <Footer />
     </div>
