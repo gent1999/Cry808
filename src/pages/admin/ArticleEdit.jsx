@@ -15,7 +15,8 @@ const ArticleEdit = () => {
     content: '',
     tags: '',
     spotify_url: '',
-    youtube_url: ''
+    youtube_url: '',
+    category: 'article'
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -41,7 +42,8 @@ const ArticleEdit = () => {
           content: article.content || '',
           tags: article.tags ? article.tags.join(', ') : '',
           spotify_url: article.spotify_url || '',
-          youtube_url: article.youtube_url || ''
+          youtube_url: article.youtube_url || '',
+          category: article.category || 'article'
         });
 
         // Set existing image if available
@@ -115,6 +117,9 @@ const ArticleEdit = () => {
       if (formData.youtube_url) {
         formDataToSend.append('youtube_url', formData.youtube_url);
       }
+
+      // Add category
+      formDataToSend.append('category', formData.category);
 
       // Append new image file if it exists
       if (imageFile) {
@@ -227,6 +232,25 @@ const ArticleEdit = () => {
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Enter author name"
               />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-2">
+                Category *
+              </label>
+              <select
+                id="category"
+                name="category"
+                required
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="article">Article</option>
+                <option value="interview">Interview</option>
+              </select>
+              <p className="mt-1 text-sm text-gray-400">Choose whether this is an article or interview</p>
             </div>
 
             {/* Image Upload */}

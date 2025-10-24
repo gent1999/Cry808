@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import News from "./pages/News";
+import Interviews from "./pages/Interviews";
 import ArticleDetail from "./pages/ArticleDetail";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -41,6 +42,15 @@ export default function App() {
               <>
                 <Navbar />
                 <News />
+              </>
+            }
+          />
+          <Route
+            path="/interviews"
+            element={
+              <>
+                <Navbar />
+                <Interviews />
               </>
             }
           />
