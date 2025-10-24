@@ -13,22 +13,16 @@ const Footer = () => {
           <Link to="/about" className="text-white/70 hover:text-white text-sm transition-colors">
             About
           </Link>
-          <Link to="/" className="text-white/70 hover:text-white text-sm transition-colors">
-            Advertise
+          <Link to="/privacy-policy" className="text-white/70 hover:text-white text-sm transition-colors">
+            Privacy Policy
           </Link>
-          <Link to="/" className="text-white/70 hover:text-white text-sm transition-colors">
-            Privacy & Policy
-          </Link>
-          <Link to="/" className="text-white/70 hover:text-white text-sm transition-colors">
+          <Link to="/submit-music" className="text-white/70 hover:text-white text-sm transition-colors">
             Submit Music
           </Link>
-          <Link to="/" className="text-white/70 hover:text-white text-sm transition-colors">
-            Contact
-          </Link>
-          <Link to="/" className="text-white/70 hover:text-white text-sm transition-colors">
+          <Link to="/dmca" className="text-white/70 hover:text-white text-sm transition-colors">
             DMCA
           </Link>
-          <Link to="/" className="text-white/70 hover:text-white text-sm transition-colors">
+          <Link to="/terms-of-use" className="text-white/70 hover:text-white text-sm transition-colors">
             Terms of Use
           </Link>
         </div>

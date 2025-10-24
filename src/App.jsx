@@ -5,6 +5,10 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import News from "./pages/News";
 import Interviews from "./pages/Interviews";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import SubmitMusic from "./pages/SubmitMusic";
+import DMCA from "./pages/DMCA";
+import TermsOfUse from "./pages/TermsOfUse";
 import ArticleDetail from "./pages/ArticleDetail";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -51,6 +55,42 @@ export default function App() {
               <>
                 <Navbar />
                 <Interviews />
+              </>
+            }
+          />
+          <Route
+            path="/privacy-policy"
+            element={
+              <>
+                <Navbar />
+                <PrivacyPolicy />
+              </>
+            }
+          />
+          <Route
+            path="/submit-music"
+            element={
+              <>
+                <Navbar />
+                <SubmitMusic />
+              </>
+            }
+          />
+          <Route
+            path="/dmca"
+            element={
+              <>
+                <Navbar />
+                <DMCA />
+              </>
+            }
+          />
+          <Route
+            path="/terms-of-use"
+            element={
+              <>
+                <Navbar />
+                <TermsOfUse />
               </>
             }
           />
