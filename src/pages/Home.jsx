@@ -253,7 +253,7 @@ export default function Home() {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/20"></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-900/30 to-pink-900/30 mix-blend-multiply"></div>
                   </div>
 
@@ -261,18 +261,18 @@ export default function Home() {
                   <div className="relative h-full flex flex-col justify-end p-6 md:p-12">
                     <div className="max-w-3xl">
                       {/* Title */}
-                      <h1 className="text-3xl md:text-5xl font-bold mb-3 leading-tight">
+                      <h1 className="text-3xl md:text-5xl font-bold mb-3 leading-tight text-white drop-shadow-lg">
                         {heroArticle.title}
                       </h1>
 
                       {/* Meta */}
-                      <p className="text-white/80 text-sm md:text-base mb-4">
+                      <p className="text-white/90 text-sm md:text-base mb-4 drop-shadow-md">
                         By {heroArticle.author} • {new Date(heroArticle.created_at).toLocaleDateString()}
                       </p>
 
                       {/* Excerpt - Hidden on mobile, shown on larger screens */}
-                      <p className="hidden md:block text-white/90 text-base mb-5 line-clamp-2">
-                        {heroArticle.content}
+                      <p className="hidden md:block text-white/80 text-base mb-5 line-clamp-2 drop-shadow-md">
+                        {heroArticle.content.substring(0, 200).replace(/\n\n---\nSource:.*$/, '').trim()}...
                       </p>
 
                       {/* Read More Button */}
