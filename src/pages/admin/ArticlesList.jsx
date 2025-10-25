@@ -56,6 +56,33 @@ const ArticlesList = () => {
     }
   };
 
+  const handleToggleFeatured = async (id, currentStatus) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+
+      // If currently featured, unset it. Otherwise, set it as featured
+      const method = currentStatus ? 'DELETE' : 'PUT';
+      const response = await fetch(`${API_URL}/api/featured/${id}`, {
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update featured status');
+      }
+
+      // Update articles state - unset all others and set the new one
+      setArticles(articles.map(article => ({
+        ...article,
+        is_featured: currentStatus ? false : article.id === id
+      })));
+    } catch (err) {
+      setError(err.message || 'Failed to update featured status');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -142,13 +169,26 @@ const ArticlesList = () => {
             {articles.map((article) => (
               <div
                 key={article.id}
-                className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-purple-500 transition-colors"
+                className={`bg-gray-800 rounded-lg overflow-hidden border transition-colors ${
+                  article.is_featured
+                    ? 'border-yellow-500 shadow-lg shadow-yellow-500/20'
+                    : 'border-gray-700 hover:border-purple-500'
+                }`}
               >
                 {/* Clickable Article Preview */}
                 <div
                   onClick={() => navigate(`/article/${article.id}`)}
-                  className="cursor-pointer"
+                  className="cursor-pointer relative"
                 >
+                  {/* Featured Badge */}
+                  {article.is_featured && (
+                    <div className="absolute top-2 right-2 z-10 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      FEATURED
+                    </div>
+                  )}
                   {/* Image Preview */}
                   {article.image_url ? (
                     <div className="h-48 overflow-hidden bg-gray-700">
@@ -197,25 +237,40 @@ const ArticlesList = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 p-6 pt-0">
+                <div className="p-6 pt-0 space-y-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/admin/articles/edit/${article.id}`);
+                      handleToggleFeatured(article.id, article.is_featured);
                     }}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md transition-colors"
+                    className={`w-full px-4 py-2 text-white text-sm font-semibold rounded-md transition-colors ${
+                      article.is_featured
+                        ? 'bg-yellow-600 hover:bg-yellow-700'
+                        : 'bg-gray-600 hover:bg-gray-700'
+                    }`}
                   >
-                    Edit
+                    {article.is_featured ? '⭐ Remove Featured' : '☆ Set as Featured'}
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(article.id);
-                    }}
-                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-md transition-colors"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/admin/articles/edit/${article.id}`);
+                      }}
+                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(article.id);
+                      }}
+                      className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-md transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -226,14 +281,27 @@ const ArticlesList = () => {
             {articles.map((article) => (
               <div
                 key={article.id}
-                className="bg-gray-800 rounded-lg border border-gray-700 hover:border-purple-500 transition-colors overflow-hidden"
+                className={`rounded-lg border transition-colors overflow-hidden ${
+                  article.is_featured
+                    ? 'bg-gray-800 border-yellow-500 shadow-lg shadow-yellow-500/20'
+                    : 'bg-gray-800 border-gray-700 hover:border-purple-500'
+                }`}
               >
                 <div className="flex flex-col sm:flex-row">
                   {/* Clickable Article Preview */}
                   <div
                     onClick={() => navigate(`/article/${article.id}`)}
-                    className="cursor-pointer flex flex-col sm:flex-row flex-1"
+                    className="cursor-pointer flex flex-col sm:flex-row flex-1 relative"
                   >
+                    {/* Featured Badge */}
+                    {article.is_featured && (
+                      <div className="absolute top-2 right-2 z-10 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        FEATURED
+                      </div>
+                    )}
                     {/* Image Preview */}
                     {article.image_url ? (
                       <div className="sm:w-64 h-48 sm:h-auto overflow-hidden bg-gray-700 flex-shrink-0">
@@ -285,6 +353,19 @@ const ArticlesList = () => {
 
                   {/* Actions */}
                   <div className="flex gap-2 p-6 pt-0 sm:pt-6 sm:flex-col sm:justify-center sm:w-auto border-t sm:border-t-0 sm:border-l border-gray-700">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleFeatured(article.id, article.is_featured);
+                      }}
+                      className={`flex-1 sm:flex-initial px-6 py-2 text-white text-sm font-semibold rounded-md transition-colors ${
+                        article.is_featured
+                          ? 'bg-yellow-600 hover:bg-yellow-700'
+                          : 'bg-gray-600 hover:bg-gray-700'
+                      }`}
+                    >
+                      {article.is_featured ? '⭐' : '☆'}
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

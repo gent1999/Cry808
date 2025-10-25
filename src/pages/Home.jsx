@@ -21,6 +21,14 @@ export default function Home() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
+        // Fetch featured article
+        const featuredResponse = await fetch(`${API_URL}/api/articles/featured/article`);
+        const featuredData = await featuredResponse.json();
+
+        // Set featured article as hero
+        setHeroArticle(featuredData.article);
+
+        // Fetch all articles
         const response = await fetch(`${API_URL}/api/articles`);
 
         if (!response.ok) {
@@ -30,11 +38,11 @@ export default function Home() {
         const data = await response.json();
         const sortedArticles = data.articles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        // Set the most recent article as hero
-        setHeroArticle(sortedArticles[0]);
+        // Filter out the featured article from the grid
+        const filteredArticles = sortedArticles.filter(article => article.id !== featuredData.article?.id);
 
         // Get the rest for the mixed grid (max 8 items)
-        setMixedContent(sortedArticles.slice(1, 9));
+        setMixedContent(filteredArticles.slice(0, 8));
 
         // Extract and count tags for trending section
         const tagCounts = {};
