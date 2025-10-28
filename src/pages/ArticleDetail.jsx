@@ -191,7 +191,34 @@ const ArticleDetail = () => {
         {/* Article Content */}
         <div className="prose prose-invert prose-lg max-w-none">
           <div className="text-white/90 leading-relaxed whitespace-pre-wrap">
-            {article.content}
+            {article.content.split('\n').map((line, index) => {
+              // Check if line contains a URL (for source links)
+              const urlMatch = line.match(/(https?:\/\/[^\s]+)/g);
+              if (urlMatch) {
+                const parts = line.split(/(https?:\/\/[^\s]+)/g);
+                return (
+                  <div key={index}>
+                    {parts.map((part, i) => {
+                      if (part.match(/^https?:\/\//)) {
+                        return (
+                          <a
+                            key={i}
+                            href={part}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-400 hover:text-purple-300 underline"
+                          >
+                            {part}
+                          </a>
+                        );
+                      }
+                      return part;
+                    })}
+                  </div>
+                );
+              }
+              return <div key={index}>{line || '\u00A0'}</div>;
+            })}
           </div>
         </div>
 
