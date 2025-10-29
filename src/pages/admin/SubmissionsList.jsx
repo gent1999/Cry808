@@ -15,9 +15,24 @@ const SubmissionsList = () => {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/submissions`);
+        const token = localStorage.getItem('adminToken');
+
+        if (!token) {
+          navigate('/admin/login');
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/api/submissions`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            navigate('/admin/login');
+            return;
+          }
           throw new Error('Failed to fetch submissions');
         }
 
@@ -31,7 +46,7 @@ const SubmissionsList = () => {
     };
 
     fetchSubmissions();
-  }, []);
+  }, [navigate]);
 
   const formatPrice = (cents) => {
     return `$${(cents / 100).toFixed(2)}`;
