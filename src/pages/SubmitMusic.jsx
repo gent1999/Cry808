@@ -34,15 +34,30 @@ function CheckoutForm({ formData, onSuccess }) {
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
       // Payment successful, save submission
       try {
+        // Create FormData to handle file uploads
+        const submitFormData = new FormData();
+        submitFormData.append('artist_name', formData.artist_name);
+        submitFormData.append('email', formData.email);
+        submitFormData.append('content', formData.content || '');
+        submitFormData.append('submission_type', formData.submission_type);
+        submitFormData.append('payment_id', paymentIntent.id);
+
+        if (formData.youtube_url) {
+          submitFormData.append('youtube_url', formData.youtube_url);
+        }
+        if (formData.spotify_url) {
+          submitFormData.append('spotify_url', formData.spotify_url);
+        }
+        if (formData.image) {
+          submitFormData.append('image', formData.image);
+        }
+        if (formData.document) {
+          submitFormData.append('document', formData.document);
+        }
+
         const response = await fetch(`${API_URL}/api/submissions/submit`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...formData,
-            payment_id: paymentIntent.id,
-          }),
+          body: submitFormData, // Send as FormData, not JSON
         });
 
         if (response.ok) {
@@ -86,8 +101,13 @@ export default function SubmitMusic() {
     content: '',
     youtube_url: '',
     spotify_url: '',
-    submission_type: '' // 'regular' or 'featured'
+    submission_type: '', // 'regular' or 'featured'
+    image: null, // File object
+    document: null // File object for txt/doc/pdf
   });
+  const [imagePreview, setImagePreview] = useState(null);
+  const [documentName, setDocumentName] = useState(null);
+  const [contentMethod, setContentMethod] = useState('text'); // 'text' or 'file'
   const [clientSecret, setClientSecret] = useState('');
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -98,6 +118,60 @@ export default function SubmitMusic() {
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({ ...prev, image: 'Image must be less than 5MB' }));
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setErrors(prev => ({ ...prev, image: 'Only image files are allowed' }));
+        return;
+      }
+
+      setFormData(prev => ({ ...prev, image: file }));
+      setErrors(prev => ({ ...prev, image: '' }));
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDocumentChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        setErrors(prev => ({ ...prev, document: 'Document must be less than 10MB' }));
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = [
+        'text/plain',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors(prev => ({ ...prev, document: 'Only txt, doc, docx, and pdf files are allowed' }));
+        return;
+      }
+
+      setFormData(prev => ({ ...prev, document: file, content: '' }));
+      setDocumentName(file.name);
+      setErrors(prev => ({ ...prev, document: '', content: '' }));
     }
   };
 
@@ -114,12 +188,23 @@ export default function SubmitMusic() {
       newErrors.email = 'Email is invalid';
     }
 
-    if (!formData.content.trim()) {
-      newErrors.content = 'Content is required';
-    } else if (formData.content.trim().length < 300) {
-      newErrors.content = 'Content must be at least 300 characters';
-    } else if (formData.content.trim().length > 800) {
-      newErrors.content = 'Content must not exceed 800 characters';
+    // Either content OR document is required
+    const hasContent = formData.content && formData.content.trim().length > 0;
+    const hasDocument = formData.document !== null;
+
+    if (!hasContent && !hasDocument) {
+      newErrors.content = 'Either type content or upload a document';
+    } else if (hasContent && !hasDocument) {
+      // Validate text content only if no document
+      if (formData.content.trim().length < 300) {
+        newErrors.content = 'Content must be at least 300 characters';
+      } else if (formData.content.trim().length > 800) {
+        newErrors.content = 'Content must not exceed 800 characters';
+      }
+    }
+
+    if (!formData.image) {
+      newErrors.image = 'Cover image is required';
     }
 
     setErrors(newErrors);
@@ -392,32 +477,155 @@ export default function SubmitMusic() {
                     {errors.email && <p className="mt-2 text-red-400 text-sm">{errors.email}</p>}
                   </div>
 
-                  {/* Content */}
+                  {/* Content - Text or File */}
                   <div>
                     <label className="block text-white/90 font-semibold mb-2">
                       Article Content <span className="text-red-400">*</span>
                     </label>
-                    <p className="text-white/60 text-sm mb-2">
-                      Write about your music, tell your story, describe the sound (300-800 words)
+                    <p className="text-white/60 text-sm mb-3">
+                      Choose one: Type your content (300-800 characters) OR upload a document file
                     </p>
-                    <textarea
-                      name="content"
-                      value={formData.content}
-                      onChange={handleInputChange}
-                      placeholder="Tell us about your music..."
-                      rows="8"
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                    ></textarea>
-                    <div className="flex justify-between items-center mt-2">
-                      {errors.content && <p className="text-red-400 text-sm">{errors.content}</p>}
-                      <p className={`text-sm ml-auto ${
-                        formData.content.length < 300 ? 'text-white/40' :
-                        formData.content.length > 800 ? 'text-red-400' :
-                        'text-green-400'
-                      }`}>
-                        {formData.content.length} / 800 characters
-                      </p>
+
+                    {/* Toggle Buttons */}
+                    <div className="flex gap-3 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setContentMethod('text');
+                          setFormData(prev => ({ ...prev, document: null }));
+                          setDocumentName(null);
+                          setErrors(prev => ({ ...prev, document: '' }));
+                        }}
+                        className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                          contentMethod === 'text'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-white/10 text-white/60 hover:bg-white/20'
+                        }`}
+                      >
+                        ✍️ Type Text
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setContentMethod('file');
+                          setFormData(prev => ({ ...prev, content: '' }));
+                          setErrors(prev => ({ ...prev, content: '' }));
+                        }}
+                        className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                          contentMethod === 'file'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-white/10 text-white/60 hover:bg-white/20'
+                        }`}
+                      >
+                        📄 Upload File
+                      </button>
                     </div>
+
+                    {/* Text Input */}
+                    {contentMethod === 'text' && (
+                      <>
+                        <textarea
+                          name="content"
+                          value={formData.content}
+                          onChange={handleInputChange}
+                          placeholder="Tell us about your music, your story, your sound..."
+                          rows="8"
+                          className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                        ></textarea>
+                        <div className="flex justify-between items-center mt-2">
+                          {errors.content && <p className="text-red-400 text-sm">{errors.content}</p>}
+                          <p className={`text-sm ml-auto ${
+                            formData.content.length < 300 ? 'text-white/40' :
+                            formData.content.length > 800 ? 'text-red-400' :
+                            'text-green-400'
+                          }`}>
+                            {formData.content.length} / 800 characters
+                          </p>
+                        </div>
+                      </>
+                    )}
+
+                    {/* File Upload */}
+                    {contentMethod === 'file' && (
+                      <>
+                        <input
+                          type="file"
+                          accept=".txt,.doc,.docx,.pdf"
+                          onChange={handleDocumentChange}
+                          className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 file:cursor-pointer"
+                        />
+                        {documentName && (
+                          <div className="mt-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <div>
+                                <p className="text-white font-semibold">{documentName}</p>
+                                <p className="text-green-400 text-sm">Document uploaded successfully</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, document: null }));
+                                setDocumentName(null);
+                              }}
+                              className="text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                        {errors.document && <p className="mt-2 text-red-400 text-sm">{errors.document}</p>}
+                        {errors.content && <p className="mt-2 text-red-400 text-sm">{errors.content}</p>}
+                        <p className="text-white/50 text-xs mt-2">
+                          Accepted formats: .txt, .doc, .docx, .pdf (max 10MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Image Upload */}
+                  <div>
+                    <label className="block text-white/90 font-semibold mb-2">
+                      Cover Image <span className="text-red-400">*</span>
+                    </label>
+                    <p className="text-white/60 text-sm mb-2">
+                      Upload a cover image for your article (max 5MB)
+                    </p>
+                    <div className="space-y-4">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 file:cursor-pointer"
+                      />
+                      {imagePreview && (
+                        <div className="relative">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-64 object-cover rounded-lg border border-white/20"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, image: null }));
+                              setImagePreview(null);
+                            }}
+                            className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-colors"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {errors.image && <p className="mt-2 text-red-400 text-sm">{errors.image}</p>}
                   </div>
 
                   {/* YouTube URL */}

@@ -13,7 +13,8 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({
     total: 0,
     published: 0,
-    drafts: 0
+    drafts: 0,
+    submissions: 0
   });
 
   useEffect(() => {
@@ -43,14 +44,29 @@ const AdminDashboard = () => {
 
         // Fetch article stats
         const articlesResponse = await fetch(`${API_URL}/api/articles`);
+        const submissionsResponse = await fetch(`${API_URL}/api/submissions`);
+
+        let articleStats = { total: 0, published: 0, drafts: 0 };
+        let submissionsCount = 0;
+
         if (articlesResponse.ok) {
           const articlesData = await articlesResponse.json();
-          setStats({
+          articleStats = {
             total: articlesData.count,
             published: articlesData.count, // For now, all articles are published
             drafts: 0 // No draft functionality yet
-          });
+          };
         }
+
+        if (submissionsResponse.ok) {
+          const submissionsData = await submissionsResponse.json();
+          submissionsCount = submissionsData.count;
+        }
+
+        setStats({
+          ...articleStats,
+          submissions: submissionsCount
+        });
       } catch (err) {
         setError('Session expired. Please login again.');
         setTimeout(() => {
@@ -153,7 +169,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <div className="flex items-center justify-between">
               <div>
@@ -195,12 +211,29 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+
+          <div
+            onClick={() => navigate('/admin/submissions')}
+            className="bg-gray-800 rounded-lg p-6 border border-gray-700 cursor-pointer hover:border-purple-500 transition-colors"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Submissions</p>
+                <p className="text-3xl font-bold text-white mt-1">{stats.submissions}</p>
+              </div>
+              <div className="bg-purple-500/20 p-3 rounded-full">
+                <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Quick Actions */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700 mb-8">
           <h3 className="text-xl font-bold text-white mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               onClick={() => navigate('/admin/articles/create')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
@@ -212,6 +245,15 @@ const AdminDashboard = () => {
               className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
             >
               View All Articles
+            </button>
+            <button
+              onClick={() => navigate('/admin/submissions')}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+              View Submissions
             </button>
           </div>
         </div>
