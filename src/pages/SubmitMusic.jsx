@@ -198,8 +198,8 @@ export default function SubmitMusic() {
       // Validate text content only if no document
       if (formData.content.trim().length < 300) {
         newErrors.content = 'Content must be at least 300 characters';
-      } else if (formData.content.trim().length > 800) {
-        newErrors.content = 'Content must not exceed 800 characters';
+      } else if (formData.content.trim().length > 5000) {
+        newErrors.content = 'Content must not exceed 5000 characters';
       }
     }
 
@@ -483,7 +483,7 @@ export default function SubmitMusic() {
                       Article Content <span className="text-red-400">*</span>
                     </label>
                     <p className="text-white/60 text-sm mb-3">
-                      Choose one: Type your content (300-800 characters) OR upload a document file
+                      Choose one: Type your content (300-5000 characters) OR upload a document file
                     </p>
 
                     {/* Toggle Buttons */}
@@ -536,10 +536,10 @@ export default function SubmitMusic() {
                           {errors.content && <p className="text-red-400 text-sm">{errors.content}</p>}
                           <p className={`text-sm ml-auto ${
                             formData.content.length < 300 ? 'text-white/40' :
-                            formData.content.length > 800 ? 'text-red-400' :
+                            formData.content.length > 5000 ? 'text-red-400' :
                             'text-green-400'
                           }`}>
-                            {formData.content.length} / 800 characters
+                            {formData.content.length} / 5000 characters
                           </p>
                         </div>
                       </>
