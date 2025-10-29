@@ -38,6 +38,7 @@ function CheckoutForm({ formData, onSuccess }) {
         const submitFormData = new FormData();
         submitFormData.append('artist_name', formData.artist_name);
         submitFormData.append('email', formData.email);
+        submitFormData.append('title', formData.title);
         submitFormData.append('content', formData.content || '');
         submitFormData.append('submission_type', formData.submission_type);
         submitFormData.append('payment_id', paymentIntent.id);
@@ -98,6 +99,7 @@ export default function SubmitMusic() {
   const [formData, setFormData] = useState({
     artist_name: '',
     email: '',
+    title: '',
     content: '',
     youtube_url: '',
     spotify_url: '',
@@ -186,6 +188,10 @@ export default function SubmitMusic() {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
+    }
+
+    if (!formData.title.trim()) {
+      newErrors.title = 'Title is required';
     }
 
     // Either content OR document is required
@@ -475,6 +481,22 @@ export default function SubmitMusic() {
                       className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                     {errors.email && <p className="mt-2 text-red-400 text-sm">{errors.email}</p>}
+                  </div>
+
+                  {/* Title */}
+                  <div>
+                    <label className="block text-white/90 font-semibold mb-2">
+                      Article Title <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      placeholder="Enter a catchy title for your article"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                    {errors.title && <p className="mt-2 text-red-400 text-sm">{errors.title}</p>}
                   </div>
 
                   {/* Content - Text or File */}

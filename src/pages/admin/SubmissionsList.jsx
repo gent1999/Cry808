@@ -137,6 +137,11 @@ const SubmissionsList = () => {
                       <h3 className="text-xl font-bold text-white mb-2">
                         {submission.artist_name}
                       </h3>
+                      {submission.title && (
+                        <p className="text-purple-400 font-semibold mb-2">
+                          "{submission.title}"
+                        </p>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getSubmissionTypeColor(submission.submission_type)}`}>
                           {getSubmissionTypeLabel(submission.submission_type)}
@@ -332,6 +337,18 @@ const SubmissionsList = () => {
                   </p>
                 </div>
               </div>
+
+              {/* Title */}
+              {selectedSubmission.title && (
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-2">Article Title</h3>
+                  <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                    <p className="text-purple-300 text-xl font-bold">
+                      {selectedSubmission.title}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Image */}
               {selectedSubmission.image_url && (
