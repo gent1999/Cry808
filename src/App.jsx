@@ -9,6 +9,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import SubmitMusic from "./pages/SubmitMusic";
 import DMCA from "./pages/DMCA";
 import TermsOfUse from "./pages/TermsOfUse";
+import Contact from "./pages/Contact";
 import ArticleDetail from "./pages/ArticleDetail";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -92,6 +93,15 @@ export default function App() {
               <>
                 <Navbar />
                 <TermsOfUse />
+              </>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <>
+                <Navbar />
+                <Contact />
               </>
             }
           />

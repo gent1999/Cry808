@@ -90,7 +90,7 @@ export default function Navbar() {
           </Link>
 
           {/* Search Bar & Nav Links */}
-          <div className="hidden md:flex items-center space-x-4 flex-1 max-w-2xl mx-8">
+          <div className="hidden md:flex items-center space-x-4 flex-1 max-w-4xl mx-8">
             {/* Search */}
             <form onSubmit={handleSearchSubmit} className="relative flex-1">
               <input
@@ -167,6 +167,26 @@ export default function Navbar() {
               >
                 Interviews
               </Link>
+              <Link
+                to="/about"
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+                  isActive('/about')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                About
+              </Link>
+              <Link
+                to="/contact"
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+                  isActive('/contact')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Contact
+              </Link>
             </div>
           </div>
 
@@ -223,6 +243,28 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               Interviews
+            </Link>
+            <Link
+              to="/about"
+              className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                isActive('/about')
+                  ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                  : 'text-white/70 hover:text-white hover:bg-white/5'
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              About
+            </Link>
+            <Link
+              to="/contact"
+              className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                isActive('/contact')
+                  ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                  : 'text-white/70 hover:text-white hover:bg-white/5'
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
             </Link>
           </div>
         </div>
