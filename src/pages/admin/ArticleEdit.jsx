@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import SimpleMDE from 'react-simplemde-editor';
+import 'easymde/dist/easymde.min.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -21,6 +23,26 @@ const ArticleEdit = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [existingImageUrl, setExistingImageUrl] = useState(null);
+
+  // Markdown editor configuration
+  const editorOptions = useMemo(() => ({
+    spellChecker: false,
+    placeholder: 'Write your article content here... (Supports Markdown)',
+    status: ['lines', 'words', 'cursor'],
+    toolbar: [
+      'bold', 'italic', 'heading', '|',
+      'quote', 'unordered-list', 'ordered-list', '|',
+      'link', 'image', '|',
+      'preview', 'side-by-side', 'fullscreen', '|',
+      'guide'
+    ],
+    autofocus: false,
+    autosave: {
+      enabled: true,
+      uniqueId: `article-edit-${id}`,
+      delay: 1000,
+    },
+  }), [id]);
 
   // Fetch article data when component mounts
   useEffect(() => {
@@ -334,18 +356,21 @@ const ArticleEdit = () => {
             {/* Content */}
             <div>
               <label htmlFor="content" className="block text-sm font-medium text-gray-300 mb-2">
-                Content *
+                Content * (Markdown Supported)
               </label>
-              <textarea
-                id="content"
-                name="content"
-                required
-                rows={12}
-                value={formData.content}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-y"
-                placeholder="Write your article content here..."
-              />
+              <div className="markdown-editor-wrapper">
+                <SimpleMDE
+                  value={formData.content}
+                  onChange={(value) => {
+                    setFormData({
+                      ...formData,
+                      content: value
+                    });
+                    setError('');
+                  }}
+                  options={editorOptions}
+                />
+              </div>
             </div>
 
             {/* Action Buttons */}

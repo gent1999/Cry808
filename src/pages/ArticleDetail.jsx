@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Footer from '../components/Footer';
 import AdSidebar from '../components/AdSidebar';
+import { stripMarkdown } from '../utils/markdownUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -190,36 +193,47 @@ const ArticleDetail = () => {
 
         {/* Article Content */}
         <div className="prose prose-invert prose-lg max-w-none">
-          <div className="text-white/90 leading-relaxed whitespace-pre-wrap">
-            {article.content.split('\n').map((line, index) => {
-              // Check if line contains a URL (for source links)
-              const urlMatch = line.match(/(https?:\/\/[^\s]+)/g);
-              if (urlMatch) {
-                const parts = line.split(/(https?:\/\/[^\s]+)/g);
-                return (
-                  <div key={index}>
-                    {parts.map((part, i) => {
-                      if (part.match(/^https?:\/\//)) {
-                        return (
-                          <a
-                            key={i}
-                            href={part}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-purple-400 hover:text-purple-300 underline"
-                          >
-                            {part}
-                          </a>
-                        );
-                      }
-                      return part;
-                    })}
-                  </div>
-                );
-              }
-              return <div key={index}>{line || '\u00A0'}</div>;
-            })}
-          </div>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              a: ({ node, ...props }) => (
+                <a
+                  {...props}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-400 hover:text-purple-300 underline"
+                />
+              ),
+              h1: ({ node, ...props }) => (
+                <h1 {...props} className="text-3xl font-bold mt-8 mb-4 text-white" />
+              ),
+              h2: ({ node, ...props }) => (
+                <h2 {...props} className="text-2xl font-bold mt-6 mb-3 text-white" />
+              ),
+              h3: ({ node, ...props }) => (
+                <h3 {...props} className="text-xl font-bold mt-4 mb-2 text-white" />
+              ),
+              p: ({ node, ...props }) => (
+                <p {...props} className="text-white/90 leading-relaxed mb-4" />
+              ),
+              ul: ({ node, ...props }) => (
+                <ul {...props} className="list-disc list-inside mb-4 text-white/90" />
+              ),
+              ol: ({ node, ...props }) => (
+                <ol {...props} className="list-decimal list-inside mb-4 text-white/90" />
+              ),
+              blockquote: ({ node, ...props }) => (
+                <blockquote {...props} className="border-l-4 border-purple-500 pl-4 italic text-white/80 my-4" />
+              ),
+              code: ({ node, inline, ...props }) => (
+                inline ?
+                  <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-purple-300" /> :
+                  <code {...props} className="block bg-gray-800 p-4 rounded text-purple-300 overflow-x-auto" />
+              ),
+            }}
+          >
+            {article.content}
+          </ReactMarkdown>
         </div>
 
         {/* Spotify Embed */}
@@ -308,7 +322,7 @@ const ArticleDetail = () => {
                   </p>
 
                   <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                    {article.content}
+                    {stripMarkdown(article.content)}
                   </p>
 
                   {/* Tags */}

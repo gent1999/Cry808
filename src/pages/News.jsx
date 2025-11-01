@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
+import { stripMarkdown } from "../utils/markdownUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -91,7 +92,7 @@ export default function News() {
                     </p>
 
                     <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                      {article.content}
+                      {stripMarkdown(article.content)}
                     </p>
 
                     {/* Tags */}

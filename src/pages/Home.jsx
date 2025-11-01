@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
+import { stripMarkdown } from "../utils/markdownUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -280,7 +281,7 @@ export default function Home() {
 
                       {/* Excerpt - Hidden on mobile, shown on larger screens */}
                       <p className="hidden md:block text-white/80 text-base mb-5 line-clamp-2 drop-shadow-md">
-                        {heroArticle.content.substring(0, 200).replace(/\n\n---\nSource:.*$/, '').trim()}...
+                        {stripMarkdown(heroArticle.content).substring(0, 200).trim()}...
                       </p>
 
                       {/* Read More Button */}
@@ -376,7 +377,7 @@ export default function Home() {
                           </p>
 
                           <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                            {item.content}
+                            {stripMarkdown(item.content)}
                           </p>
 
                           {/* Tags */}
