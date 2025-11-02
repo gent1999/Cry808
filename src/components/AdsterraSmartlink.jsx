@@ -46,10 +46,10 @@ const AdsterraSmartlink = ({
         onClick={handleClick}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        className={`block bg-gradient-to-br from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-lg p-6 hover:border-purple-500/50 transition-all cursor-pointer ${className}`}
+        className={`flex flex-col bg-gradient-to-br from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-lg p-6 hover:border-purple-500/50 transition-all cursor-pointer ${className}`}
       >
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -59,11 +59,11 @@ const AdsterraSmartlink = ({
             <div className="text-sm text-white/70">Featured Content</div>
           </div>
         </div>
-        <h3 className="text-white font-bold mb-2">{text}</h3>
-        <p className="text-white/60 text-sm mb-3">
+        <h3 className="text-white font-bold mb-2 text-xl">{text}</h3>
+        <p className="text-white/60 text-sm mb-4 flex-grow">
           Discover exclusive content and opportunities curated for hip-hop fans.
         </p>
-        <div className="text-purple-400 text-sm font-semibold flex items-center gap-1">
+        <div className="text-purple-400 text-sm font-semibold flex items-center gap-1 mt-auto">
           Learn More
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -4,7 +4,6 @@ import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
-import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import { stripMarkdown } from "../utils/markdownUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -69,71 +68,62 @@ export default function News() {
               <div className="text-white/70 text-lg">No articles available yet.</div>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {articles.map((article, index) => (
-                <React.Fragment key={article.id}>
+            <>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+                {articles.map((article) => (
                   <div
+                    key={article.id}
                     onClick={() => navigate(`/article/${article.id}`)}
                     className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
                   >
-                  {/* Article Image */}
-                  {article.image_url && (
-                    <div className="h-48 overflow-hidden">
-                      <img
-                        src={article.image_url}
-                        alt={article.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-
-                  {/* Article Content */}
-                  <div className="p-6">
-                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">
-                      {article.title}
-                    </h2>
-
-                    <p className="text-white/50 text-xs mb-3">
-                      By {article.author} • {new Date(article.created_at).toLocaleDateString()}
-                    </p>
-
-                    <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                      {stripMarkdown(article.content)}
-                    </p>
-
-                    {/* Tags */}
-                    {article.tags && article.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {article.tags.slice(0, 3).map((tag, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                    {/* Article Image */}
+                    {article.image_url && (
+                      <div className="h-48 overflow-hidden">
+                        <img
+                          src={article.image_url}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     )}
-                  </div>
-                </div>
 
-                {/* Insert native ad every 6 articles */}
-                {(index + 1) % 6 === 0 && index !== articles.length - 1 && (
-                  <AdsterraNative showLabel={true} />
-                )}
+                    {/* Article Content */}
+                    <div className="p-6">
+                      <h2 className="text-xl font-semibold mb-2 line-clamp-2">
+                        {article.title}
+                      </h2>
 
-                {/* Insert smartlink card every 9 articles */}
-                {(index + 1) % 9 === 0 && index !== articles.length - 1 && (
-                  <div className="col-span-1">
-                    <AdsterraSmartlink
-                      type="card"
-                      text="Trending Hip-Hop Stories"
-                    />
+                      <p className="text-white/50 text-xs mb-3">
+                        By {article.author} • {new Date(article.created_at).toLocaleDateString()}
+                      </p>
+
+                      <p className="text-white/70 text-sm line-clamp-3 mb-4">
+                        {stripMarkdown(article.content)}
+                      </p>
+
+                      {/* Tags */}
+                      {article.tags && article.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {article.tags.slice(0, 3).map((tag, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </React.Fragment>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              {/* Native Banner - Full Width after all articles */}
+              <div className="mb-8">
+                <AdsterraNative showLabel={true} />
+              </div>
+            </>
           )}
           </div>
 

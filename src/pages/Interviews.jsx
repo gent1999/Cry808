@@ -72,71 +72,89 @@ export default function Interviews() {
               <div className="text-white/70 text-lg">No interviews available yet.</div>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {interviews.map((interview, index) => (
-                <React.Fragment key={interview.id}>
-                  <div
-                    onClick={() => navigate(`/article/${interview.id}`)}
-                    className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
-                  >
-                  {/* Interview Image */}
-                  {interview.image_url && (
-                    <div className="h-48 overflow-hidden">
-                      <img
-                        src={interview.image_url}
-                        alt={interview.title}
-                        className="w-full h-full object-cover"
-                      />
+            <>
+              {/* Render interviews in chunks of 6, with full-width native banner between chunks */}
+              {Array.from({ length: Math.ceil(interviews.length / 6) }).map((_, chunkIndex) => {
+                const startIdx = chunkIndex * 6;
+                const endIdx = Math.min(startIdx + 6, interviews.length);
+                const chunk = interviews.slice(startIdx, endIdx);
+
+                return (
+                  <React.Fragment key={`chunk-${chunkIndex}`}>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+                      {chunk.map((interview, indexInChunk) => {
+                        const globalIndex = startIdx + indexInChunk;
+                        return (
+                          <React.Fragment key={interview.id}>
+                            <div
+                              onClick={() => navigate(`/article/${interview.id}`)}
+                              className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
+                            >
+                              {/* Interview Image */}
+                              {interview.image_url && (
+                                <div className="h-48 overflow-hidden">
+                                  <img
+                                    src={interview.image_url}
+                                    alt={interview.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+
+                              {/* Interview Content */}
+                              <div className="p-6">
+                                <h2 className="text-xl font-semibold mb-2 line-clamp-2">
+                                  {interview.title}
+                                </h2>
+
+                                <p className="text-white/50 text-xs mb-3">
+                                  By {interview.author} • {new Date(interview.created_at).toLocaleDateString()}
+                                </p>
+
+                                <p className="text-white/70 text-sm line-clamp-3 mb-4">
+                                  {stripMarkdown(interview.content)}
+                                </p>
+
+                                {/* Tags */}
+                                {interview.tags && interview.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {interview.tags.slice(0, 3).map((tag, index) => (
+                                      <span
+                                        key={index}
+                                        className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Insert smartlink card every 9 interviews */}
+                            {(globalIndex + 1) % 9 === 0 && globalIndex !== interviews.length - 1 && (
+                              <div className="col-span-1">
+                                <AdsterraSmartlink
+                                  type="card"
+                                  text="Exclusive Artist Interviews"
+                                />
+                              </div>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
                     </div>
-                  )}
 
-                  {/* Interview Content */}
-                  <div className="p-6">
-                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">
-                      {interview.title}
-                    </h2>
-
-                    <p className="text-white/50 text-xs mb-3">
-                      By {interview.author} • {new Date(interview.created_at).toLocaleDateString()}
-                    </p>
-
-                    <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                      {stripMarkdown(interview.content)}
-                    </p>
-
-                    {/* Tags */}
-                    {interview.tags && interview.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {interview.tags.slice(0, 3).map((tag, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                    {/* Native Banner - Full Width after every 6 interviews */}
+                    {endIdx < interviews.length && (
+                      <div className="mb-8">
+                        <AdsterraNative showLabel={true} />
                       </div>
                     )}
-                  </div>
-                </div>
-
-                {/* Insert native ad every 6 interviews */}
-                {(index + 1) % 6 === 0 && index !== interviews.length - 1 && (
-                  <AdsterraNative showLabel={true} />
-                )}
-
-                {/* Insert smartlink card every 9 interviews */}
-                {(index + 1) % 9 === 0 && index !== interviews.length - 1 && (
-                  <div className="col-span-1">
-                    <AdsterraSmartlink
-                      type="card"
-                      text="Exclusive Artist Interviews"
-                    />
-                  </div>
-                )}
-              </React.Fragment>
-              ))}
-            </div>
+                  </React.Fragment>
+                );
+              })}
+            </>
           )}
           </div>
 

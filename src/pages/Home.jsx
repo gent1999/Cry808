@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
+import AdsterraSmartlink from "../components/AdsterraSmartlink";
+import AdsterraNative from "../components/AdsterraNative";
 import { stripMarkdown } from "../utils/markdownUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -400,12 +402,30 @@ export default function Home() {
                         </div>
                       </div>
                     ))}
+
+                    {/* Smartlink Ad - 9th Spot (High Earning) */}
+                    {mixedContent.length >= 8 && (
+                      <div className="col-span-1 flex">
+                        <div className="flex-1">
+                          <AdsterraSmartlink
+                            type="card"
+                            text="Don't Miss These Stories"
+                            className="h-full"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-12 text-white/50">
                     No more stories available.
                   </div>
                 )}
+
+                {/* Native Banner - Full Width before Newsletter */}
+                <div className="mb-8">
+                  <AdsterraNative showLabel={true} />
+                </div>
 
                 {/* Newsletter CTA */}
                 <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-sm">

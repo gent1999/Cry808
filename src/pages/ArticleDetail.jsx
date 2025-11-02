@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Footer from '../components/Footer';
-import AdSidebar from '../components/AdSidebar';
+import AdSidebarArticle from '../components/AdSidebarArticle';
 import AdsterraInArticle from '../components/AdsterraInArticle';
 import AdsterraMobileBanner from '../components/AdsterraMobileBanner';
 import AdsterraSmartlink from '../components/AdsterraSmartlink';
@@ -301,8 +301,8 @@ const ArticleDetail = () => {
         </div>
           </div>
 
-          {/* Ad Sidebar */}
-          <AdSidebar />
+          {/* Ad Sidebar - Article Specific */}
+          <AdSidebarArticle />
         </div>
       </div>
 
