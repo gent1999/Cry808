@@ -14,24 +14,31 @@ const AdsterraNative = ({ className = '', showLabel = true }) => {
   const adRef = useRef(null);
 
   useEffect(() => {
-    // Load Adsterra native ad
+    // Load Adsterra 300x250 banner ad
     if (adRef.current && !adRef.current.hasAttribute('data-ad-loaded')) {
       adRef.current.setAttribute('data-ad-loaded', 'true');
 
-      // Create container div with specific ID (add timestamp to make unique)
-      const uniqueId = `container-09bd789febed0d52285f37d4273b028e-${Date.now()}`;
-      const containerDiv = document.createElement('div');
-      containerDiv.id = uniqueId;
+      // Create atOptions script
+      const atOptionsScript = document.createElement('script');
+      atOptionsScript.type = 'text/javascript';
+      atOptionsScript.innerHTML = `
+        atOptions = {
+          'key': '513c04d634d0a2ba825c8fe0ac47a077',
+          'format': 'iframe',
+          'height': 250,
+          'width': 300,
+          'params': {}
+        };
+      `;
 
-      // Create native ad script
-      const nativeScript = document.createElement('script');
-      nativeScript.async = true;
-      nativeScript.setAttribute('data-cfasync', 'false');
-      nativeScript.src = '//pl27975526.effectivegatecpm.com/09bd789febed0d52285f37d4273b028e/invoke.js';
+      // Create invoke script
+      const invokeScript = document.createElement('script');
+      invokeScript.type = 'text/javascript';
+      invokeScript.src = '//www.highperformanceformat.com/513c04d634d0a2ba825c8fe0ac47a077/invoke.js';
 
-      // Append to ad container
-      adRef.current.appendChild(nativeScript);
-      adRef.current.appendChild(containerDiv);
+      // Append scripts to ad container
+      adRef.current.appendChild(atOptionsScript);
+      adRef.current.appendChild(invokeScript);
     }
   }, []);
 
