@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
+import AdsterraNative from "../components/AdsterraNative";
 import { stripMarkdown } from "../utils/markdownUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -64,12 +65,12 @@ export default function News() {
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {articles.map((article) => (
-                <div
-                  key={article.id}
-                  onClick={() => navigate(`/article/${article.id}`)}
-                  className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
-                >
+              {articles.map((article, index) => (
+                <React.Fragment key={article.id}>
+                  <div
+                    onClick={() => navigate(`/article/${article.id}`)}
+                    className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
+                  >
                   {/* Article Image */}
                   {article.image_url && (
                     <div className="h-48 overflow-hidden">
@@ -110,6 +111,12 @@ export default function News() {
                     )}
                   </div>
                 </div>
+
+                {/* Insert native ad every 6 articles */}
+                {(index + 1) % 6 === 0 && index !== articles.length - 1 && (
+                  <AdsterraNative showLabel={true} />
+                )}
+              </React.Fragment>
               ))}
             </div>
           )}

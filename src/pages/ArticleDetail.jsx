@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Footer from '../components/Footer';
 import AdSidebar from '../components/AdSidebar';
+import AdsterraInArticle from '../components/AdsterraInArticle';
 import { stripMarkdown } from '../utils/markdownUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -235,6 +236,9 @@ const ArticleDetail = () => {
             {article.content}
           </ReactMarkdown>
         </div>
+
+        {/* In-Article Ad */}
+        <AdsterraInArticle />
 
         {/* Spotify Embed */}
         {article.spotify_url && (
