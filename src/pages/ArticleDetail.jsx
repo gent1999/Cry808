@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import Footer from '../components/Footer';
 import AdSidebar from '../components/AdSidebar';
 import AdsterraInArticle from '../components/AdsterraInArticle';
+import AdsterraMobileBanner from '../components/AdsterraMobileBanner';
 import { stripMarkdown } from '../utils/markdownUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -151,6 +152,9 @@ const ArticleDetail = () => {
               </svg>
               Back to Home
             </button>
+
+            {/* Mobile Banner Ad - Top of Article */}
+            <AdsterraMobileBanner className="mb-6" />
 
         {/* Article Image */}
         {article.image_url && (

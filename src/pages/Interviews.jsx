@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
 import AdsterraNative from "../components/AdsterraNative";
+import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import { stripMarkdown } from "../utils/markdownUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -54,6 +55,9 @@ export default function Interviews() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8 justify-center">
           <div className="flex-1">
+          {/* Mobile Banner Ad - Top of Interviews Page */}
+          <AdsterraMobileBanner className="mb-8" />
+
           {loading ? (
             <div className="text-center py-12">
               <div className="text-white/70 text-lg">Loading interviews...</div>

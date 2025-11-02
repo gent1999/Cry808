@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import AdsterraSocialBar from "./components/AdsterraSocialBar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import News from "./pages/News";
@@ -123,6 +124,9 @@ export default function App() {
           <Route path="/admin/articles/edit/:id" element={<ArticleEdit />} />
           <Route path="/admin/submissions" element={<SubmissionsList />} />
         </Routes>
+
+        {/* Social Bar Ad - Sticky Footer on All Pages */}
+        <AdsterraSocialBar />
       </div>
     </Router>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
+import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import { stripMarkdown } from "../utils/markdownUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -327,6 +328,9 @@ export default function Home() {
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
               <div className="flex-1">
+                {/* Mobile Banner Ad - Top of Latest Stories */}
+                <AdsterraMobileBanner className="mb-8" />
+
                 {/* Latest Stories Header */}
                 <div className="mb-8">
                   <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
