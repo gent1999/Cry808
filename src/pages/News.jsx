@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
+import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import { stripMarkdown } from "../utils/markdownUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -119,6 +120,16 @@ export default function News() {
                 {/* Insert native ad every 6 articles */}
                 {(index + 1) % 6 === 0 && index !== articles.length - 1 && (
                   <AdsterraNative showLabel={true} />
+                )}
+
+                {/* Insert smartlink card every 9 articles */}
+                {(index + 1) % 9 === 0 && index !== articles.length - 1 && (
+                  <div className="col-span-1">
+                    <AdsterraSmartlink
+                      type="card"
+                      text="Trending Hip-Hop Stories"
+                    />
+                  </div>
                 )}
               </React.Fragment>
               ))}

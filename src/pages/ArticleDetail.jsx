@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import AdSidebar from '../components/AdSidebar';
 import AdsterraInArticle from '../components/AdsterraInArticle';
 import AdsterraMobileBanner from '../components/AdsterraMobileBanner';
+import AdsterraSmartlink from '../components/AdsterraSmartlink';
 import { stripMarkdown } from '../utils/markdownUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -281,8 +282,16 @@ const ArticleDetail = () => {
           </div>
         )}
 
+        {/* Smartlink CTA - End of Article */}
+        <div className="mt-12 mb-8">
+          <AdsterraSmartlink
+            type="banner"
+            text="Discover More Hip-Hop Content You'll Love"
+          />
+        </div>
+
         {/* Back Button Section */}
-        <div className="mt-12 pt-8 border-t border-white/10">
+        <div className="mt-8 pt-8 border-t border-white/10">
           <button
             onClick={() => navigate('/')}
             className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
