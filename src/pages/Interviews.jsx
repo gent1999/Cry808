@@ -6,6 +6,7 @@ import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import { stripMarkdown } from "../utils/markdownUtils";
+import { generateArticleUrl } from "../utils/slugify";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -87,7 +88,7 @@ export default function Interviews() {
                         return (
                           <React.Fragment key={interview.id}>
                             <div
-                              onClick={() => navigate(`/article/${interview.id}`)}
+                              onClick={() => navigate(generateArticleUrl(interview.id, interview.title))}
                               className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
                             >
                               {/* Interview Image */}

@@ -5,6 +5,7 @@ import AdSidebar from "../components/AdSidebar";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import { stripMarkdown } from "../utils/markdownUtils";
+import { generateArticleUrl } from "../utils/slugify";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -73,7 +74,7 @@ export default function News() {
                 {articles.map((article) => (
                   <div
                     key={article.id}
-                    onClick={() => navigate(`/article/${article.id}`)}
+                    onClick={() => navigate(generateArticleUrl(article.id, article.title))}
                     className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
                   >
                     {/* Article Image */}

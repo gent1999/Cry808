@@ -6,6 +6,7 @@ import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import AdsterraNative from "../components/AdsterraNative";
 import { stripMarkdown } from "../utils/markdownUtils";
+import { generateArticleUrl } from "../utils/slugify";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -254,7 +255,7 @@ export default function Home() {
           <>
             {/* Hero Article with Overlay */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="relative group cursor-pointer" onClick={() => navigate(`/article/${heroArticle.id}`)}>
+              <div className="relative group cursor-pointer" onClick={() => navigate(generateArticleUrl(heroArticle.id, heroArticle.title))}>
                 <div className="relative h-[400px] md:h-[450px] rounded-2xl overflow-hidden">
                   {/* Background Image with Gradient Overlay */}
                   <div className="absolute inset-0">
@@ -347,7 +348,7 @@ export default function Home() {
                     {mixedContent.map((item) => (
                       <div
                         key={item.id}
-                        onClick={() => navigate(`/article/${item.id}`)}
+                        onClick={() => navigate(generateArticleUrl(item.id, item.title))}
                         className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
                       >
                         {/* Image */}
