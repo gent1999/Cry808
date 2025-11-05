@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Navbar from "./components/Navbar";
 import AdsterraSocialBar from "./components/AdsterraSocialBar";
 import Home from "./pages/Home";
@@ -21,8 +22,9 @@ import SubmissionsList from "./pages/admin/SubmissionsList";
 
 export default function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-black">
+    <HelmetProvider>
+      <Router>
+        <div className="min-h-screen bg-black">
         <Routes>
           {/* Public Routes with Navbar */}
           <Route
@@ -129,5 +131,6 @@ export default function App() {
         <AdsterraSocialBar />
       </div>
     </Router>
+    </HelmetProvider>
   );
 }
