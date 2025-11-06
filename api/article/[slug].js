@@ -1,12 +1,12 @@
 export default async function handler(req, res) {
-  let { id } = req.query;
+  const { slug } = req.query; // Now receives "123-drake-new-album"
   const userAgent = req.headers['user-agent'] || '';
-  const fullPath = id; // This contains the full path like "123/article-slug"
 
-  // Extract just the numeric ID if the id contains a slash (e.g., "123/article-slug")
-  let articleId = id;
-  if (id && id.includes('/')) {
-    articleId = id.split('/')[0];
+  // Extract numeric ID from slug (e.g., "123-drake-new-album" -> "123")
+  const articleId = slug ? slug.split('-')[0] : null;
+
+  if (!articleId) {
+    return res.redirect(307, '/');
   }
 
   // Detect social media crawlers
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     const response = await fetch(`${apiUrl}/api/articles/${articleId}`);
 
     if (!response.ok) {
-      return res.redirect(307, `/article/${fullPath}`);
+      return res.redirect(307, `/article/${slug}`);
     }
 
     const data = await response.json();
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     };
 
     const description = stripMarkdown(article.content).substring(0, 160) + '...';
-    const url = `https://cry808.com/article/${fullPath}`;
+    const url = `https://cry808.com/article/${slug}`;
 
     // Generate HTML with meta tags
     const html = `
@@ -78,13 +78,13 @@ export default async function handler(req, res) {
   <meta name="twitter:description" content="${description}">
   ${article.image_url ? `<meta name="twitter:image" content="${article.image_url}">` : ''}
 
-  <meta http-equiv="refresh" content="0;url=/article/${fullPath}">
-  <script>window.location.href = '/article/${fullPath}';</script>
+  <meta http-equiv="refresh" content="0;url=/article/${slug}">
+  <script>window.location.href = '/article/${slug}';</script>
 </head>
 <body>
   <h1>${article.title}</h1>
   <p>${description}</p>
-  <p><a href="/article/${fullPath}">Click here if you are not redirected</a></p>
+  <p><a href="/article/${slug}">Click here if you are not redirected</a></p>
 </body>
 </html>`;
 
@@ -92,6 +92,6 @@ export default async function handler(req, res) {
     res.status(200).send(html);
   } catch (error) {
     console.error('Error fetching article for crawler:', error);
-    return res.redirect(307, `/article/${fullPath}`);
+    return res.redirect(307, `/article/${slug}`);
   }
 }

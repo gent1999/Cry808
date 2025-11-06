@@ -109,7 +109,7 @@ export default function App() {
             }
           />
           <Route
-            path="/article/:id/:slug?"
+            path="/article/:id"
             element={
               <>
                 <Navbar />

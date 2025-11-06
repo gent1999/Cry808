@@ -14,12 +14,15 @@ import { generateArticleUrl } from '../utils/slugify';
 const API_URL = import.meta.env.VITE_API_URL;
 
 const ArticleDetail = () => {
-  const { id } = useParams();
+  const { id: urlId } = useParams();
   const navigate = useNavigate();
   const [article, setArticle] = useState(null);
   const [moreArticles, setMoreArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Extract numeric ID from URL (e.g., "123-drake-new-album" -> "123")
+  const id = urlId.split('-')[0];
 
   useEffect(() => {
     const fetchArticle = async () => {

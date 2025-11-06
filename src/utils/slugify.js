@@ -15,10 +15,10 @@ export const slugify = (text) => {
 };
 
 /**
- * Generate article URL with ID and slug
- * Example: (123, "Drake's New Album") -> "/article/123/drakes-new-album"
+ * Generate article URL with ID and slug combined
+ * Example: (123, "Drake's New Album") -> "/article/123-drakes-new-album"
  */
 export const generateArticleUrl = (id, title) => {
   const slug = slugify(title);
-  return `/article/${id}/${slug}`;
+  return `/article/${id}-${slug}`;
 };

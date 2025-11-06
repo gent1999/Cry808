@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/article/:id(.*)",
-      "destination": "/api/article/:id"
+      "source": "/article/:slug",
+      "destination": "/api/article/:slug"
     },
     {
       "source": "/((?!api).*)",
