@@ -57,6 +57,38 @@ export default async function handler(req, res) {
       ogImage = `https://images.weserv.nl/?url=${encodeURIComponent(article.image_url)}&w=1200&h=630&fit=cover&output=jpg`;
     }
 
+    // Generate JSON-LD structured data for rich search results
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "headline": article.title,
+      "description": description,
+      "image": ogImage || article.image_url,
+      "datePublished": article.created_at,
+      "dateModified": article.updated_at || article.created_at,
+      "author": {
+        "@type": "Person",
+        "name": article.author
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Cry808",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://cry808.com/logo.png"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": url
+      }
+    };
+
+    // Add keywords if tags exist
+    if (article.tags && article.tags.length > 0) {
+      structuredData.keywords = article.tags.join(', ');
+    }
+
     // Generate HTML with meta tags
     const html = `
 <!DOCTYPE html>
@@ -64,8 +96,16 @@ export default async function handler(req, res) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${article.title} | Cry808</title>
+  <title>${article.title} | Cry808 - Hip Hop News & Interviews</title>
   <meta name="description" content="${description}">
+  ${article.tags && article.tags.length > 0 ? `<meta name="keywords" content="${article.tags.join(', ')}, hip hop, rap, music news, ${article.author}">` : ''}
+  <meta name="author" content="${article.author}">
+  <link rel="canonical" href="${url}">
+
+  <!-- Structured Data for Google Rich Results -->
+  <script type="application/ld+json">
+  ${JSON.stringify(structuredData)}
+  </script>
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article">

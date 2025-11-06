@@ -1,0 +1,13 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://cry808.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
