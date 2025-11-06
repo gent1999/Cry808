@@ -50,6 +50,13 @@ export default async function handler(req, res) {
     const description = stripMarkdown(article.content).substring(0, 160) + '...';
     const url = `https://cry808.com/article/${slug}`;
 
+    // Resize image to 1200x630 for optimal Open Graph display (banner format)
+    let ogImage = '';
+    if (article.image_url) {
+      // Use images.weserv.nl to resize image to 1200x630
+      ogImage = `https://images.weserv.nl/?url=${encodeURIComponent(article.image_url)}&w=1200&h=630&fit=cover&output=jpg`;
+    }
+
     // Generate HTML with meta tags
     const html = `
 <!DOCTYPE html>
@@ -65,7 +72,10 @@ export default async function handler(req, res) {
   <meta property="og:url" content="${url}">
   <meta property="og:title" content="${article.title}">
   <meta property="og:description" content="${description}">
-  ${article.image_url ? `<meta property="og:image" content="${article.image_url}">` : ''}
+  ${ogImage ? `<meta property="og:image" content="${ogImage}">` : ''}
+  ${ogImage ? `<meta property="og:image:width" content="1200">` : ''}
+  ${ogImage ? `<meta property="og:image:height" content="630">` : ''}
+  ${ogImage ? `<meta property="og:image:type" content="image/jpeg">` : ''}
   <meta property="og:site_name" content="Cry808">
   <meta property="article:published_time" content="${article.created_at}">
   <meta property="article:author" content="${article.author}">
@@ -76,7 +86,7 @@ export default async function handler(req, res) {
   <meta name="twitter:url" content="${url}">
   <meta name="twitter:title" content="${article.title}">
   <meta name="twitter:description" content="${description}">
-  ${article.image_url ? `<meta name="twitter:image" content="${article.image_url}">` : ''}
+  ${ogImage ? `<meta name="twitter:image" content="${ogImage}">` : ''}
 
   <meta http-equiv="refresh" content="0;url=/article/${slug}">
   <script>window.location.href = '/article/${slug}';</script>
