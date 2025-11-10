@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
+import { ADS_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -54,7 +55,7 @@ export default function News() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8 justify-center">
           <div className="flex-1">
           {/* Mobile Banner Ad - Top of News Page */}
-          <AdsterraMobileBanner className="mb-8" />
+          {ADS_ENABLED && <AdsterraMobileBanner className="mb-8" />}
 
           {loading ? (
             <div className="text-center py-12">
@@ -121,15 +122,17 @@ export default function News() {
               </div>
 
               {/* Native Banner - Full Width after all articles */}
-              <div className="mb-8">
-                <AdsterraNative showLabel={true} />
-              </div>
+              {ADS_ENABLED && (
+                <div className="mb-8">
+                  <AdsterraNative showLabel={true} />
+                </div>
+              )}
             </>
           )}
           </div>
 
           {/* Ad Sidebar */}
-          <AdSidebar />
+          {ADS_ENABLED && <AdSidebar />}
         </div>
       </div>
       <Footer />

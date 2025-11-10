@@ -5,6 +5,7 @@ import AdSidebar from "../components/AdSidebar";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import AdsterraNative from "../components/AdsterraNative";
+import { ADS_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -248,7 +249,7 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              <AdSidebar />
+              {ADS_ENABLED && <AdSidebar />}
             </div>
           </>
         ) : error ? (
@@ -340,7 +341,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
               <div className="flex-1">
                 {/* Mobile Banner Ad - Top of Latest Stories */}
-                <AdsterraMobileBanner className="mb-8" />
+                {ADS_ENABLED && <AdsterraMobileBanner className="mb-8" />}
 
                 {/* 1of1 Originals Section */}
                 {originals.length > 0 && (
@@ -413,13 +414,15 @@ export default function Home() {
                       ))}
 
                       {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                      <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
-                        <AdsterraSmartlink
-                          type="card"
-                          text="Sponsored Content"
-                          className="h-full w-full"
-                        />
-                      </div>
+                      {ADS_ENABLED && (
+                        <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
+                          <AdsterraSmartlink
+                            type="card"
+                            text="Sponsored Content"
+                            className="h-full w-full"
+                          />
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
@@ -495,13 +498,15 @@ export default function Home() {
                     ))}
 
                     {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                    <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
-                      <AdsterraSmartlink
-                        type="card"
-                        text="Sponsored Content"
-                        className="h-full w-full"
-                      />
-                    </div>
+                    {ADS_ENABLED && (
+                      <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
+                        <AdsterraSmartlink
+                          type="card"
+                          text="Sponsored Content"
+                          className="h-full w-full"
+                        />
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-12 text-white/50">
@@ -510,9 +515,11 @@ export default function Home() {
                 )}
 
                 {/* Native Banner - Full Width before Newsletter */}
-                <div className="mb-8">
-                  <AdsterraNative showLabel={true} />
-                </div>
+                {ADS_ENABLED && (
+                  <div className="mb-8">
+                    <AdsterraNative showLabel={true} />
+                  </div>
+                )}
 
                 {/* Newsletter CTA */}
                 <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-sm">
@@ -559,7 +566,7 @@ export default function Home() {
               </div>
 
               {/* Ad Sidebar */}
-              <AdSidebar />
+              {ADS_ENABLED && <AdSidebar />}
             </div>
           </>
         )}

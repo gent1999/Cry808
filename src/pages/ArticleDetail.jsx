@@ -8,6 +8,7 @@ import AdSidebarArticle from '../components/AdSidebarArticle';
 import AdsterraInArticle from '../components/AdsterraInArticle';
 import AdsterraMobileBanner from '../components/AdsterraMobileBanner';
 import AdsterraSmartlink from '../components/AdsterraSmartlink';
+import { ADS_ENABLED } from '../config/ads';
 import { stripMarkdown } from '../utils/markdownUtils';
 import { generateArticleUrl } from '../utils/slugify';
 
@@ -190,7 +191,7 @@ const ArticleDetail = () => {
             </button>
 
             {/* Mobile Banner Ad - Top of Article */}
-            <AdsterraMobileBanner className="mb-6" />
+            {ADS_ENABLED && <AdsterraMobileBanner className="mb-6" />}
 
         {/* Article Image */}
         {article.image_url && (
@@ -278,7 +279,7 @@ const ArticleDetail = () => {
         </div>
 
         {/* In-Article Ad */}
-        <AdsterraInArticle />
+        {ADS_ENABLED && <AdsterraInArticle />}
 
         {/* Spotify Embed */}
         {article.spotify_url && (
@@ -337,12 +338,14 @@ const ArticleDetail = () => {
         )}
 
         {/* Smartlink CTA - End of Article */}
-        <div className="mt-12 mb-8">
-          <AdsterraSmartlink
-            type="banner"
-            text="Discover More Hip-Hop Content You'll Love"
-          />
-        </div>
+        {ADS_ENABLED && (
+          <div className="mt-12 mb-8">
+            <AdsterraSmartlink
+              type="banner"
+              text="Discover More Hip-Hop Content You'll Love"
+            />
+          </div>
+        )}
 
         {/* Back Button Section */}
         <div className="mt-8 pt-8 border-t border-white/10">
@@ -356,7 +359,7 @@ const ArticleDetail = () => {
           </div>
 
           {/* Ad Sidebar - Article Specific */}
-          <AdSidebarArticle />
+          {ADS_ENABLED && <AdSidebarArticle />}
         </div>
       </div>
 

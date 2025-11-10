@@ -5,6 +5,7 @@ import AdSidebar from "../components/AdSidebar";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
+import { ADS_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -58,7 +59,7 @@ export default function Interviews() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8 justify-center">
           <div className="flex-1">
           {/* Mobile Banner Ad - Top of Interviews Page */}
-          <AdsterraMobileBanner className="mb-8" />
+          {ADS_ENABLED && <AdsterraMobileBanner className="mb-8" />}
 
           {loading ? (
             <div className="text-center py-12">
@@ -133,7 +134,7 @@ export default function Interviews() {
                             </div>
 
                             {/* Insert smartlink card every 9 interviews */}
-                            {(globalIndex + 1) % 9 === 0 && globalIndex !== interviews.length - 1 && (
+                            {ADS_ENABLED && (globalIndex + 1) % 9 === 0 && globalIndex !== interviews.length - 1 && (
                               <div className="col-span-1">
                                 <AdsterraSmartlink
                                   type="card"
@@ -147,7 +148,7 @@ export default function Interviews() {
                     </div>
 
                     {/* Native Banner - Full Width after every 6 interviews */}
-                    {endIdx < interviews.length && (
+                    {ADS_ENABLED && endIdx < interviews.length && (
                       <div className="mb-8">
                         <AdsterraNative showLabel={true} />
                       </div>
@@ -160,7 +161,7 @@ export default function Interviews() {
           </div>
 
           {/* Ad Sidebar */}
-          <AdSidebar />
+          {ADS_ENABLED && <AdSidebar />}
         </div>
       </div>
       <Footer />
