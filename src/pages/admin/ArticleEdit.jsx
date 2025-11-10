@@ -18,6 +18,7 @@ const ArticleEdit = () => {
     tags: '',
     spotify_url: '',
     youtube_url: '',
+    soundcloud_url: '',
     category: 'article',
     is_original: false
   });
@@ -66,6 +67,7 @@ const ArticleEdit = () => {
           tags: article.tags ? article.tags.join(', ') : '',
           spotify_url: article.spotify_url || '',
           youtube_url: article.youtube_url || '',
+          soundcloud_url: article.soundcloud_url || '',
           category: article.category || 'article',
           is_original: article.is_original || false
         });
@@ -141,6 +143,11 @@ const ArticleEdit = () => {
       // Add YouTube URL if provided
       if (formData.youtube_url) {
         formDataToSend.append('youtube_url', formData.youtube_url);
+      }
+
+      // Add SoundCloud URL if provided
+      if (formData.soundcloud_url) {
+        formDataToSend.append('soundcloud_url', formData.soundcloud_url);
       }
 
       // Add category
@@ -379,6 +386,23 @@ const ArticleEdit = () => {
                 placeholder="https://www.youtube.com/watch?v=..."
               />
               <p className="mt-1 text-sm text-gray-400">Paste a YouTube video URL</p>
+            </div>
+
+            {/* SoundCloud URL */}
+            <div>
+              <label htmlFor="soundcloud_url" className="block text-sm font-medium text-gray-300 mb-2">
+                SoundCloud Link (Optional)
+              </label>
+              <input
+                type="url"
+                id="soundcloud_url"
+                name="soundcloud_url"
+                value={formData.soundcloud_url}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="https://soundcloud.com/..."
+              />
+              <p className="mt-1 text-sm text-gray-400">Paste a SoundCloud track or playlist URL</p>
             </div>
 
             {/* Content */}

@@ -317,6 +317,25 @@ const ArticleDetail = () => {
           </div>
         )}
 
+        {/* SoundCloud Embed */}
+        {article.soundcloud_url && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">Listen on SoundCloud</h2>
+            <div className="rounded-lg overflow-hidden">
+              <iframe
+                width="100%"
+                height="166"
+                scrolling="no"
+                frameBorder="no"
+                allow="autoplay"
+                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(article.soundcloud_url)}&color=%23a855f7&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true`}
+                loading="lazy"
+                className="rounded-lg"
+              ></iframe>
+            </div>
+          </div>
+        )}
+
         {/* Smartlink CTA - End of Article */}
         <div className="mt-12 mb-8">
           <AdsterraSmartlink
