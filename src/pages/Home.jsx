@@ -13,6 +13,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function Home() {
   const navigate = useNavigate();
   const [heroArticle, setHeroArticle] = useState(null);
+  const [originals, setOriginals] = useState([]);
   const [mixedContent, setMixedContent] = useState([]);
   const [trendingTags, setTrendingTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,8 +47,15 @@ export default function Home() {
         // Filter out the featured article from the grid
         const filteredArticles = sortedArticles.filter(article => article.id !== featuredData.article?.id);
 
-        // Get the rest for the mixed grid (max 8 items)
-        setMixedContent(filteredArticles.slice(0, 8));
+        // Separate originals from regular articles
+        const originalsOnly = filteredArticles.filter(article => article.is_original === true);
+        const regularArticles = filteredArticles.filter(article => !article.is_original);
+
+        // Limit originals to 5 (for 2 rows with 6th spot being ad)
+        setOriginals(originalsOnly.slice(0, 5));
+
+        // Limit regular articles to 5 (for 2 rows with 6th spot being ad)
+        setMixedContent(regularArticles.slice(0, 5));
 
         // Extract and count tags for trending section
         const tagCounts = {};
@@ -334,6 +342,88 @@ export default function Home() {
                 {/* Mobile Banner Ad - Top of Latest Stories */}
                 <AdsterraMobileBanner className="mb-8" />
 
+                {/* 1of1 Originals Section */}
+                {originals.length > 0 && (
+                  <>
+                    <div className="mb-8">
+                      <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                        1of1 Originals
+                      </h2>
+                      <div className="h-1 w-24 bg-gradient-to-r from-yellow-500 to-orange-500"></div>
+                    </div>
+
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-16">
+                      {originals.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => navigate(generateArticleUrl(item.id, item.title))}
+                          className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/20"
+                        >
+                          {/* Image */}
+                          {item.image_url && (
+                            <div className="h-48 overflow-hidden">
+                              <img
+                                src={item.image_url}
+                                alt={item.title}
+                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                              />
+                            </div>
+                          )}
+
+                          {/* Content */}
+                          <div className="p-6">
+                            {/* Category Badge */}
+                            <div className="mb-2">
+                              <span className={`px-2 py-1 text-xs font-semibold rounded ${
+                                item.category === 'interview'
+                                  ? 'bg-pink-600/20 text-pink-400'
+                                  : 'bg-yellow-600/20 text-yellow-400'
+                              }`}>
+                                {item.category === 'interview' ? 'Interview' : 'Original'}
+                              </span>
+                            </div>
+
+                            <h3 className="text-xl font-semibold mb-2 line-clamp-2">
+                              {item.title}
+                            </h3>
+
+                            <p className="text-white/50 text-xs mb-3">
+                              By {item.author} • {new Date(item.created_at).toLocaleDateString()}
+                            </p>
+
+                            <p className="text-white/70 text-sm line-clamp-3 mb-4">
+                              {stripMarkdown(item.content)}
+                            </p>
+
+                            {/* Tags */}
+                            {item.tags && item.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {item.tags.slice(0, 2).map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Sponsored Content Ad - 6th spot (2 rows max) */}
+                      <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
+                        <AdsterraSmartlink
+                          type="card"
+                          text="Sponsored Content"
+                          className="h-full w-full"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 {/* Latest Stories Header */}
                 <div className="mb-8">
                   <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -404,18 +494,14 @@ export default function Home() {
                       </div>
                     ))}
 
-                    {/* Smartlink Ad - 9th Spot (High Earning) */}
-                    {mixedContent.length >= 8 && (
-                      <div className="col-span-1 flex">
-                        <div className="flex-1">
-                          <AdsterraSmartlink
-                            type="card"
-                            text="Don't Miss These Stories"
-                            className="h-full"
-                          />
-                        </div>
-                      </div>
-                    )}
+                    {/* Sponsored Content Ad - 6th spot (2 rows max) */}
+                    <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
+                      <AdsterraSmartlink
+                        type="card"
+                        text="Sponsored Content"
+                        className="h-full w-full"
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-12 text-white/50">

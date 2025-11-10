@@ -18,7 +18,8 @@ const ArticleEdit = () => {
     tags: '',
     spotify_url: '',
     youtube_url: '',
-    category: 'article'
+    category: 'article',
+    is_original: false
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -65,7 +66,8 @@ const ArticleEdit = () => {
           tags: article.tags ? article.tags.join(', ') : '',
           spotify_url: article.spotify_url || '',
           youtube_url: article.youtube_url || '',
-          category: article.category || 'article'
+          category: article.category || 'article',
+          is_original: article.is_original || false
         });
 
         // Set existing image if available
@@ -84,9 +86,10 @@ const ArticleEdit = () => {
   }, [id]);
 
   const handleChange = (e) => {
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
     setError('');
   };
@@ -142,6 +145,9 @@ const ArticleEdit = () => {
 
       // Add category
       formDataToSend.append('category', formData.category);
+
+      // Add is_original flag
+      formDataToSend.append('is_original', formData.is_original);
 
       // Append new image file if it exists
       if (imageFile) {
@@ -273,6 +279,28 @@ const ArticleEdit = () => {
                 <option value="interview">Interview</option>
               </select>
               <p className="mt-1 text-sm text-gray-400">Choose whether this is an article or interview</p>
+            </div>
+
+            {/* 1of1 Original Toggle */}
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="is_original"
+                  name="is_original"
+                  type="checkbox"
+                  checked={formData.is_original}
+                  onChange={handleChange}
+                  className="w-5 h-5 bg-gray-700 border-gray-600 rounded text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-gray-800"
+                />
+              </div>
+              <div className="ml-3">
+                <label htmlFor="is_original" className="text-sm font-medium text-gray-300">
+                  Mark as 1of1 Original
+                </label>
+                <p className="text-sm text-gray-400">
+                  This article will appear in the "1of1 Originals" section instead of "Latest Stories"
+                </p>
+              </div>
             </div>
 
             {/* Image Upload */}
