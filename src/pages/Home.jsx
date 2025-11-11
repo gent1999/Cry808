@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import AdSidebar from "../components/AdSidebar";
-import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
-import AdsterraSmartlink from "../components/AdsterraSmartlink";
-import AdsterraNative from "../components/AdsterraNative";
-import HilltopAdSidebar from "../components/HilltopAdSidebar";
-import HilltopMultiBanner from "../components/HilltopMultiBanner";
-import HilltopInPagePush from "../components/HilltopInPagePush";
-import HilltopPopUnder from "../components/HilltopPopUnder";
+import SpotifyEmbed from "../components/SpotifyEmbed";
 import HilltopSmartlink from "../components/HilltopSmartlink";
 import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
@@ -254,8 +247,6 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              {ADSTERRA_ENABLED && <AdSidebar />}
-              {HILLTOP_ENABLED && <HilltopAdSidebar />}
             </div>
           </>
         ) : error ? (
@@ -358,11 +349,6 @@ export default function Home() {
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
               <div className="flex-1">
-                {/* Mobile Banner Ad - Top of Main Content */}
-                <div className="xl:hidden mb-8">
-                  {HILLTOP_ENABLED && <HilltopMultiBanner />}
-                </div>
-
                 {/* 1of1 Originals Section */}
                 {originals.length > 0 && (
                   <>
@@ -585,16 +571,17 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Ad Sidebar */}
-              {ADSTERRA_ENABLED && <AdSidebar />}
-              {HILLTOP_ENABLED && <HilltopAdSidebar />}
+              {/* Spotify Sidebar */}
+              <div className="hidden xl:block w-80 flex-shrink-0">
+                <div className="sticky top-24">
+                  <SpotifyEmbed />
+                </div>
+              </div>
             </div>
           </>
         )}
       </div>
       <Footer />
-      {HILLTOP_ENABLED && <HilltopInPagePush />}
-      {HILLTOP_ENABLED && <HilltopPopUnder />}
     </div>
   );
 }
