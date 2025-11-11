@@ -6,6 +6,7 @@ import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import AdsterraNative from "../components/AdsterraNative";
 import HilltopAdSidebar from "../components/HilltopAdSidebar";
+import HilltopMultiBanner from "../components/HilltopMultiBanner";
 import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
@@ -342,6 +343,11 @@ export default function Home() {
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
               <div className="flex-1">
+                {/* Mobile Banner Ad - Top of Main Content */}
+                <div className="xl:hidden mb-8">
+                  {HILLTOP_ENABLED && <HilltopMultiBanner />}
+                </div>
+
                 {/* 1of1 Originals Section */}
                 {originals.length > 0 && (
                   <>

@@ -8,38 +8,24 @@ const HilltopMultiBanner = ({ className = '' }) => {
   const adRef = useRef(null);
 
   useEffect(() => {
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      if (adRef.current) {
-        const containerId = `hilltop-container-${Date.now()}`;
+    if (adRef.current && adRef.current.children.length === 0) {
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = "//itchytree.com/b.XSVIsgd-GQl_0/YlWucR/aeJmF9GudZxUXlBkdPoTzYh2ZOZTRkY3BN/D/YetxN/j/Yk5PO/TGcc0KNJwh";
+      script.async = true;
+      script.setAttribute('data-cfasync', 'false');
 
-        // Create container
-        const container = document.createElement('div');
-        container.id = containerId;
-        adRef.current.appendChild(container);
+      script.onload = () => console.log('Hilltop desktop ad script loaded');
+      script.onerror = () => console.error('Failed to load Hilltop desktop ad script');
 
-        // Create wrapper script that executes the Hilltop ad code
-        const wrapperScript = document.createElement('script');
-        wrapperScript.type = 'text/javascript';
-        wrapperScript.innerHTML = `
-          (function() {
-            var d = document,
-                s = d.createElement('script'),
-                container = d.getElementById('${containerId}');
-            s.src = "//itchytree.com/b.XSVIsgd-GQl_0/YlWucR/aeJmF9GudZxUXlBkdPoTzYh2ZOZTRkY3BN/D/YetxN/j/Yk5PO/TGcc0KNJwh";
-            s.async = true;
-            s.referrerPolicy = 'no-referrer-when-downgrade';
-            if (container) {
-              container.appendChild(s);
-            }
-          })();
-        `;
+      adRef.current.appendChild(script);
 
-        adRef.current.appendChild(wrapperScript);
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
+      return () => {
+        if (adRef.current && adRef.current.contains(script)) {
+          adRef.current.removeChild(script);
+        }
+      };
+    }
   }, []);
 
   return (
@@ -47,7 +33,7 @@ const HilltopMultiBanner = ({ className = '' }) => {
       <div className="text-xs text-white/40 mb-2 text-center">Advertisement</div>
       <div
         ref={adRef}
-        className="min-h-[250px] bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-center"
+        className="min-h-[250px] w-full max-w-[300px] mx-auto"
       >
         {/* Hilltop ad will load here */}
       </div>

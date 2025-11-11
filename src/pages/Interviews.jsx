@@ -6,6 +6,7 @@ import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import HilltopAdSidebar from "../components/HilltopAdSidebar";
+import HilltopMultiBanner from "../components/HilltopMultiBanner";
 import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
@@ -61,6 +62,9 @@ export default function Interviews() {
           <div className="flex-1">
           {/* Mobile Banner Ad - Top of Interviews Page */}
           {ADSTERRA_ENABLED && <AdsterraMobileBanner className="mb-8" />}
+          <div className="xl:hidden mb-8">
+            {HILLTOP_ENABLED && <HilltopMultiBanner />}
+          </div>
 
           {loading ? (
             <div className="text-center py-12">
