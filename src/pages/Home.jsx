@@ -7,6 +7,7 @@ import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import AdsterraNative from "../components/AdsterraNative";
 import HilltopAdSidebar from "../components/HilltopAdSidebar";
 import HilltopMultiBanner from "../components/HilltopMultiBanner";
+import HilltopInPagePush from "../components/HilltopInPagePush";
 import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
@@ -578,6 +579,7 @@ export default function Home() {
         )}
       </div>
       <Footer />
+      {HILLTOP_ENABLED && <HilltopInPagePush />}
     </div>
   );
 }
