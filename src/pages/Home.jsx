@@ -8,6 +8,8 @@ import AdsterraNative from "../components/AdsterraNative";
 import HilltopAdSidebar from "../components/HilltopAdSidebar";
 import HilltopMultiBanner from "../components/HilltopMultiBanner";
 import HilltopInPagePush from "../components/HilltopInPagePush";
+import HilltopPopUnder from "../components/HilltopPopUnder";
+import HilltopSmartlink from "../components/HilltopSmartlink";
 import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
@@ -420,9 +422,9 @@ export default function Home() {
                       ))}
 
                       {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                      {ADSTERRA_ENABLED && (
+                      {HILLTOP_ENABLED && (
                         <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
-                          <AdsterraSmartlink
+                          <HilltopSmartlink
                             type="card"
                             text="Sponsored Content"
                             className="h-full w-full"
@@ -504,9 +506,9 @@ export default function Home() {
                     ))}
 
                     {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                    {ADSTERRA_ENABLED && (
+                    {HILLTOP_ENABLED && (
                       <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
-                        <AdsterraSmartlink
+                        <HilltopSmartlink
                           type="card"
                           text="Sponsored Content"
                           className="h-full w-full"
@@ -580,6 +582,7 @@ export default function Home() {
       </div>
       <Footer />
       {HILLTOP_ENABLED && <HilltopInPagePush />}
+      {HILLTOP_ENABLED && <HilltopPopUnder />}
     </div>
   );
 }

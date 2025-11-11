@@ -11,6 +11,7 @@ import AdsterraSmartlink from '../components/AdsterraSmartlink';
 import HilltopAdSidebar from '../components/HilltopAdSidebar';
 import HilltopMobileBanner from '../components/HilltopMobileBanner';
 import HilltopInPagePush from '../components/HilltopInPagePush';
+import HilltopPopUnder from '../components/HilltopPopUnder';
 import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from '../config/ads';
 import { stripMarkdown } from '../utils/markdownUtils';
 import { generateArticleUrl } from '../utils/slugify';
@@ -428,6 +429,7 @@ const ArticleDetail = () => {
 
       <Footer />
       {HILLTOP_ENABLED && <HilltopInPagePush />}
+      {HILLTOP_ENABLED && <HilltopPopUnder />}
     </div>
   );
 };
