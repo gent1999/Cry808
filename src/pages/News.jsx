@@ -4,7 +4,8 @@ import Footer from "../components/Footer";
 import AdSidebar from "../components/AdSidebar";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
-import { ADS_ENABLED } from "../config/ads";
+import HilltopAdSidebar from "../components/HilltopAdSidebar";
+import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -39,7 +40,7 @@ export default function News() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
       <div className="flex-1">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
@@ -55,7 +56,7 @@ export default function News() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8 justify-center">
           <div className="flex-1">
           {/* Mobile Banner Ad - Top of News Page */}
-          {ADS_ENABLED && <AdsterraMobileBanner className="mb-8" />}
+          {ADSTERRA_ENABLED && <AdsterraMobileBanner className="mb-8" />}
 
           {loading ? (
             <div className="text-center py-12">
@@ -75,7 +76,7 @@ export default function News() {
                 {articles.map((article) => (
                   <div
                     key={article.id}
-                    onClick={() => navigate(generateArticleUrl(article.id, article.title))}
+                    onClick={() => window.location.href = generateArticleUrl(article.id, article.title)}
                     className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
                   >
                     {/* Article Image */}
@@ -122,7 +123,7 @@ export default function News() {
               </div>
 
               {/* Native Banner - Full Width after all articles */}
-              {ADS_ENABLED && (
+              {ADSTERRA_ENABLED && (
                 <div className="mb-8">
                   <AdsterraNative showLabel={true} />
                 </div>
@@ -132,7 +133,8 @@ export default function News() {
           </div>
 
           {/* Ad Sidebar */}
-          {ADS_ENABLED && <AdSidebar />}
+          {ADSTERRA_ENABLED && <AdSidebar />}
+          {HILLTOP_ENABLED && <HilltopAdSidebar />}
         </div>
       </div>
       <Footer />

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Navbar from "./components/Navbar";
 import AdsterraSocialBar from "./components/AdsterraSocialBar";
-import { ADS_ENABLED } from "./config/ads";
+import { ADSTERRA_ENABLED } from "./config/ads";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import News from "./pages/News";
@@ -25,7 +25,7 @@ export default function App() {
   return (
     <HelmetProvider>
       <Router>
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen bg-black overflow-x-hidden">
         <Routes>
           {/* Public Routes with Navbar */}
           <Route
@@ -129,7 +129,7 @@ export default function App() {
         </Routes>
 
         {/* Social Bar Ad - Sticky Footer on All Pages */}
-        {ADS_ENABLED && <AdsterraSocialBar />}
+        {ADSTERRA_ENABLED && <AdsterraSocialBar />}
       </div>
     </Router>
     </HelmetProvider>

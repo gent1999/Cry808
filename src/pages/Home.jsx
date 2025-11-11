@@ -5,7 +5,8 @@ import AdSidebar from "../components/AdSidebar";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import AdsterraNative from "../components/AdsterraNative";
-import { ADS_ENABLED } from "../config/ads";
+import HilltopAdSidebar from "../components/HilltopAdSidebar";
+import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -221,7 +222,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
       <div className="flex-1">
         {loading ? (
           <>
@@ -249,7 +250,8 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              {ADS_ENABLED && <AdSidebar />}
+              {ADSTERRA_ENABLED && <AdSidebar />}
+              {HILLTOP_ENABLED && <HilltopAdSidebar />}
             </div>
           </>
         ) : error ? (
@@ -264,7 +266,7 @@ export default function Home() {
           <>
             {/* Hero Article with Overlay */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="relative group cursor-pointer" onClick={() => navigate(generateArticleUrl(heroArticle.id, heroArticle.title))}>
+              <div className="relative group cursor-pointer" onClick={() => window.location.href = generateArticleUrl(heroArticle.id, heroArticle.title)}>
                 <div className="relative h-[400px] md:h-[450px] rounded-2xl overflow-hidden">
                   {/* Background Image with Gradient Overlay */}
                   <div className="absolute inset-0">
@@ -340,9 +342,6 @@ export default function Home() {
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
               <div className="flex-1">
-                {/* Mobile Banner Ad - Top of Latest Stories */}
-                {ADS_ENABLED && <AdsterraMobileBanner className="mb-8" />}
-
                 {/* 1of1 Originals Section */}
                 {originals.length > 0 && (
                   <>
@@ -357,7 +356,7 @@ export default function Home() {
                       {originals.map((item) => (
                         <div
                           key={item.id}
-                          onClick={() => navigate(generateArticleUrl(item.id, item.title))}
+                          onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
                           className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/20"
                         >
                           {/* Image */}
@@ -414,7 +413,7 @@ export default function Home() {
                       ))}
 
                       {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                      {ADS_ENABLED && (
+                      {ADSTERRA_ENABLED && (
                         <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
                           <AdsterraSmartlink
                             type="card"
@@ -441,7 +440,7 @@ export default function Home() {
                     {mixedContent.map((item) => (
                       <div
                         key={item.id}
-                        onClick={() => navigate(generateArticleUrl(item.id, item.title))}
+                        onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
                         className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
                       >
                         {/* Image */}
@@ -498,7 +497,7 @@ export default function Home() {
                     ))}
 
                     {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                    {ADS_ENABLED && (
+                    {ADSTERRA_ENABLED && (
                       <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
                         <AdsterraSmartlink
                           type="card"
@@ -515,7 +514,7 @@ export default function Home() {
                 )}
 
                 {/* Native Banner - Full Width before Newsletter */}
-                {ADS_ENABLED && (
+                {ADSTERRA_ENABLED && (
                   <div className="mb-8">
                     <AdsterraNative showLabel={true} />
                   </div>
@@ -566,7 +565,8 @@ export default function Home() {
               </div>
 
               {/* Ad Sidebar */}
-              {ADS_ENABLED && <AdSidebar />}
+              {ADSTERRA_ENABLED && <AdSidebar />}
+              {HILLTOP_ENABLED && <HilltopAdSidebar />}
             </div>
           </>
         )}

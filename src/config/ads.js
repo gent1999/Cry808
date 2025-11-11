@@ -1,4 +1,6 @@
 // Centralized Ad Configuration
-// Set to false to disable all ads across the site
+// Control each ad network independently
 
-export const ADS_ENABLED = false; // Set to true to enable ads, false to disable
+export const ADSTERRA_ENABLED = false;  // Adsterra ad network
+export const HILLTOP_ENABLED = true;     // Hilltop Ads network
+export const MONETAG_ENABLED = false;    // Monetag network (for future use)

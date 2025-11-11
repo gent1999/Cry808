@@ -5,7 +5,8 @@ import AdSidebar from "../components/AdSidebar";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
-import { ADS_ENABLED } from "../config/ads";
+import HilltopAdSidebar from "../components/HilltopAdSidebar";
+import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -43,7 +44,7 @@ export default function Interviews() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
       <div className="flex-1">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
@@ -59,7 +60,7 @@ export default function Interviews() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8 justify-center">
           <div className="flex-1">
           {/* Mobile Banner Ad - Top of Interviews Page */}
-          {ADS_ENABLED && <AdsterraMobileBanner className="mb-8" />}
+          {ADSTERRA_ENABLED && <AdsterraMobileBanner className="mb-8" />}
 
           {loading ? (
             <div className="text-center py-12">
@@ -89,7 +90,7 @@ export default function Interviews() {
                         return (
                           <React.Fragment key={interview.id}>
                             <div
-                              onClick={() => navigate(generateArticleUrl(interview.id, interview.title))}
+                              onClick={() => window.location.href = generateArticleUrl(interview.id, interview.title)}
                               className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
                             >
                               {/* Interview Image */}
@@ -134,7 +135,7 @@ export default function Interviews() {
                             </div>
 
                             {/* Insert smartlink card every 9 interviews */}
-                            {ADS_ENABLED && (globalIndex + 1) % 9 === 0 && globalIndex !== interviews.length - 1 && (
+                            {ADSTERRA_ENABLED && (globalIndex + 1) % 9 === 0 && globalIndex !== interviews.length - 1 && (
                               <div className="col-span-1">
                                 <AdsterraSmartlink
                                   type="card"
@@ -148,7 +149,7 @@ export default function Interviews() {
                     </div>
 
                     {/* Native Banner - Full Width after every 6 interviews */}
-                    {ADS_ENABLED && endIdx < interviews.length && (
+                    {ADSTERRA_ENABLED && endIdx < interviews.length && (
                       <div className="mb-8">
                         <AdsterraNative showLabel={true} />
                       </div>
@@ -161,7 +162,8 @@ export default function Interviews() {
           </div>
 
           {/* Ad Sidebar */}
-          {ADS_ENABLED && <AdSidebar />}
+          {ADSTERRA_ENABLED && <AdSidebar />}
+          {HILLTOP_ENABLED && <HilltopAdSidebar />}
         </div>
       </div>
       <Footer />

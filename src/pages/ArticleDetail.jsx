@@ -8,7 +8,8 @@ import AdSidebarArticle from '../components/AdSidebarArticle';
 import AdsterraInArticle from '../components/AdsterraInArticle';
 import AdsterraMobileBanner from '../components/AdsterraMobileBanner';
 import AdsterraSmartlink from '../components/AdsterraSmartlink';
-import { ADS_ENABLED } from '../config/ads';
+import HilltopAdSidebar from '../components/HilltopAdSidebar';
+import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from '../config/ads';
 import { stripMarkdown } from '../utils/markdownUtils';
 import { generateArticleUrl } from '../utils/slugify';
 
@@ -64,7 +65,7 @@ const ArticleDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col">
+      <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-xl">Loading article...</div>
         </div>
@@ -75,7 +76,7 @@ const ArticleDetail = () => {
 
   if (error || !article) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col">
+      <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="text-red-400 text-xl mb-4">{error || 'Article not found'}</div>
@@ -109,7 +110,7 @@ const ArticleDetail = () => {
   const articleUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
       {/* SEO Meta Tags */}
       <Helmet>
         <title>{article.title} | Cry808</title>
@@ -191,7 +192,7 @@ const ArticleDetail = () => {
             </button>
 
             {/* Mobile Banner Ad - Top of Article */}
-            {ADS_ENABLED && <AdsterraMobileBanner className="mb-6" />}
+            {ADSTERRA_ENABLED && <AdsterraMobileBanner className="mb-6" />}
 
         {/* Article Image */}
         {article.image_url && (
@@ -279,7 +280,7 @@ const ArticleDetail = () => {
         </div>
 
         {/* In-Article Ad */}
-        {ADS_ENABLED && <AdsterraInArticle />}
+        {ADSTERRA_ENABLED && <AdsterraInArticle />}
 
         {/* Spotify Embed */}
         {article.spotify_url && (
@@ -338,7 +339,7 @@ const ArticleDetail = () => {
         )}
 
         {/* Smartlink CTA - End of Article */}
-        {ADS_ENABLED && (
+        {ADSTERRA_ENABLED && (
           <div className="mt-12 mb-8">
             <AdsterraSmartlink
               type="banner"
@@ -359,7 +360,8 @@ const ArticleDetail = () => {
           </div>
 
           {/* Ad Sidebar - Article Specific */}
-          {ADS_ENABLED && <AdSidebarArticle />}
+          {ADSTERRA_ENABLED && <AdSidebarArticle />}
+          {HILLTOP_ENABLED && <HilltopAdSidebar />}
         </div>
       </div>
 
@@ -371,7 +373,7 @@ const ArticleDetail = () => {
             {moreArticles.map((article) => (
               <div
                 key={article.id}
-                onClick={() => navigate(generateArticleUrl(article.id, article.title))}
+                onClick={() => window.location.href = generateArticleUrl(article.id, article.title)}
                 className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
               >
                 {/* Article Image */}

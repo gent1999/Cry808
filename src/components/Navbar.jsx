@@ -66,10 +66,13 @@ export default function Navbar() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchResults.length > 0) {
-      navigate(`/article/${searchResults[0].id}`);
-      setShowSearchResults(false);
-      setSearchQuery('');
+      window.location.href = `/article/${searchResults[0].id}`;
     }
+  };
+
+  const handleNavClick = (path) => (e) => {
+    e.preventDefault();
+    window.location.href = path;
   };
 
   return (
@@ -81,7 +84,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center group">
+          <Link to="/" onClick={handleNavClick('/')} className="flex items-center group">
             <img
               src={logo}
               alt="CRY808"
@@ -113,9 +116,7 @@ export default function Navbar() {
                     <div
                       key={result.id}
                       onClick={() => {
-                        navigate(`/article/${result.id}`);
-                        setShowSearchResults(false);
-                        setSearchQuery('');
+                        window.location.href = `/article/${result.id}`;
                       }}
                       className="px-4 py-3 hover:bg-purple-600/20 cursor-pointer border-b border-white/5 last:border-0 transition-colors"
                     >
@@ -139,6 +140,7 @@ export default function Navbar() {
             <div className="flex items-center space-x-1">
               <Link
                 to="/"
+                onClick={handleNavClick('/')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
                   isActive('/')
                     ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
@@ -149,6 +151,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/news"
+                onClick={handleNavClick('/news')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
                   isActive('/news')
                     ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
@@ -159,6 +162,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/interviews"
+                onClick={handleNavClick('/interviews')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
                   isActive('/interviews')
                     ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
@@ -218,7 +222,7 @@ export default function Navbar() {
                   ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
                   : 'text-white/70 hover:text-white hover:bg-white/5'
               }`}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={handleNavClick('/')}
             >
               Home
             </Link>
@@ -229,7 +233,7 @@ export default function Navbar() {
                   ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
                   : 'text-white/70 hover:text-white hover:bg-white/5'
               }`}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={handleNavClick('/news')}
             >
               News
             </Link>
@@ -240,7 +244,7 @@ export default function Navbar() {
                   ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
                   : 'text-white/70 hover:text-white hover:bg-white/5'
               }`}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={handleNavClick('/interviews')}
             >
               Interviews
             </Link>
