@@ -20,6 +20,7 @@ import ArticleCreate from "./pages/admin/ArticleCreate";
 import ArticleEdit from "./pages/admin/ArticleEdit";
 import ArticlesList from "./pages/admin/ArticlesList";
 import SubmissionsList from "./pages/admin/SubmissionsList";
+import SpotifyManager from "./pages/admin/SpotifyManager";
 
 export default function App() {
   return (
@@ -126,6 +127,7 @@ export default function App() {
           <Route path="/admin/articles/create" element={<ArticleCreate />} />
           <Route path="/admin/articles/edit/:id" element={<ArticleEdit />} />
           <Route path="/admin/submissions" element={<SubmissionsList />} />
+          <Route path="/admin/spotify" element={<SpotifyManager />} />
         </Routes>
 
         {/* Social Bar Ad - Sticky Footer on All Pages */}
