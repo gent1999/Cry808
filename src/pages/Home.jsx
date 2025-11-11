@@ -343,6 +343,18 @@ export default function Home() {
               </div>
             )}
 
+            {/* Submit Music CTA - Mobile Only */}
+            <div className="md:hidden border-b border-white/10 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <button
+                  onClick={() => window.location.href = '/submit-music'}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg text-center"
+                >
+                  🎵 Submit Your Music
+                </button>
+              </div>
+            </div>
+
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
               <div className="flex-1">

@@ -204,67 +204,67 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`md:hidden overflow-hidden transition-all duration-300 ${
-          isMenuOpen ? 'max-h-64 pb-4' : 'max-h-0'
-        }`}>
-          <div className="flex flex-col space-y-2 pt-2">
-            <Link
-              to="/"
-              className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                isActive('/')
-                  ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
-              }`}
-              onClick={handleNavClick('/')}
-            >
-              Home
-            </Link>
-            <Link
-              to="/news"
-              className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                isActive('/news')
-                  ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
-              }`}
-              onClick={handleNavClick('/news')}
-            >
-              News
-            </Link>
-            <Link
-              to="/interviews"
-              className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                isActive('/interviews')
-                  ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
-              }`}
-              onClick={handleNavClick('/interviews')}
-            >
-              Interviews
-            </Link>
-            <Link
-              to="/about"
-              className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                isActive('/about')
-                  ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                isActive('/contact')
-                  ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </Link>
+        {isMenuOpen && (
+          <div className="md:hidden pb-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col space-y-2">
+              <Link
+                to="/"
+                className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  isActive('/')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                onClick={handleNavClick('/')}
+              >
+                Home
+              </Link>
+              <Link
+                to="/news"
+                className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  isActive('/news')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                onClick={handleNavClick('/news')}
+              >
+                News
+              </Link>
+              <Link
+                to="/interviews"
+                className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  isActive('/interviews')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                onClick={handleNavClick('/interviews')}
+              >
+                Interviews
+              </Link>
+              <Link
+                to="/about"
+                className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  isActive('/about')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                to="/contact"
+                className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  isActive('/contact')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Search Dropdown */}
         {isSearchOpen && (
