@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import SpotifyEmbed from "../components/SpotifyEmbed";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
+import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import { ADSTERRA_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
@@ -346,6 +347,9 @@ export default function Home() {
                 </button>
               </div>
             </div>
+
+            {/* Mobile Ad - 320x50 */}
+            {ADSTERRA_ENABLED && <AdsterraMobileBanner className="py-6" />}
 
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
