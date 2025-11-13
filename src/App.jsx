@@ -16,6 +16,7 @@ import Contact from "./pages/Contact";
 import ArticleDetail from "./pages/ArticleDetail";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminSettings from "./pages/admin/AdminSettings";
 import ArticleCreate from "./pages/admin/ArticleCreate";
 import ArticleEdit from "./pages/admin/ArticleEdit";
 import ArticlesList from "./pages/admin/ArticlesList";
@@ -123,6 +124,7 @@ export default function App() {
           {/* Admin Routes without Navbar */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/articles" element={<ArticlesList />} />
           <Route path="/admin/articles/create" element={<ArticleCreate />} />
           <Route path="/admin/articles/edit/:id" element={<ArticleEdit />} />
