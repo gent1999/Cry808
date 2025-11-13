@@ -4,15 +4,10 @@ import { Helmet } from 'react-helmet-async';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Footer from '../components/Footer';
-import AdSidebarArticle from '../components/AdSidebarArticle';
-import AdsterraInArticle from '../components/AdsterraInArticle';
-import AdsterraMobileBanner from '../components/AdsterraMobileBanner';
-import AdsterraSmartlink from '../components/AdsterraSmartlink';
 import HilltopAdSidebar from '../components/HilltopAdSidebar';
 import HilltopMobileBanner from '../components/HilltopMobileBanner';
-import HilltopInPagePush from '../components/HilltopInPagePush';
 import HilltopPopUnder from '../components/HilltopPopUnder';
-import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from '../config/ads';
+import { HILLTOP_ENABLED } from '../config/ads';
 import { stripMarkdown } from '../utils/markdownUtils';
 import { generateArticleUrl } from '../utils/slugify';
 
@@ -195,7 +190,6 @@ const ArticleDetail = () => {
             </button>
 
             {/* Mobile Banner Ad - Top of Article */}
-            {ADSTERRA_ENABLED && <AdsterraMobileBanner className="mb-6" />}
             <div className="xl:hidden mb-6">
               {HILLTOP_ENABLED && <HilltopMobileBanner />}
             </div>
@@ -285,9 +279,6 @@ const ArticleDetail = () => {
           </ReactMarkdown>
         </div>
 
-        {/* In-Article Ad */}
-        {ADSTERRA_ENABLED && <AdsterraInArticle />}
-
         {/* Spotify Embed */}
         {article.spotify_url && (
           <div className="mt-8">
@@ -344,16 +335,6 @@ const ArticleDetail = () => {
           </div>
         )}
 
-        {/* Smartlink CTA - End of Article */}
-        {ADSTERRA_ENABLED && (
-          <div className="mt-12 mb-8">
-            <AdsterraSmartlink
-              type="banner"
-              text="Discover More Hip-Hop Content You'll Love"
-            />
-          </div>
-        )}
-
         {/* Back Button Section */}
         <div className="mt-8 pt-8 border-t border-white/10">
           <button
@@ -366,7 +347,6 @@ const ArticleDetail = () => {
           </div>
 
           {/* Ad Sidebar - Article Specific */}
-          {ADSTERRA_ENABLED && <AdSidebarArticle />}
           {HILLTOP_ENABLED && <HilltopAdSidebar />}
         </div>
       </div>
@@ -428,7 +408,6 @@ const ArticleDetail = () => {
       )}
 
       <Footer />
-      {HILLTOP_ENABLED && <HilltopInPagePush />}
       {HILLTOP_ENABLED && <HilltopPopUnder />}
     </div>
   );
