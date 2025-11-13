@@ -5,7 +5,6 @@ import SpotifyEmbed from "../components/SpotifyEmbed";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
-import { ADSTERRA_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -24,6 +23,7 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stats, setStats] = useState({ articles: 0, interviews: 0, subscribers: 0 });
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [adSettings, setAdSettings] = useState({ adsterra_enabled: false });
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -104,6 +104,23 @@ export default function Home() {
     };
 
     fetchArticles();
+  }, []);
+
+  // Load ad settings from API
+  useEffect(() => {
+    const loadAdSettings = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/settings/public`);
+        const data = await response.json();
+        if (data.settings) {
+          setAdSettings(data.settings);
+        }
+      } catch (error) {
+        console.error('Failed to load ad settings:', error);
+      }
+    };
+
+    loadAdSettings();
   }, []);
 
   const handleNewsletterSubmit = async (e) => {
@@ -349,7 +366,7 @@ export default function Home() {
             </div>
 
             {/* Mobile Ad - 320x50 */}
-            {ADSTERRA_ENABLED && <AdsterraMobileBanner className="py-6" />}
+            {adSettings.adsterra_enabled && <AdsterraMobileBanner className="py-6" />}
 
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
@@ -425,7 +442,7 @@ export default function Home() {
                       ))}
 
                       {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                      {ADSTERRA_ENABLED && (
+                      {adSettings.adsterra_enabled && (
                         <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
                           <AdsterraSmartlink
                             type="card"
@@ -509,7 +526,7 @@ export default function Home() {
                     ))}
 
                     {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                    {ADSTERRA_ENABLED && (
+                    {adSettings.adsterra_enabled && (
                       <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
                         <AdsterraSmartlink
                           type="card"
@@ -573,7 +590,7 @@ export default function Home() {
               <div className="hidden xl:block w-80 flex-shrink-0">
                 <div className="sticky top-24 space-y-6">
                   {/* Adsterra Native Banner */}
-                  {ADSTERRA_ENABLED && <AdsterraNative />}
+                  {adSettings.adsterra_enabled && <AdsterraNative />}
 
                   <SpotifyEmbed />
                 </div>

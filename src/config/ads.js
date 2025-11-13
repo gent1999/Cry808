@@ -1,31 +1,59 @@
 // Centralized Ad Configuration
-// These values are loaded from the backend API
-// Default fallback values if API is unavailable
-let adSettings = {
-  ADSTERRA_ENABLED: false,
-  HILLTOP_ENABLED: true,
-  MONETAG_ENABLED: false
-};
+// Dynamic settings loaded from backend
 
-// Function to load settings from API
-export const loadAdSettings = async () => {
-  try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${API_URL}/api/settings/public`);
-    const data = await response.json();
+// Get API URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-    if (data.settings) {
-      adSettings.ADSTERRA_ENABLED = data.settings.adsterra_enabled;
-      adSettings.HILLTOP_ENABLED = data.settings.hilltop_enabled;
-      adSettings.MONETAG_ENABLED = data.settings.monetag_enabled;
-    }
-  } catch (error) {
-    console.error('Failed to load ad settings:', error);
+// Create a settings store
+class AdSettingsStore {
+  constructor() {
+    this.settings = {
+      ADSTERRA_ENABLED: false,
+      HILLTOP_ENABLED: true,
+      MONETAG_ENABLED: false
+    };
+    this.loaded = false;
   }
-  return adSettings;
-};
 
-// Export individual settings
-export const ADSTERRA_ENABLED = adSettings.ADSTERRA_ENABLED;
-export const HILLTOP_ENABLED = adSettings.HILLTOP_ENABLED;
-export const MONETAG_ENABLED = adSettings.MONETAG_ENABLED;
+  async load() {
+    if (this.loaded) return this.settings;
+
+    try {
+      const response = await fetch(`${API_URL}/api/settings/public`);
+      const data = await response.json();
+
+      if (data.settings) {
+        this.settings.ADSTERRA_ENABLED = data.settings.adsterra_enabled;
+        this.settings.HILLTOP_ENABLED = data.settings.hilltop_enabled;
+        this.settings.MONETAG_ENABLED = data.settings.monetag_enabled;
+      }
+      this.loaded = true;
+    } catch (error) {
+      console.error('Failed to load ad settings:', error);
+    }
+
+    return this.settings;
+  }
+
+  get ADSTERRA_ENABLED() {
+    return this.settings.ADSTERRA_ENABLED;
+  }
+
+  get HILLTOP_ENABLED() {
+    return this.settings.HILLTOP_ENABLED;
+  }
+
+  get MONETAG_ENABLED() {
+    return this.settings.MONETAG_ENABLED;
+  }
+}
+
+export const adSettingsStore = new AdSettingsStore();
+
+// Load settings immediately
+adSettingsStore.load();
+
+// Export for backwards compatibility (but won't update reactively)
+export const ADSTERRA_ENABLED = adSettingsStore.ADSTERRA_ENABLED;
+export const HILLTOP_ENABLED = adSettingsStore.HILLTOP_ENABLED;
+export const MONETAG_ENABLED = adSettingsStore.MONETAG_ENABLED;
