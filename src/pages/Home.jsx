@@ -5,6 +5,7 @@ import SpotifyEmbed from "../components/SpotifyEmbed";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
+import Infolinks from "../components/Infolinks";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -241,6 +242,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
+      {/* Infolinks - loads once for entire page */}
+      <Infolinks />
+
       <div className="flex-1">
         {loading ? (
           <>
