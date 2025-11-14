@@ -10,6 +10,8 @@ const AdsterraMobileBanner = ({ position = 'top', className = '' }) => {
   const adRef = useRef(null);
 
   useEffect(() => {
+    console.log('📱 AdsterraMobileBanner component mounted');
+
     // Load Adsterra mobile banner ad
     if (adRef.current && !adRef.current.hasAttribute('data-ad-loaded')) {
       adRef.current.setAttribute('data-ad-loaded', 'true');
@@ -32,9 +34,19 @@ const AdsterraMobileBanner = ({ position = 'top', className = '' }) => {
       invokeScript.type = 'text/javascript';
       invokeScript.src = '//www.highperformanceformat.com/ad951cea811b4fbc62cf82ef7b8b0ce8/invoke.js';
 
+      invokeScript.onload = () => {
+        console.log('✅ Adsterra mobile banner (320x50) script loaded');
+      };
+
+      invokeScript.onerror = () => {
+        console.error('❌ Adsterra mobile banner script failed to load');
+      };
+
       // Append scripts to ad container
       adRef.current.appendChild(atOptionsScript);
       adRef.current.appendChild(invokeScript);
+
+      console.log('📢 Adsterra mobile banner (320x50) initialization started');
     }
   }, []);
 

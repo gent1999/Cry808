@@ -114,6 +114,8 @@ export default function Home() {
         const data = await response.json();
         if (data.settings) {
           setAdSettings(data.settings);
+          console.log('📊 Ad settings loaded:', data.settings);
+          console.log('📱 Adsterra enabled:', data.settings.adsterra_enabled);
         }
       } catch (error) {
         console.error('Failed to load ad settings:', error);
@@ -366,7 +368,12 @@ export default function Home() {
             </div>
 
             {/* Mobile Ad - 320x50 */}
-            {adSettings.adsterra_enabled && <AdsterraMobileBanner className="py-6" />}
+            {adSettings.adsterra_enabled && (
+              <>
+                {console.log('🎯 Rendering mobile banner - adsterra_enabled:', adSettings.adsterra_enabled)}
+                <AdsterraMobileBanner className="py-6" />
+              </>
+            )}
 
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
