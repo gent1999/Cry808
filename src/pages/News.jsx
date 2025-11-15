@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import AdSidebar from "../components/AdSidebar";
-import AdsterraNative from "../components/AdsterraNative";
-import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
-import HilltopAdSidebar from "../components/HilltopAdSidebar";
-import HilltopMultiBanner from "../components/HilltopMultiBanner";
-import HilltopInPagePush from "../components/HilltopInPagePush";
-import HilltopPopUnder from "../components/HilltopPopUnder";
-import { ADSTERRA_ENABLED, HILLTOP_ENABLED } from "../config/ads";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -56,14 +48,8 @@ export default function News() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8 justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex-1">
-          {/* Mobile Banner Ad - Top of News Page */}
-          {ADSTERRA_ENABLED && <AdsterraMobileBanner className="mb-8" />}
-          <div className="xl:hidden mb-8">
-            {HILLTOP_ENABLED && <HilltopMultiBanner />}
-          </div>
-
           {loading ? (
             <div className="text-center py-12">
               <div className="text-white/70 text-lg">Loading articles...</div>
@@ -127,25 +113,12 @@ export default function News() {
                   </div>
                 ))}
               </div>
-
-              {/* Native Banner - Full Width after all articles */}
-              {ADSTERRA_ENABLED && (
-                <div className="mb-8">
-                  <AdsterraNative showLabel={true} />
-                </div>
-              )}
             </>
           )}
           </div>
-
-          {/* Ad Sidebar */}
-          {ADSTERRA_ENABLED && <AdSidebar />}
-          {HILLTOP_ENABLED && <HilltopAdSidebar />}
         </div>
       </div>
       <Footer />
-      {HILLTOP_ENABLED && <HilltopInPagePush />}
-      {HILLTOP_ENABLED && <HilltopPopUnder />}
     </div>
   );
 }
