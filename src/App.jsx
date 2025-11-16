@@ -1,9 +1,10 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Navbar from "./components/Navbar";
 import AdsterraSocialBar from "./components/AdsterraSocialBar";
 import { ADSTERRA_ENABLED } from "./config/ads";
+import { initGA, logPageView } from "./utils/analytics";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import News from "./pages/News";
@@ -23,10 +24,27 @@ import ArticlesList from "./pages/admin/ArticlesList";
 import SubmissionsList from "./pages/admin/SubmissionsList";
 import SpotifyManager from "./pages/admin/SpotifyManager";
 
+// Component to track page views
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    logPageView(location.pathname + location.search);
+  }, [location]);
+
+  return null;
+}
+
 export default function App() {
+  useEffect(() => {
+    // Initialize Google Analytics on app mount
+    initGA();
+  }, []);
+
   return (
     <HelmetProvider>
       <Router>
+        <AnalyticsTracker />
         <div className="min-h-screen bg-black overflow-x-hidden">
         <Routes>
           {/* Public Routes with Navbar */}
