@@ -4,9 +4,9 @@ import Footer from "../components/Footer";
 import SpotifyEmbed from "../components/SpotifyEmbed";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
-import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import Infolinks from "../components/Infolinks";
 import AmazonWidget from "../components/AmazonWidget";
+import AmazonMobileAd from "../components/AmazonMobileAd";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -226,15 +226,15 @@ export default function Home() {
   );
 
   const SkeletonHero = () => (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="relative h-[400px] md:h-[450px] rounded-2xl bg-white/5 animate-pulse overflow-hidden">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+      <div className="relative h-[280px] md:h-[450px] rounded-2xl bg-white/5 animate-pulse overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent"></div>
-        <div className="relative h-full flex items-end p-6 md:p-12">
+        <div className="relative h-full flex items-end p-4 md:p-12">
           <div className="max-w-3xl w-full">
-            <div className="h-8 bg-white/10 rounded-full w-32 mb-3"></div>
-            <div className="h-10 bg-white/10 rounded w-3/4 mb-3"></div>
-            <div className="h-6 bg-white/10 rounded w-1/2 mb-4"></div>
-            <div className="h-12 bg-white/10 rounded w-40"></div>
+            <div className="h-6 md:h-8 bg-white/10 rounded-full w-32 mb-2 md:mb-3"></div>
+            <div className="h-8 md:h-10 bg-white/10 rounded w-3/4 mb-2 md:mb-3"></div>
+            <div className="h-4 md:h-6 bg-white/10 rounded w-1/2 mb-3 md:mb-4"></div>
+            <div className="h-8 md:h-12 bg-white/10 rounded w-32 md:w-40"></div>
           </div>
         </div>
       </div>
@@ -254,10 +254,10 @@ export default function Home() {
 
             {/* Skeleton Tags */}
             <div className="border-y border-white/10 bg-white/5">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div className="flex gap-3">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-6">
+                <div className="flex gap-2 md:gap-3">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-10 w-24 bg-white/10 rounded-full animate-pulse"></div>
+                    <div key={i} className="h-7 md:h-10 w-20 md:w-24 bg-white/10 rounded-full animate-pulse"></div>
                   ))}
                 </div>
               </div>
@@ -286,9 +286,9 @@ export default function Home() {
         ) : (
           <>
             {/* Hero Article with Overlay */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
               <div className="relative group cursor-pointer" onClick={() => window.location.href = generateArticleUrl(heroArticle.id, heroArticle.title)}>
-                <div className="relative h-[400px] md:h-[450px] rounded-2xl overflow-hidden">
+                <div className="relative h-[280px] md:h-[450px] rounded-2xl overflow-hidden">
                   {/* Background Image with Gradient Overlay */}
                   <div className="absolute inset-0">
                     {heroArticle.image_url && (
@@ -303,15 +303,15 @@ export default function Home() {
                   </div>
 
                   {/* Hero Content */}
-                  <div className="relative h-full flex flex-col justify-end p-6 md:p-12">
+                  <div className="relative h-full flex flex-col justify-end p-4 md:p-12">
                     <div className="max-w-3xl">
                       {/* Title */}
-                      <h1 className="text-3xl md:text-5xl font-bold mb-3 leading-tight text-white drop-shadow-lg">
+                      <h1 className="text-2xl md:text-5xl font-bold mb-2 md:mb-3 leading-tight text-white drop-shadow-lg">
                         {heroArticle.title}
                       </h1>
 
                       {/* Meta */}
-                      <p className="text-white/90 text-sm md:text-base mb-4 drop-shadow-md">
+                      <p className="text-white/90 text-xs md:text-base mb-3 md:mb-4 drop-shadow-md">
                         By {heroArticle.author} • {new Date(heroArticle.created_at).toLocaleDateString()}
                       </p>
 
@@ -321,7 +321,7 @@ export default function Home() {
                       </p>
 
                       {/* Read More Button */}
-                      <button className="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm md:text-base font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
+                      <button className="px-4 py-2 md:px-8 md:py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs md:text-base font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
                         Read Full Story
                       </button>
                     </div>
@@ -329,8 +329,8 @@ export default function Home() {
                 </div>
 
                 {/* Category Badge - Outside image container */}
-                <div className="absolute top-4 right-10 md:right-16">
-                  <span className="inline-block px-3 py-1.5 bg-purple-600/90 backdrop-blur-sm text-white text-xs md:text-sm font-semibold rounded-full uppercase tracking-wider shadow-lg">
+                <div className="absolute top-3 right-3 md:top-4 md:right-16">
+                  <span className="inline-block px-2 py-1 md:px-3 md:py-1.5 bg-purple-600/90 backdrop-blur-sm text-white text-xs md:text-sm font-semibold rounded-full uppercase tracking-wider shadow-lg">
                     {heroArticle.category === 'interview' ? '🎤 Interview' : '📰 Latest'}
                   </span>
                 </div>
@@ -340,16 +340,16 @@ export default function Home() {
             {/* Trending Tags Section */}
             {trendingTags.length > 0 && (
               <div className="border-b border-white/10 bg-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <span className="text-white/50 font-semibold uppercase text-sm tracking-wider">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-6">
+                  <div className="flex flex-wrap items-center gap-2 md:gap-4">
+                    <span className="text-white/50 font-semibold uppercase text-xs md:text-sm tracking-wider">
                       🔥 Trending:
                     </span>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-2 md:gap-3">
                       {trendingTags.map((tag, index) => (
                         <button
                           key={index}
-                          className="px-4 py-2 bg-white/10 hover:bg-purple-600/30 border border-white/20 hover:border-purple-500/50 text-white text-sm rounded-full transition-all"
+                          className="px-3 py-1.5 md:px-4 md:py-2 bg-white/10 hover:bg-purple-600/30 border border-white/20 hover:border-purple-500/50 text-white text-xs md:text-sm rounded-full transition-all"
                         >
                           {tag}
                         </button>
@@ -362,26 +362,21 @@ export default function Home() {
 
             {/* Submit Music CTA - Mobile Only */}
             <div className="md:hidden border-b border-white/10 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <button
                   onClick={() => window.location.href = '/submit-music'}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg text-center"
+                  className="w-full px-5 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg text-center"
                 >
                   🎵 Submit Your Music
                 </button>
               </div>
             </div>
 
-            {/* Mobile Ad - 320x50 */}
-            {adSettings.adsterra_enabled && (
-              <>
-                {console.log('🎯 Rendering mobile banner - adsterra_enabled:', adSettings.adsterra_enabled)}
-                <AdsterraMobileBanner className="py-6" />
-              </>
-            )}
+            {/* Mobile Ad - Amazon Product */}
+            <AmazonMobileAd className="py-4" />
 
             {/* Main Content Grid */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 flex gap-8 justify-center">
               <div className="flex-1">
                 {/* 1of1 Originals Section */}
                 {originals.length > 0 && (

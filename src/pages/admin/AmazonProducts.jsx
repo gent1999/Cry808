@@ -18,7 +18,8 @@ const AmazonProducts = () => {
     description: '',
     affiliate_link: '',
     is_active: true,
-    display_order: 0
+    display_order: 0,
+    is_mobile_featured: false
   });
 
   useEffect(() => {
@@ -83,6 +84,7 @@ const AmazonProducts = () => {
       formDataToSend.append('affiliate_link', formData.affiliate_link);
       formDataToSend.append('is_active', formData.is_active);
       formDataToSend.append('display_order', formData.display_order);
+      formDataToSend.append('is_mobile_featured', formData.is_mobile_featured);
 
       // Append image file if it exists
       if (imageFile) {
@@ -119,7 +121,8 @@ const AmazonProducts = () => {
         description: '',
         affiliate_link: '',
         is_active: true,
-        display_order: 0
+        display_order: 0,
+        is_mobile_featured: false
       });
     } catch (err) {
       alert(err.message || 'Failed to save product');
@@ -133,7 +136,8 @@ const AmazonProducts = () => {
       description: product.description || '',
       affiliate_link: product.affiliate_link,
       is_active: product.is_active,
-      display_order: product.display_order
+      display_order: product.display_order,
+      is_mobile_featured: product.is_mobile_featured || false
     });
     // Set existing image as preview if available
     if (product.image_url) {
@@ -195,7 +199,8 @@ const AmazonProducts = () => {
                     description: '',
                     affiliate_link: '',
                     is_active: true,
-                    display_order: 0
+                    display_order: 0,
+                    is_mobile_featured: false
                   });
                   setShowModal(true);
                 }}
@@ -239,13 +244,20 @@ const AmazonProducts = () => {
                 <div className="p-4">
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="text-lg font-semibold text-white">{product.name}</h3>
-                    <span className={`px-2 py-1 text-xs rounded ${
-                      product.is_active
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {product.is_active ? 'Active' : 'Inactive'}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        product.is_active
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-red-500/20 text-red-400'
+                      }`}>
+                        {product.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                      {product.is_mobile_featured && (
+                        <span className="px-2 py-1 text-xs rounded bg-orange-500/20 text-orange-400">
+                          📱 Mobile Ad
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <p className="text-sm text-gray-400 mb-3">{product.description}</p>
                   <p className="text-xs text-gray-500 mb-3">Order: {product.display_order}</p>
@@ -364,6 +376,28 @@ const AmazonProducts = () => {
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Mobile Featured Toggle */}
+              <div className="flex items-start border border-orange-500/30 rounded-lg p-4 bg-orange-500/5">
+                <div className="flex items-center h-5">
+                  <input
+                    id="is_mobile_featured"
+                    name="is_mobile_featured"
+                    type="checkbox"
+                    checked={formData.is_mobile_featured}
+                    onChange={(e) => setFormData({ ...formData, is_mobile_featured: e.target.checked })}
+                    className="w-5 h-5 bg-gray-700 border-gray-600 rounded text-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-gray-800"
+                  />
+                </div>
+                <div className="ml-3">
+                  <label htmlFor="is_mobile_featured" className="text-sm font-medium text-orange-400">
+                    📱 Set as Mobile Homepage Ad
+                  </label>
+                  <p className="text-sm text-gray-400">
+                    This product will replace the 300x50 banner on mobile devices. Only one product can be featured at a time.
+                  </p>
                 </div>
               </div>
 
