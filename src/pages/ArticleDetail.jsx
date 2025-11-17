@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import HilltopAdSidebar from '../components/HilltopAdSidebar';
 import HilltopMobileBanner from '../components/HilltopMobileBanner';
 import HilltopPopUnder from '../components/HilltopPopUnder';
+import AmazonWidget from '../components/AmazonWidget';
 import { HILLTOP_ENABLED } from '../config/ads';
 import { stripMarkdown } from '../utils/markdownUtils';
 import { generateArticleUrl } from '../utils/slugify';
@@ -346,8 +347,16 @@ const ArticleDetail = () => {
         </div>
           </div>
 
-          {/* Ad Sidebar - Article Specific */}
-          {HILLTOP_ENABLED && <HilltopAdSidebar />}
+          {/* Sidebar */}
+          <div className="hidden xl:block w-80 flex-shrink-0">
+            <div className="sticky top-24 space-y-6">
+              {/* Hilltop Ad */}
+              {HILLTOP_ENABLED && <HilltopAdSidebar />}
+
+              {/* Amazon Affiliate Widget */}
+              <AmazonWidget />
+            </div>
+          </div>
         </div>
       </div>
 
