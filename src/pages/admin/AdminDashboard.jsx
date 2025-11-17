@@ -16,6 +16,14 @@ const AdminDashboard = () => {
     drafts: 0,
     submissions: 0
   });
+  const [analyticsStats, setAnalyticsStats] = useState({
+    current: 0,
+    previous: 0,
+    change: 0,
+    realtime: 0,
+    loading: true,
+    error: null
+  });
 
   useEffect(() => {
     const verifyAdmin = async () => {
@@ -67,6 +75,9 @@ const AdminDashboard = () => {
           ...articleStats,
           submissions: submissionsCount
         });
+
+        // Fetch analytics data
+        fetchAnalytics(token);
       } catch (err) {
         setError('Session expired. Please login again.');
         setTimeout(() => {
@@ -74,6 +85,38 @@ const AdminDashboard = () => {
         }, 2000);
       } finally {
         setLoading(false);
+      }
+    };
+
+    const fetchAnalytics = async (token) => {
+      try {
+        const analyticsResponse = await fetch(`${API_URL}/api/analytics/visitors`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (analyticsResponse.ok) {
+          const analyticsData = await analyticsResponse.json();
+          setAnalyticsStats({
+            ...analyticsData.visitors,
+            loading: false,
+            error: null
+          });
+        } else {
+          setAnalyticsStats(prev => ({
+            ...prev,
+            loading: false,
+            error: 'Analytics not configured'
+          }));
+        }
+      } catch (err) {
+        console.error('Error fetching analytics:', err);
+        setAnalyticsStats(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Failed to load analytics'
+        }));
       }
     };
 
@@ -169,7 +212,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <div className="flex items-center justify-between">
               <div>
@@ -224,6 +267,42 @@ const AdminDashboard = () => {
               <div className="bg-purple-500/20 p-3 rounded-full">
                 <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Monthly Visitors from Google Analytics */}
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-gray-400 text-sm">Monthly Visitors</p>
+                  {analyticsStats.realtime > 0 && (
+                    <span className="flex items-center gap-1 text-xs text-green-400">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                      {analyticsStats.realtime} online
+                    </span>
+                  )}
+                </div>
+                {analyticsStats.loading ? (
+                  <p className="text-xl font-bold text-gray-500 mt-1">Loading...</p>
+                ) : analyticsStats.error ? (
+                  <p className="text-sm text-gray-500 mt-1">{analyticsStats.error}</p>
+                ) : (
+                  <>
+                    <p className="text-3xl font-bold text-white mt-1">{analyticsStats.current.toLocaleString()}</p>
+                    {analyticsStats.change !== 0 && (
+                      <p className={`text-xs mt-1 ${analyticsStats.change > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {analyticsStats.change > 0 ? '↑' : '↓'} {Math.abs(analyticsStats.change)}% vs last month
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+              <div className="bg-orange-500/20 p-3 rounded-full">
+                <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
             </div>
