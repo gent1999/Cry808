@@ -104,10 +104,11 @@ const AdminDashboard = () => {
             error: null
           });
         } else {
+          const errorData = await analyticsResponse.json();
           setAnalyticsStats(prev => ({
             ...prev,
             loading: false,
-            error: 'Analytics not configured'
+            error: errorData.message || errorData.error || 'Analytics not configured'
           }));
         }
       } catch (err) {
@@ -288,7 +289,7 @@ const AdminDashboard = () => {
                 {analyticsStats.loading ? (
                   <p className="text-xl font-bold text-gray-500 mt-1">Loading...</p>
                 ) : analyticsStats.error ? (
-                  <p className="text-sm text-gray-500 mt-1">{analyticsStats.error}</p>
+                  <p className="text-xs text-red-400 mt-1 break-words">{analyticsStats.error}</p>
                 ) : (
                   <>
                     <p className="text-3xl font-bold text-white mt-1">{analyticsStats.current.toLocaleString()}</p>
