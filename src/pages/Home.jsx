@@ -462,6 +462,17 @@ export default function Home() {
                   </>
                 )}
 
+                {/* Promotional Banner */}
+                <div className="mb-12">
+                  <a href="/submit-music" className="block">
+                    <img
+                      src="/promo_banner_1_.png"
+                      alt="Promotional Banner"
+                      className="w-full rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                    />
+                  </a>
+                </div>
+
                 {/* Latest Stories Header */}
                 <div className="mb-8">
                   <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
