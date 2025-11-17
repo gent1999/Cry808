@@ -30,7 +30,7 @@ export default function AmazonMobileAd({ className = '' }) {
   }
 
   return (
-    <div className={className}>
+    <div className={`xl:hidden ${className}`}>
       <div className="max-w-2xl mx-auto px-4">
         <a
           href={product.affiliate_link}
