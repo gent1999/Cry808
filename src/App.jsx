@@ -23,6 +23,7 @@ import ArticleEdit from "./pages/admin/ArticleEdit";
 import ArticlesList from "./pages/admin/ArticlesList";
 import SubmissionsList from "./pages/admin/SubmissionsList";
 import SpotifyManager from "./pages/admin/SpotifyManager";
+import AmazonProducts from "./pages/admin/AmazonProducts";
 
 // Component to track page views
 function AnalyticsTracker() {
@@ -148,6 +149,7 @@ export default function App() {
           <Route path="/admin/articles/edit/:id" element={<ArticleEdit />} />
           <Route path="/admin/submissions" element={<SubmissionsList />} />
           <Route path="/admin/spotify" element={<SpotifyManager />} />
+          <Route path="/admin/amazon-products" element={<AmazonProducts />} />
         </Routes>
 
         {/* Social Bar Ad - Sticky Footer on All Pages */}

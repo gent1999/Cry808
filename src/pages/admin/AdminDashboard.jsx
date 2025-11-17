@@ -345,6 +345,15 @@ const AdminDashboard = () => {
               Spotify Manager
             </button>
             <button
+              onClick={() => navigate('/admin/amazon-products')}
+              className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.743-2.64 1.316-4.185 1.726-1.548.41-3.14.615-4.777.615-2.425 0-4.802-.515-7.13-1.545-2.33-1.03-4.17-2.44-5.53-4.237-.06-.08-.09-.144-.09-.194 0-.08.05-.138.15-.174zm23.95 1.06c-.18-.23-.48-.23-.94 0-.28.14-.628.34-1.046.6-.42.26-.97.56-1.66.91-.69.35-1.49.64-2.4.87-.91.23-1.91.34-3 .34-1.66 0-3.22-.36-4.69-1.08-1.47-.72-2.7-1.74-3.69-3.06-.11-.14-.16-.25-.16-.31 0-.09.06-.15.18-.18.13-.03.3.03.51.18.21.15.49.38.84.69.35.31.77.64 1.26.98.49.34 1.05.64 1.68.89.63.25 1.33.44 2.1.56.77.12 1.58.18 2.43.18 1.54 0 3-.24 4.38-.72 1.38-.48 2.54-1.15 3.48-2.01.1-.09.19-.14.26-.14.06 0 .1.05.14.14.03.1.03.19-.01.27z"/>
+              </svg>
+              Amazon Products
+            </button>
+            <button
               onClick={() => navigate('/admin/settings')}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
             >

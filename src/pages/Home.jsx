@@ -6,6 +6,7 @@ import AdsterraNative from "../components/AdsterraNative";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import Infolinks from "../components/Infolinks";
+import AmazonWidget from "../components/AmazonWidget";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -604,6 +605,9 @@ export default function Home() {
                   {adSettings.adsterra_enabled && <AdsterraNative />}
 
                   <SpotifyEmbed />
+
+                  {/* Amazon Affiliate Widget */}
+                  <AmazonWidget />
                 </div>
               </div>
             </div>
