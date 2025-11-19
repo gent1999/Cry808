@@ -49,6 +49,9 @@ function CheckoutForm({ formData, onSuccess }) {
         if (formData.spotify_url) {
           submitFormData.append('spotify_url', formData.spotify_url);
         }
+        if (formData.soundcloud_url) {
+          submitFormData.append('soundcloud_url', formData.soundcloud_url);
+        }
         if (formData.image) {
           submitFormData.append('image', formData.image);
         }
@@ -103,6 +106,7 @@ export default function SubmitMusic() {
     content: '',
     youtube_url: '',
     spotify_url: '',
+    soundcloud_url: '',
     submission_type: '', // 'regular' or 'featured'
     image: null, // File object
     document: null // File object for txt/doc/pdf
@@ -676,6 +680,21 @@ export default function SubmitMusic() {
                       value={formData.spotify_url}
                       onChange={handleInputChange}
                       placeholder="https://open.spotify.com/track/..."
+                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* SoundCloud URL */}
+                  <div>
+                    <label className="block text-white/90 font-semibold mb-2">
+                      SoundCloud Link
+                    </label>
+                    <input
+                      type="url"
+                      name="soundcloud_url"
+                      value={formData.soundcloud_url}
+                      onChange={handleInputChange}
+                      placeholder="https://soundcloud.com/..."
                       className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
