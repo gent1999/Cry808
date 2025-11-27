@@ -212,8 +212,11 @@ const AdminSettings = () => {
           {/* Beatport/Loopcloud Banner */}
           <div className="flex items-center justify-between py-4">
             <div>
-              <h3 className="text-lg font-medium">Beatport/Loopcloud Banner</h3>
-              <p className="text-sm text-white/60">300x250 affiliate banner on home page sidebar</p>
+              <h3 className="text-lg font-medium">Beatport/Loopcloud Banners</h3>
+              <p className="text-sm text-white/60">Desktop: 300x250 sidebar | Mobile: 300x50 banner</p>
+              <p className="text-xs text-white/40 mt-1">
+                Images: loopcloud_300x250.jpg & loopcloud_300x50.jpg
+              </p>
             </div>
             <button
               onClick={() => handleToggle('beatport_banner_enabled')}

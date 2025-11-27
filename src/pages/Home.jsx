@@ -8,6 +8,7 @@ import Infolinks from "../components/Infolinks";
 import AmazonWidget from "../components/AmazonWidget";
 import AmazonMobileAd from "../components/AmazonMobileAd";
 import BeatportBanner from "../components/BeatportBanner";
+import BeatportMobileBanner from "../components/BeatportMobileBanner";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -384,6 +385,9 @@ export default function Home() {
 
             {/* Mobile Ad - Amazon Product */}
             <AmazonMobileAd className="py-4" />
+
+            {/* Mobile Ad - Beatport/Loopcloud */}
+            <BeatportMobileBanner className="py-4" />
 
             {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 flex gap-8 justify-center">
