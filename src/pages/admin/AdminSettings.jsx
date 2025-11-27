@@ -11,7 +11,8 @@ const AdminSettings = () => {
   const [settings, setSettings] = useState({
     adsterra_enabled: false,
     hilltop_enabled: true,
-    monetag_enabled: false
+    monetag_enabled: false,
+    beatport_banner_enabled: false
   });
 
   useEffect(() => {
@@ -35,7 +36,16 @@ const AdminSettings = () => {
         }
 
         const data = await response.json();
-        setSettings(data.settings);
+        // Convert string 'true'/'false' to boolean for UI
+        const convertedSettings = {};
+        Object.entries(data.settings).forEach(([key, value]) => {
+          if (value === 'true' || value === 'false') {
+            convertedSettings[key] = value === 'true';
+          } else {
+            convertedSettings[key] = value;
+          }
+        });
+        setSettings(convertedSettings);
         setLoading(false);
       } catch (error) {
         console.error('Error:', error);
@@ -53,6 +63,13 @@ const AdminSettings = () => {
     }));
   };
 
+  const handleInputChange = (key, value) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
@@ -60,13 +77,23 @@ const AdminSettings = () => {
     const token = localStorage.getItem('adminToken');
 
     try {
+      // Convert boolean values back to strings for storage
+      const convertedSettings = {};
+      Object.entries(settings).forEach(([key, value]) => {
+        if (typeof value === 'boolean') {
+          convertedSettings[key] = value.toString();
+        } else {
+          convertedSettings[key] = value;
+        }
+      });
+
       const response = await fetch(`${API_URL}/api/admin/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ settings }),
+        body: JSON.stringify({ settings: convertedSettings }),
       });
 
       if (!response.ok) {
@@ -163,7 +190,7 @@ const AdminSettings = () => {
           </div>
 
           {/* Monetag */}
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between py-4 border-b border-white/10">
             <div>
               <h3 className="text-lg font-medium">Monetag</h3>
               <p className="text-sm text-white/60">Enable Monetag ads (future use)</p>
@@ -177,6 +204,26 @@ const AdminSettings = () => {
               <span
                 className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
                   settings.monetag_enabled ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Beatport/Loopcloud Banner */}
+          <div className="flex items-center justify-between py-4">
+            <div>
+              <h3 className="text-lg font-medium">Beatport/Loopcloud Banner</h3>
+              <p className="text-sm text-white/60">300x250 affiliate banner on home page sidebar</p>
+            </div>
+            <button
+              onClick={() => handleToggle('beatport_banner_enabled')}
+              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                settings.beatport_banner_enabled ? 'bg-green-600' : 'bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                  settings.beatport_banner_enabled ? 'translate-x-7' : 'translate-x-1'
                 }`}
               />
             </button>

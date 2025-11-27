@@ -7,6 +7,7 @@ import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import Infolinks from "../components/Infolinks";
 import AmazonWidget from "../components/AmazonWidget";
 import AmazonMobileAd from "../components/AmazonMobileAd";
+import BeatportBanner from "../components/BeatportBanner";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 
@@ -115,9 +116,18 @@ export default function Home() {
         const response = await fetch(`${API_URL}/api/settings/public`);
         const data = await response.json();
         if (data.settings) {
-          setAdSettings(data.settings);
-          console.log('📊 Ad settings loaded:', data.settings);
-          console.log('📱 Adsterra enabled:', data.settings.adsterra_enabled);
+          // Convert string 'true'/'false' to boolean
+          const convertedSettings = {};
+          Object.entries(data.settings).forEach(([key, value]) => {
+            if (value === 'true' || value === 'false') {
+              convertedSettings[key] = value === 'true';
+            } else {
+              convertedSettings[key] = value;
+            }
+          });
+          setAdSettings(convertedSettings);
+          console.log('📊 Ad settings loaded:', convertedSettings);
+          console.log('📱 Adsterra enabled:', convertedSettings.adsterra_enabled);
         }
       } catch (error) {
         console.error('Failed to load ad settings:', error);
@@ -609,6 +619,9 @@ export default function Home() {
                 <div className="sticky top-24 space-y-6">
                   {/* Adsterra Native Banner */}
                   {adSettings.adsterra_enabled && <AdsterraNative />}
+
+                  {/* Beatport/Loopcloud Banner */}
+                  <BeatportBanner />
 
                   <SpotifyEmbed />
 

@@ -23,9 +23,10 @@ class AdSettingsStore {
       const data = await response.json();
 
       if (data.settings) {
-        this.settings.ADSTERRA_ENABLED = data.settings.adsterra_enabled;
-        this.settings.HILLTOP_ENABLED = data.settings.hilltop_enabled;
-        this.settings.MONETAG_ENABLED = data.settings.monetag_enabled;
+        // Convert string 'true'/'false' to boolean
+        this.settings.ADSTERRA_ENABLED = data.settings.adsterra_enabled === 'true';
+        this.settings.HILLTOP_ENABLED = data.settings.hilltop_enabled === 'true';
+        this.settings.MONETAG_ENABLED = data.settings.monetag_enabled === 'true';
       }
       this.loaded = true;
     } catch (error) {
