@@ -56,11 +56,11 @@ export default function Home() {
         const originalsOnly = filteredArticles.filter(article => article.is_original === true);
         const regularArticles = filteredArticles.filter(article => !article.is_original);
 
-        // Limit originals to 5 (for 2 rows with 6th spot being ad)
-        setOriginals(originalsOnly.slice(0, 5));
+        // Limit originals to 6 (2 rows of 3 articles each)
+        setOriginals(originalsOnly.slice(0, 6));
 
-        // Limit regular articles to 5 (for 2 rows with 6th spot being ad)
-        setMixedContent(regularArticles.slice(0, 5));
+        // Limit regular articles to 6 (2 rows of 3 articles each)
+        setMixedContent(regularArticles.slice(0, 6));
 
         // Extract and count tags for trending section
         const tagCounts = {};
@@ -461,17 +461,6 @@ export default function Home() {
                           </div>
                         </div>
                       ))}
-
-                      {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                      {adSettings.adsterra_enabled && (
-                        <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
-                          <AdsterraSmartlink
-                            type="card"
-                            text="Sponsored Content"
-                            className="h-full w-full"
-                          />
-                        </div>
-                      )}
                     </div>
                   </>
                 )}
@@ -556,17 +545,6 @@ export default function Home() {
                         </div>
                       </div>
                     ))}
-
-                    {/* Sponsored Content Ad - 6th spot (2 rows max) */}
-                    {adSettings.adsterra_enabled && (
-                      <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden flex items-center justify-center p-6">
-                        <AdsterraSmartlink
-                          type="card"
-                          text="Sponsored Content"
-                          className="h-full w-full"
-                        />
-                      </div>
-                    )}
                   </div>
                 ) : (
                   <div className="text-center py-12 text-white/50">
