@@ -8,6 +8,7 @@ import HilltopAdSidebar from '../components/HilltopAdSidebar';
 import HilltopMobileBanner from '../components/HilltopMobileBanner';
 import HilltopPopUnder from '../components/HilltopPopUnder';
 import AmazonWidget from '../components/AmazonWidget';
+import SpotifyEmbed from '../components/SpotifyEmbed';
 import BeatportArticleBanner from '../components/BeatportArticleBanner';
 import BeatportArticleTopBanner from '../components/BeatportArticleTopBanner';
 import { HILLTOP_ENABLED } from '../config/ads';
@@ -23,6 +24,7 @@ const ArticleDetail = () => {
   const [moreArticles, setMoreArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [adSettings, setAdSettings] = useState({});
 
   // Extract numeric ID from URL (e.g., "123-drake-new-album" -> "123")
   const id = urlId.split('-')[0];
@@ -63,6 +65,32 @@ const ArticleDetail = () => {
     fetchArticle();
     fetchMoreArticles();
   }, [id]);
+
+  // Load ad settings from API
+  useEffect(() => {
+    const loadAdSettings = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/settings/public`);
+        const data = await response.json();
+        if (data.settings) {
+          // Convert string 'true'/'false' to boolean
+          const convertedSettings = {};
+          Object.entries(data.settings).forEach(([key, value]) => {
+            if (value === 'true' || value === 'false') {
+              convertedSettings[key] = value === 'true';
+            } else {
+              convertedSettings[key] = value;
+            }
+          });
+          setAdSettings(convertedSettings);
+        }
+      } catch (error) {
+        console.error('Failed to load ad settings:', error);
+      }
+    };
+
+    loadAdSettings();
+  }, []);
 
   if (loading) {
     return (
@@ -360,11 +388,32 @@ const ArticleDetail = () => {
           {/* Sidebar */}
           <div className="hidden xl:block w-80 flex-shrink-0">
             <div className="sticky top-24 space-y-6">
-              {/* Hilltop Ad */}
-              {HILLTOP_ENABLED && <HilltopAdSidebar />}
+              {(() => {
+                // Build array of sidebar components with their order
+                const sidebarComponents = [
+                  {
+                    order: parseInt(adSettings.hilltop_article_order || '1'),
+                    key: 'hilltop',
+                    component: HILLTOP_ENABLED && <HilltopAdSidebar key="hilltop" />
+                  },
+                  {
+                    order: parseInt(adSettings.amazon_article_order || '2'),
+                    key: 'amazon',
+                    component: <AmazonWidget key="amazon" />
+                  },
+                  {
+                    order: parseInt(adSettings.spotify_article_order || '3'),
+                    key: 'spotify',
+                    component: <SpotifyEmbed key="spotify" />
+                  }
+                ];
 
-              {/* Amazon Affiliate Widget */}
-              <AmazonWidget />
+                // Sort by order and render
+                return sidebarComponents
+                  .sort((a, b) => a.order - b.order)
+                  .map(item => item.component)
+                  .filter(Boolean);
+              })()}
             </div>
           </div>
         </div>

@@ -599,16 +599,37 @@ export default function Home() {
               {/* Sidebar */}
               <div className="hidden xl:block w-80 flex-shrink-0">
                 <div className="sticky top-24 space-y-6">
-                  {/* Adsterra Native Banner */}
-                  {adSettings.adsterra_enabled && <AdsterraNative />}
+                  {(() => {
+                    // Build array of sidebar components with their order
+                    const sidebarComponents = [
+                      {
+                        order: parseInt(adSettings.adsterra_order || '1'),
+                        key: 'adsterra',
+                        component: adSettings.adsterra_enabled && <AdsterraNative key="adsterra" />
+                      },
+                      {
+                        order: parseInt(adSettings.beatport_sidebar_order || '2'),
+                        key: 'beatport',
+                        component: <BeatportBanner key="beatport" />
+                      },
+                      {
+                        order: parseInt(adSettings.spotify_order || '3'),
+                        key: 'spotify',
+                        component: <SpotifyEmbed key="spotify" />
+                      },
+                      {
+                        order: parseInt(adSettings.amazon_order || '4'),
+                        key: 'amazon',
+                        component: <AmazonWidget key="amazon" />
+                      }
+                    ];
 
-                  {/* Beatport/Loopcloud Banner */}
-                  <BeatportBanner />
-
-                  <SpotifyEmbed />
-
-                  {/* Amazon Affiliate Widget */}
-                  <AmazonWidget />
+                    // Sort by order and render
+                    return sidebarComponents
+                      .sort((a, b) => a.order - b.order)
+                      .map(item => item.component)
+                      .filter(Boolean);
+                  })()}
                 </div>
               </div>
             </div>

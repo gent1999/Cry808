@@ -16,7 +16,14 @@ const AdminSettings = () => {
     beatport_home_desktop_enabled: false,
     beatport_home_mobile_enabled: false,
     beatport_article_desktop_enabled: false,
-    beatport_article_bottom_enabled: false
+    beatport_article_bottom_enabled: false,
+    adsterra_order: '1',
+    beatport_sidebar_order: '2',
+    spotify_order: '3',
+    amazon_order: '4',
+    hilltop_article_order: '1',
+    amazon_article_order: '2',
+    spotify_article_order: '3'
   });
 
   useEffect(() => {
@@ -297,6 +304,140 @@ const AdminSettings = () => {
                   }`}
                 />
               </button>
+            </div>
+          </div>
+
+          {/* Home Page Sidebar Order */}
+          <div className="py-4 border-t border-white/10 mt-6">
+            <h3 className="text-lg font-medium mb-4">Home Page Sidebar Order</h3>
+            <p className="text-sm text-white/60 mb-4">Set the display order for enabled sidebar components. Lower numbers appear higher.</p>
+
+            <div className="space-y-3">
+              {/* Adsterra Order - Only show if enabled */}
+              {settings.adsterra_enabled && (
+                <div className="flex items-center justify-between py-2">
+                  <label htmlFor="adsterra_order" className="text-sm font-medium text-white">
+                    Adsterra Ads
+                  </label>
+                  <input
+                    id="adsterra_order"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={settings.adsterra_order}
+                    onChange={(e) => handleInputChange('adsterra_order', e.target.value)}
+                    className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              )}
+
+              {/* Beatport Sidebar Order - Only show if enabled */}
+              {settings.beatport_home_desktop_enabled && (
+                <div className="flex items-center justify-between py-2">
+                  <label htmlFor="beatport_sidebar_order" className="text-sm font-medium text-white">
+                    Beatport/Loopcloud Banner
+                  </label>
+                  <input
+                    id="beatport_sidebar_order"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={settings.beatport_sidebar_order}
+                    onChange={(e) => handleInputChange('beatport_sidebar_order', e.target.value)}
+                    className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              )}
+
+              {/* Spotify Order - Always shown */}
+              <div className="flex items-center justify-between py-2">
+                <label htmlFor="spotify_order" className="text-sm font-medium text-white">
+                  Spotify Embed
+                </label>
+                <input
+                  id="spotify_order"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={settings.spotify_order}
+                  onChange={(e) => handleInputChange('spotify_order', e.target.value)}
+                  className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              {/* Amazon Order - Always shown */}
+              <div className="flex items-center justify-between py-2">
+                <label htmlFor="amazon_order" className="text-sm font-medium text-white">
+                  Amazon Products
+                </label>
+                <input
+                  id="amazon_order"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={settings.amazon_order}
+                  onChange={(e) => handleInputChange('amazon_order', e.target.value)}
+                  className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Article Page Sidebar Order */}
+          <div className="py-4 border-t border-white/10 mt-6">
+            <h3 className="text-lg font-medium mb-4">Article Page Sidebar Order</h3>
+            <p className="text-sm text-white/60 mb-4">Set the display order for enabled sidebar components. Lower numbers appear higher.</p>
+
+            <div className="space-y-3">
+              {/* Hilltop Order - Only show if enabled */}
+              {settings.hilltop_enabled && (
+                <div className="flex items-center justify-between py-2">
+                  <label htmlFor="hilltop_article_order" className="text-sm font-medium text-white">
+                    Hilltop Ads
+                  </label>
+                  <input
+                    id="hilltop_article_order"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={settings.hilltop_article_order}
+                    onChange={(e) => handleInputChange('hilltop_article_order', e.target.value)}
+                    className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              )}
+
+              {/* Amazon Article Order - Always shown */}
+              <div className="flex items-center justify-between py-2">
+                <label htmlFor="amazon_article_order" className="text-sm font-medium text-white">
+                  Amazon Products
+                </label>
+                <input
+                  id="amazon_article_order"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={settings.amazon_article_order}
+                  onChange={(e) => handleInputChange('amazon_article_order', e.target.value)}
+                  className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              {/* Spotify Article Order - Always shown */}
+              <div className="flex items-center justify-between py-2">
+                <label htmlFor="spotify_article_order" className="text-sm font-medium text-white">
+                  Spotify Embed
+                </label>
+                <input
+                  id="spotify_article_order"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={settings.spotify_article_order}
+                  onChange={(e) => handleInputChange('spotify_article_order', e.target.value)}
+                  className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
             </div>
           </div>
 
