@@ -15,7 +15,8 @@ const AdminSettings = () => {
     beatport_banner_enabled: false,
     beatport_home_desktop_enabled: false,
     beatport_home_mobile_enabled: false,
-    beatport_article_desktop_enabled: false
+    beatport_article_desktop_enabled: false,
+    beatport_article_bottom_enabled: false
   });
 
   useEffect(() => {
@@ -256,11 +257,12 @@ const AdminSettings = () => {
               </button>
             </div>
 
-            {/* Article Desktop 970x90 */}
+            {/* Article Top Banner 1916x260 */}
             <div className="flex items-center justify-between py-3 pl-4">
               <div>
-                <h4 className="text-base font-medium">Article - Desktop Banner</h4>
-                <p className="text-sm text-white/60">970x90 (loopcloud_970x90.jpg)</p>
+                <h4 className="text-base font-medium">Article - Top Banner</h4>
+                <p className="text-sm text-white/60">1916x260 (above article & sidebar)</p>
+                <p className="text-xs text-white/40 mt-1">loopcloud_1916x260.jpg</p>
               </div>
               <button
                 onClick={() => handleToggle('beatport_article_desktop_enabled')}
@@ -271,6 +273,27 @@ const AdminSettings = () => {
                 <span
                   className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
                     settings.beatport_article_desktop_enabled ? 'translate-x-7' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Article Bottom Banner 970x90 */}
+            <div className="flex items-center justify-between py-3 pl-4">
+              <div>
+                <h4 className="text-base font-medium">Article - Bottom Banner</h4>
+                <p className="text-sm text-white/60">970x90 (below video)</p>
+                <p className="text-xs text-white/40 mt-1">loopcloud_970x90.jpg</p>
+              </div>
+              <button
+                onClick={() => handleToggle('beatport_article_bottom_enabled')}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                  settings.beatport_article_bottom_enabled ? 'bg-green-600' : 'bg-gray-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                    settings.beatport_article_bottom_enabled ? 'translate-x-7' : 'translate-x-1'
                   }`}
                 />
               </button>

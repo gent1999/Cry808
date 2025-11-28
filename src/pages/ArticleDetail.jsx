@@ -9,6 +9,7 @@ import HilltopMobileBanner from '../components/HilltopMobileBanner';
 import HilltopPopUnder from '../components/HilltopPopUnder';
 import AmazonWidget from '../components/AmazonWidget';
 import BeatportArticleBanner from '../components/BeatportArticleBanner';
+import BeatportArticleTopBanner from '../components/BeatportArticleTopBanner';
 import { HILLTOP_ENABLED } from '../config/ads';
 import { stripMarkdown } from '../utils/markdownUtils';
 import { generateArticleUrl } from '../utils/slugify';
@@ -177,8 +178,13 @@ const ArticleDetail = () => {
           </button>
         </div>
 
+        {/* Desktop Loopcloud Banner - Above Article and Sidebar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+          <BeatportArticleBanner className="mb-6" />
+        </div>
+
         {/* Main Content with Ad Sidebar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8 justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 flex gap-8 justify-center">
           <div className="max-w-4xl flex-1">
             {/* Back Button */}
             <button
@@ -195,9 +201,6 @@ const ArticleDetail = () => {
             <div className="xl:hidden mb-6">
               {HILLTOP_ENABLED && <HilltopMobileBanner />}
             </div>
-
-            {/* Desktop Loopcloud Banner - Above Article Image */}
-            <BeatportArticleBanner className="mb-6" />
 
         {/* Article Image */}
         {article.image_url && (
@@ -339,6 +342,9 @@ const ArticleDetail = () => {
             </div>
           </div>
         )}
+
+        {/* Desktop Loopcloud Banner - Before Back Button */}
+        <BeatportArticleTopBanner className="mt-8" />
 
         {/* Back Button Section */}
         <div className="mt-8 pt-8 border-t border-white/10">
