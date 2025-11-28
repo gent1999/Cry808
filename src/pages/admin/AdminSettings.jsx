@@ -22,8 +22,7 @@ const AdminSettings = () => {
     spotify_order: '3',
     amazon_order: '4',
     hilltop_article_order: '1',
-    amazon_article_order: '2',
-    spotify_article_order: '3'
+    amazon_article_order: '2'
   });
 
   useEffect(() => {
@@ -419,22 +418,6 @@ const AdminSettings = () => {
                   max="10"
                   value={settings.amazon_article_order}
                   onChange={(e) => handleInputChange('amazon_article_order', e.target.value)}
-                  className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-
-              {/* Spotify Article Order - Always shown */}
-              <div className="flex items-center justify-between py-2">
-                <label htmlFor="spotify_article_order" className="text-sm font-medium text-white">
-                  Spotify Embed
-                </label>
-                <input
-                  id="spotify_article_order"
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={settings.spotify_article_order}
-                  onChange={(e) => handleInputChange('spotify_article_order', e.target.value)}
                   className="w-20 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>

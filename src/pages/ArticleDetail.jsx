@@ -400,11 +400,6 @@ const ArticleDetail = () => {
                     order: parseInt(adSettings.amazon_article_order || '2'),
                     key: 'amazon',
                     component: <AmazonWidget key="amazon" />
-                  },
-                  {
-                    order: parseInt(adSettings.spotify_article_order || '3'),
-                    key: 'spotify',
-                    component: <SpotifyEmbed key="spotify" />
                   }
                 ];
 
