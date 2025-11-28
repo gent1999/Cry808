@@ -12,7 +12,10 @@ const AdminSettings = () => {
     adsterra_enabled: false,
     hilltop_enabled: true,
     monetag_enabled: false,
-    beatport_banner_enabled: false
+    beatport_banner_enabled: false,
+    beatport_home_desktop_enabled: false,
+    beatport_home_mobile_enabled: false,
+    beatport_article_desktop_enabled: false
   });
 
   useEffect(() => {
@@ -209,27 +212,69 @@ const AdminSettings = () => {
             </button>
           </div>
 
-          {/* Beatport/Loopcloud Banner */}
-          <div className="flex items-center justify-between py-4">
-            <div>
-              <h3 className="text-lg font-medium">Beatport/Loopcloud Banners</h3>
-              <p className="text-sm text-white/60">Desktop: 300x250 sidebar | Mobile: 300x50 banner</p>
-              <p className="text-xs text-white/40 mt-1">
-                Images: loopcloud_300x250.jpg & loopcloud_300x50.jpg
-              </p>
-            </div>
-            <button
-              onClick={() => handleToggle('beatport_banner_enabled')}
-              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                settings.beatport_banner_enabled ? 'bg-green-600' : 'bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                  settings.beatport_banner_enabled ? 'translate-x-7' : 'translate-x-1'
+          {/* Beatport/Loopcloud Banners */}
+          <div className="py-4 border-t border-white/10">
+            <h3 className="text-lg font-medium mb-4">Beatport/Loopcloud Banners</h3>
+
+            {/* Home Desktop 300x250 */}
+            <div className="flex items-center justify-between py-3 pl-4">
+              <div>
+                <h4 className="text-base font-medium">Home - Desktop Sidebar</h4>
+                <p className="text-sm text-white/60">300x250 (loopcloud_300x250.jpg)</p>
+              </div>
+              <button
+                onClick={() => handleToggle('beatport_home_desktop_enabled')}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                  settings.beatport_home_desktop_enabled ? 'bg-green-600' : 'bg-gray-600'
                 }`}
-              />
-            </button>
+              >
+                <span
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                    settings.beatport_home_desktop_enabled ? 'translate-x-7' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Home Mobile 300x50 */}
+            <div className="flex items-center justify-between py-3 pl-4">
+              <div>
+                <h4 className="text-base font-medium">Home - Mobile Banner</h4>
+                <p className="text-sm text-white/60">300x50 (loopcloud_300x50.jpg)</p>
+              </div>
+              <button
+                onClick={() => handleToggle('beatport_home_mobile_enabled')}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                  settings.beatport_home_mobile_enabled ? 'bg-green-600' : 'bg-gray-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                    settings.beatport_home_mobile_enabled ? 'translate-x-7' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Article Desktop 970x90 */}
+            <div className="flex items-center justify-between py-3 pl-4">
+              <div>
+                <h4 className="text-base font-medium">Article - Desktop Banner</h4>
+                <p className="text-sm text-white/60">970x90 (loopcloud_970x90.jpg)</p>
+              </div>
+              <button
+                onClick={() => handleToggle('beatport_article_desktop_enabled')}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                  settings.beatport_article_desktop_enabled ? 'bg-green-600' : 'bg-gray-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                    settings.beatport_article_desktop_enabled ? 'translate-x-7' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           {/* Save Button */}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function BeatportMobileBanner({ className = '' }) {
+export default function BeatportArticleBanner({ className = '' }) {
   const [bannerSettings, setBannerSettings] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,24 +30,24 @@ export default function BeatportMobileBanner({ className = '' }) {
   }
 
   // Check if enabled (value is stored as string 'true' or 'false')
-  if (bannerSettings?.beatport_home_mobile_enabled !== 'true') {
+  if (bannerSettings?.beatport_article_desktop_enabled !== 'true') {
     return null;
   }
 
   return (
-    <div className={`xl:hidden ${className}`}>
-      <div className="max-w-2xl mx-auto px-4">
+    <div className={`hidden xl:block ${className}`}>
+      <div className="flex justify-center">
         <a
-          href="https://www.loopcloud.com/cloud/subscriptions/plans?a_aid=69279c96df583&a_bid=1db32457"
+          href="https://www.loopcloud.com/cloud/subscriptions/plans?a_aid=69279c96df583&a_bid=838bdb4a"
           target="_top"
           rel="noopener noreferrer"
           className="block bg-white/5 border border-white/10 overflow-hidden hover:border-purple-500/50 transition-all"
         >
           <img
-            src="/loopcloud_300x50.jpg"
+            src="/loopcloud_970x90.jpg"
             alt="Loopcloud"
-            width="300"
-            height="50"
+            width="970"
+            height="90"
             className="w-full h-auto"
           />
         </a>

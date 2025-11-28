@@ -30,7 +30,7 @@ export default function BeatportBanner() {
   }
 
   // Check if enabled (value is stored as string 'true' or 'false')
-  if (bannerSettings?.beatport_banner_enabled !== 'true') {
+  if (bannerSettings?.beatport_home_desktop_enabled !== 'true') {
     return null;
   }
 

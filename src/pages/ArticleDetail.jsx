@@ -8,6 +8,7 @@ import HilltopAdSidebar from '../components/HilltopAdSidebar';
 import HilltopMobileBanner from '../components/HilltopMobileBanner';
 import HilltopPopUnder from '../components/HilltopPopUnder';
 import AmazonWidget from '../components/AmazonWidget';
+import BeatportArticleBanner from '../components/BeatportArticleBanner';
 import { HILLTOP_ENABLED } from '../config/ads';
 import { stripMarkdown } from '../utils/markdownUtils';
 import { generateArticleUrl } from '../utils/slugify';
@@ -194,6 +195,9 @@ const ArticleDetail = () => {
             <div className="xl:hidden mb-6">
               {HILLTOP_ENABLED && <HilltopMobileBanner />}
             </div>
+
+            {/* Desktop Loopcloud Banner - Above Article Image */}
+            <BeatportArticleBanner className="mb-6" />
 
         {/* Article Image */}
         {article.image_url && (
