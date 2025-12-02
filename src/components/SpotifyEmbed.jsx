@@ -15,11 +15,8 @@ const SpotifyEmbed = ({ pageType = 'home' }) => {
   useEffect(() => {
     const fetchEmbeds = async () => {
       try {
-        const url = `${API_URL}/api/spotify-embeds?page_type=${pageType}`;
-        console.log('🎵 SpotifyEmbed fetching:', url);
-        const response = await fetch(url);
+        const response = await fetch(`${API_URL}/api/spotify-embeds?page_type=${pageType}`);
         const data = await response.json();
-        console.log('🎵 SpotifyEmbed received data for pageType:', pageType, 'embeds:', data.embeds);
         setEmbeds(data.embeds || []);
       } catch (error) {
         console.error('Error fetching Spotify embeds:', error);

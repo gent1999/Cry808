@@ -19,6 +19,8 @@ const AdminDashboard = () => {
   const [analyticsStats, setAnalyticsStats] = useState({
     current: 0,
     previous: 0,
+    allTime: 0,
+    average: 0,
     change: 0,
     realtime: 0,
     loading: true,
@@ -212,102 +214,159 @@ const AdminDashboard = () => {
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Total Articles</p>
-                <p className="text-3xl font-bold text-white mt-1">{stats.total}</p>
-              </div>
-              <div className="bg-blue-500/20 p-3 rounded-full">
-                <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Published</p>
-                <p className="text-3xl font-bold text-white mt-1">{stats.published}</p>
-              </div>
-              <div className="bg-green-500/20 p-3 rounded-full">
-                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Drafts</p>
-                <p className="text-3xl font-bold text-white mt-1">{stats.drafts}</p>
-              </div>
-              <div className="bg-purple-500/20 p-3 rounded-full">
-                <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div
-            onClick={() => navigate('/admin/submissions')}
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700 cursor-pointer hover:border-purple-500 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Submissions</p>
-                <p className="text-3xl font-bold text-white mt-1">{stats.submissions}</p>
-              </div>
-              <div className="bg-purple-500/20 p-3 rounded-full">
-                <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Monthly Visitors from Google Analytics */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-gray-400 text-sm">Monthly Visitors</p>
-                  {analyticsStats.realtime > 0 && (
-                    <span className="flex items-center gap-1 text-xs text-green-400">
-                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                      {analyticsStats.realtime} online
-                    </span>
-                  )}
+        {/* Article Stats */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-white mb-3">Content Statistics</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Total Articles</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats.total}</p>
                 </div>
-                {analyticsStats.loading ? (
-                  <p className="text-xl font-bold text-gray-500 mt-1">Loading...</p>
-                ) : analyticsStats.error ? (
-                  <p className="text-xs text-red-400 mt-1 break-words">{analyticsStats.error}</p>
-                ) : (
-                  <>
+                <div className="bg-blue-500/20 p-3 rounded-full">
+                  <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Published</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats.published}</p>
+                </div>
+                <div className="bg-green-500/20 p-3 rounded-full">
+                  <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Drafts</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats.drafts}</p>
+                </div>
+                <div className="bg-purple-500/20 p-3 rounded-full">
+                  <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div
+              onClick={() => navigate('/admin/submissions')}
+              className="bg-gray-800 rounded-lg p-6 border border-gray-700 cursor-pointer hover:border-purple-500 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Submissions</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats.submissions}</p>
+                </div>
+                <div className="bg-purple-500/20 p-3 rounded-full">
+                  <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Analytics Stats from Google Analytics */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-white">Google Analytics</h3>
+            {analyticsStats.realtime > 0 && (
+              <span className="flex items-center gap-2 text-sm text-green-400">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                {analyticsStats.realtime} online now
+              </span>
+            )}
+          </div>
+
+          {analyticsStats.loading ? (
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <p className="text-gray-400 text-center">Loading analytics...</p>
+            </div>
+          ) : analyticsStats.error ? (
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <p className="text-red-400 text-sm">{analyticsStats.error}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* This Month Visitors */}
+              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-gray-400 text-sm">This Month</p>
                     <p className="text-3xl font-bold text-white mt-1">{analyticsStats.current.toLocaleString()}</p>
                     {analyticsStats.change !== 0 && (
-                      <p className={`text-xs mt-1 ${analyticsStats.change > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <p className={`text-xs mt-2 ${analyticsStats.change > 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {analyticsStats.change > 0 ? '↑' : '↓'} {Math.abs(analyticsStats.change)}% vs last month
                       </p>
                     )}
-                  </>
-                )}
+                  </div>
+                  <div className="bg-blue-500/20 p-3 rounded-full">
+                    <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-              <div className="bg-orange-500/20 p-3 rounded-full">
-                <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+
+              {/* Last Month Visitors */}
+              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">Last Month</p>
+                    <p className="text-3xl font-bold text-white mt-1">{analyticsStats.previous.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-purple-500/20 p-3 rounded-full">
+                    <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* All Time Visitors */}
+              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">All Time</p>
+                    <p className="text-3xl font-bold text-white mt-1">{analyticsStats.allTime.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-orange-500/20 p-3 rounded-full">
+                    <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Average Monthly Visitors */}
+              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">Avg. Monthly</p>
+                    <p className="text-3xl font-bold text-white mt-1">{analyticsStats.average.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-green-500/20 p-3 rounded-full">
+                    <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Quick Actions */}
