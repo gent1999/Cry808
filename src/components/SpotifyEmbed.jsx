@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 /**
  * Spotify Embed Component
  * Displays Spotify playlist/album/track embeds in sidebar
+ * Fetches embeds from spotify_embeds table filtered by page type
+ * @param {string} pageType - 'home' or 'article' to determine which embeds to show
  */
-const SpotifyEmbed = () => {
+const SpotifyEmbed = ({ pageType = 'home' }) => {
   const [embeds, setEmbeds] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL;
-
   useEffect(() => {
-    const fetchSpotifyEmbeds = async () => {
+    const fetchEmbeds = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/spotify-embeds`);
+        const url = `${API_URL}/api/spotify-embeds?page_type=${pageType}`;
+        console.log('🎵 SpotifyEmbed fetching:', url);
+        const response = await fetch(url);
         const data = await response.json();
+        console.log('🎵 SpotifyEmbed received data for pageType:', pageType, 'embeds:', data.embeds);
         setEmbeds(data.embeds || []);
       } catch (error) {
         console.error('Error fetching Spotify embeds:', error);
@@ -23,8 +28,8 @@ const SpotifyEmbed = () => {
       }
     };
 
-    fetchSpotifyEmbeds();
-  }, [API_URL]);
+    fetchEmbeds();
+  }, [pageType]);
 
   if (loading) {
     return (
@@ -38,12 +43,13 @@ const SpotifyEmbed = () => {
     );
   }
 
+  // Don't show if no embeds exist for this page type
   if (embeds.length === 0) {
     return null;
   }
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-4">
       {embeds.map((embed) => (
         <div key={embed.id} className="bg-white/5 border border-white/10 rounded-lg p-4">
           <h3 className="text-white font-semibold mb-3 text-sm">{embed.title}</h3>

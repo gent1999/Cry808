@@ -4,6 +4,7 @@ const SpotifyManager = () => {
   const [embeds, setEmbeds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [spotifyUrl, setSpotifyUrl] = useState('');
+  const [pageType, setPageType] = useState('home');
   const [message, setMessage] = useState({ text: '', type: '' });
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -50,7 +51,7 @@ const SpotifyManager = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ spotify_url: spotifyUrl })
+        body: JSON.stringify({ spotify_url: spotifyUrl, page_type: pageType })
       });
 
       const data = await response.json();
@@ -59,6 +60,7 @@ const SpotifyManager = () => {
         showMessage(data.message, 'success');
         fetchEmbeds();
         setSpotifyUrl('');
+        setPageType('home');
       } else {
         showMessage(data.message || 'Error saving embed', 'error');
       }
@@ -121,6 +123,23 @@ const SpotifyManager = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-white/70 mb-2">
+              Page Type
+            </label>
+            <select
+              value={pageType}
+              onChange={(e) => setPageType(e.target.value)}
+              className="w-full px-4 py-2 bg-black/50 border border-white/20 rounded-lg text-white"
+            >
+              <option value="home">Home Page</option>
+              <option value="article">Article Page</option>
+            </select>
+            <p className="text-xs text-white/50 mt-2">
+              Choose which page this Spotify embed will appear on
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-white/70 mb-2">
               Paste Spotify Link
             </label>
             <input
@@ -168,6 +187,9 @@ const SpotifyManager = () => {
                     </span>
                     <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">
                       {embed.embed_type}
+                    </span>
+                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">
+                      {embed.page_type === 'article' ? 'Article Page' : 'Home Page'}
                     </span>
                     <span className="text-white/50 text-xs">Order: {embed.display_order}</span>
                   </div>

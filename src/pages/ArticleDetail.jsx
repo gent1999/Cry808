@@ -404,7 +404,7 @@ const ArticleDetail = () => {
                   {
                     order: parseInt(adSettings.spotify_article_order || '3'),
                     key: 'spotify',
-                    component: <SpotifyEmbed key="spotify" />
+                    component: <SpotifyEmbed key="spotify" pageType="article" />
                   }
                 ];
 

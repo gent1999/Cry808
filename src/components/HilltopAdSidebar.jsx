@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import HilltopMultiBanner from './HilltopMultiBanner';
-import SpotifyEmbed from './SpotifyEmbed';
 
 const HilltopAdSidebar = () => {
   const location = useLocation();
@@ -12,9 +11,6 @@ const HilltopAdSidebar = () => {
         {/* Hilltop Multi-Tag Banner - 300x250 */}
         {/* Key forces component to remount on route change */}
         <HilltopMultiBanner key={location.pathname} placement="sidebar" />
-
-        {/* Spotify Embed - Internal Ad */}
-        <SpotifyEmbed />
       </div>
     </div>
   );

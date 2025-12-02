@@ -615,7 +615,7 @@ export default function Home() {
                       {
                         order: parseInt(adSettings.spotify_order || '3'),
                         key: 'spotify',
-                        component: <SpotifyEmbed key="spotify" />
+                        component: <SpotifyEmbed key="spotify" pageType="home" />
                       },
                       {
                         order: parseInt(adSettings.amazon_order || '4'),

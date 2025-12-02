@@ -352,7 +352,7 @@ const AdminSettings = () => {
               {/* Spotify Order - Always shown */}
               <div className="flex items-center justify-between py-2">
                 <label htmlFor="spotify_order" className="text-sm font-medium text-white">
-                  Spotify Embed
+                  Spotify Embed (HOME PAGE ONLY)
                 </label>
                 <input
                   id="spotify_order"
@@ -426,7 +426,7 @@ const AdminSettings = () => {
               {/* Spotify Article Order - Always shown */}
               <div className="flex items-center justify-between py-2">
                 <label htmlFor="spotify_article_order" className="text-sm font-medium text-white">
-                  Spotify Embed
+                  Spotify Embed (ARTICLE PAGE ONLY)
                 </label>
                 <input
                   id="spotify_article_order"
