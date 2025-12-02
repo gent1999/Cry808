@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function AmazonWidget() {
+export default function AmazonWidget({ page = 'home' }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/amazon-products`);
+        const response = await fetch(`${API_URL}/api/amazon-products?page=${page}`);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
@@ -23,7 +23,7 @@ export default function AmazonWidget() {
     };
 
     fetchProducts();
-  }, []);
+  }, [page]);
 
   if (loading) {
     return (

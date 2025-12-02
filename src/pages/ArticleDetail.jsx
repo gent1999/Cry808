@@ -399,7 +399,7 @@ const ArticleDetail = () => {
                   {
                     order: parseInt(adSettings.amazon_article_order || '2'),
                     key: 'amazon',
-                    component: <AmazonWidget key="amazon" />
+                    component: <AmazonWidget key="amazon" page="article" />
                   },
                   {
                     order: parseInt(adSettings.spotify_article_order || '3'),

@@ -19,7 +19,9 @@ const AmazonProducts = () => {
     affiliate_link: '',
     is_active: true,
     display_order: 0,
-    is_mobile_featured: false
+    is_mobile_featured: false,
+    show_on_home: true,
+    show_on_article: true
   });
 
   useEffect(() => {
@@ -85,6 +87,8 @@ const AmazonProducts = () => {
       formDataToSend.append('is_active', formData.is_active);
       formDataToSend.append('display_order', formData.display_order);
       formDataToSend.append('is_mobile_featured', formData.is_mobile_featured);
+      formDataToSend.append('show_on_home', formData.show_on_home);
+      formDataToSend.append('show_on_article', formData.show_on_article);
 
       // Append image file if it exists
       if (imageFile) {
@@ -137,7 +141,9 @@ const AmazonProducts = () => {
       affiliate_link: product.affiliate_link,
       is_active: product.is_active,
       display_order: product.display_order,
-      is_mobile_featured: product.is_mobile_featured || false
+      is_mobile_featured: product.is_mobile_featured || false,
+      show_on_home: product.show_on_home !== false,
+      show_on_article: product.show_on_article !== false
     });
     // Set existing image as preview if available
     if (product.image_url) {
@@ -398,6 +404,42 @@ const AmazonProducts = () => {
                   <p className="text-sm text-gray-400">
                     This product will replace the 300x50 banner on mobile devices. Only one product can be featured at a time.
                   </p>
+                </div>
+              </div>
+
+              {/* Page Selection */}
+              <div className="border border-purple-500/30 rounded-lg p-4 bg-purple-500/5">
+                <label className="text-sm font-medium text-purple-400 block mb-3">
+                  📄 Show On Pages
+                </label>
+                <p className="text-sm text-gray-400 mb-3">Select which pages this product should appear on. You can select multiple.</p>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <input
+                      id="show_on_home"
+                      name="show_on_home"
+                      type="checkbox"
+                      checked={formData.show_on_home}
+                      onChange={(e) => setFormData({ ...formData, show_on_home: e.target.checked })}
+                      className="w-5 h-5 bg-gray-700 border-gray-600 rounded text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-gray-800"
+                    />
+                    <label htmlFor="show_on_home" className="ml-2 text-sm text-white">
+                      Home Page
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      id="show_on_article"
+                      name="show_on_article"
+                      type="checkbox"
+                      checked={formData.show_on_article}
+                      onChange={(e) => setFormData({ ...formData, show_on_article: e.target.checked })}
+                      className="w-5 h-5 bg-gray-700 border-gray-600 rounded text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-gray-800"
+                    />
+                    <label htmlFor="show_on_article" className="ml-2 text-sm text-white">
+                      Article Pages
+                    </label>
+                  </div>
                 </div>
               </div>
 

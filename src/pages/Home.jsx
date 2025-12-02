@@ -620,7 +620,7 @@ export default function Home() {
                       {
                         order: parseInt(adSettings.amazon_order || '4'),
                         key: 'amazon',
-                        component: <AmazonWidget key="amazon" />
+                        component: <AmazonWidget key="amazon" page="home" />
                       }
                     ];
 
