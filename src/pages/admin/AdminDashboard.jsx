@@ -26,6 +26,18 @@ const AdminDashboard = () => {
     loading: true,
     error: null
   });
+  const [searchConsoleStats, setSearchConsoleStats] = useState({
+    performance: {
+      clicks: 0,
+      impressions: 0,
+      ctr: 0,
+      position: 0
+    },
+    topQueries: [],
+    topPages: [],
+    loading: true,
+    error: null
+  });
 
   useEffect(() => {
     const verifyAdmin = async () => {
@@ -80,6 +92,8 @@ const AdminDashboard = () => {
 
         // Fetch analytics data
         fetchAnalytics(token);
+        // Fetch search console data
+        fetchSearchConsole(token);
       } catch (err) {
         setError('Session expired. Please login again.');
         setTimeout(() => {
@@ -119,6 +133,69 @@ const AdminDashboard = () => {
           ...prev,
           loading: false,
           error: 'Failed to load analytics'
+        }));
+      }
+    };
+
+    const fetchSearchConsole = async (token) => {
+      try {
+        // Fetch performance metrics
+        const performanceResponse = await fetch(`${API_URL}/api/search-console/performance`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        // Fetch top queries
+        const queriesResponse = await fetch(`${API_URL}/api/search-console/top-queries`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        // Fetch top pages
+        const pagesResponse = await fetch(`${API_URL}/api/search-console/top-pages`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        let performance = { clicks: 0, impressions: 0, ctr: 0, position: 0 };
+        let topQueries = [];
+        let topPages = [];
+        let error = null;
+
+        if (performanceResponse.ok) {
+          const perfData = await performanceResponse.json();
+          performance = perfData.performance;
+        } else {
+          const errorData = await performanceResponse.json();
+          error = errorData.message || 'Search Console not configured';
+        }
+
+        if (queriesResponse.ok) {
+          const queriesData = await queriesResponse.json();
+          topQueries = queriesData.queries || [];
+        }
+
+        if (pagesResponse.ok) {
+          const pagesData = await pagesResponse.json();
+          topPages = pagesData.pages || [];
+        }
+
+        setSearchConsoleStats({
+          performance,
+          topQueries,
+          topPages,
+          loading: false,
+          error
+        });
+      } catch (err) {
+        console.error('Error fetching Search Console data:', err);
+        setSearchConsoleStats(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Failed to load Search Console data'
         }));
       }
     };
@@ -383,6 +460,167 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Google Search Console */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <span className="text-2xl">🔍</span>
+            Google Search Console (SEO)
+          </h3>
+
+          {searchConsoleStats.loading ? (
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <p className="text-gray-400 text-center">Loading Search Console data...</p>
+            </div>
+          ) : searchConsoleStats.error ? (
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <p className="text-red-400 text-sm">{searchConsoleStats.error}</p>
+            </div>
+          ) : (
+            <>
+              {/* Performance Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                {/* Total Clicks */}
+                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm">Clicks (28 days)</p>
+                      <p className="text-3xl font-bold text-white mt-1">{searchConsoleStats.performance.clicks.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-blue-500/20 p-3 rounded-full">
+                      <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total Impressions */}
+                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm">Impressions</p>
+                      <p className="text-3xl font-bold text-white mt-1">{searchConsoleStats.performance.impressions.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-purple-500/20 p-3 rounded-full">
+                      <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTR */}
+                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm">Click-Through Rate</p>
+                      <p className="text-3xl font-bold text-white mt-1">{searchConsoleStats.performance.ctr}%</p>
+                    </div>
+                    <div className="bg-green-500/20 p-3 rounded-full">
+                      <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Average Position */}
+                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm">Avg. Position</p>
+                      <p className="text-3xl font-bold text-white mt-1">{searchConsoleStats.performance.position}</p>
+                    </div>
+                    <div className="bg-orange-500/20 p-3 rounded-full">
+                      <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Queries and Pages */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Top Queries/Keywords */}
+                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <span>🎯</span>
+                    Top Keywords
+                  </h4>
+                  {searchConsoleStats.topQueries.length > 0 ? (
+                    <div className="space-y-3">
+                      {searchConsoleStats.topQueries.slice(0, 5).map((query, index) => (
+                        <div key={index} className="bg-gray-900/50 rounded-lg p-3 border border-gray-700">
+                          <div className="flex items-start justify-between mb-2">
+                            <p className="text-sm font-medium text-white flex-1">{query.query}</p>
+                            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">#{index + 1}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div>
+                              <span className="text-gray-400">Clicks:</span>
+                              <span className="text-white ml-1">{query.clicks}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">CTR:</span>
+                              <span className="text-white ml-1">{query.ctr}%</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Pos:</span>
+                              <span className="text-white ml-1">{query.position}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm text-center py-4">No keyword data available</p>
+                  )}
+                </div>
+
+                {/* Top Pages */}
+                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <span>📄</span>
+                    Top Pages
+                  </h4>
+                  {searchConsoleStats.topPages.length > 0 ? (
+                    <div className="space-y-3">
+                      {searchConsoleStats.topPages.slice(0, 5).map((page, index) => (
+                        <div key={index} className="bg-gray-900/50 rounded-lg p-3 border border-gray-700">
+                          <div className="flex items-start justify-between mb-2">
+                            <p className="text-xs text-gray-400 flex-1 truncate" title={page.page}>
+                              {page.page.replace(/^https?:\/\/[^/]+/, '')}
+                            </p>
+                            <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded ml-2">#{index + 1}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div>
+                              <span className="text-gray-400">Clicks:</span>
+                              <span className="text-white ml-1">{page.clicks}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Impr:</span>
+                              <span className="text-white ml-1">{page.impressions}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">CTR:</span>
+                              <span className="text-white ml-1">{page.ctr}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm text-center py-4">No page data available</p>
+                  )}
+                </div>
+              </div>
+            </>
           )}
         </div>
 
