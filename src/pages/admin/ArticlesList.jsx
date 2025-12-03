@@ -9,6 +9,9 @@ const ArticlesList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [expandedAnalytics, setExpandedAnalytics] = useState(null); // ID of article with expanded analytics
+  const [analyticsData, setAnalyticsData] = useState({}); // Store analytics for each article
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -80,6 +83,74 @@ const ArticlesList = () => {
       })));
     } catch (err) {
       setError(err.message || 'Failed to update featured status');
+    }
+  };
+
+  const handleToggleAnalytics = async (articleId, articleTitle) => {
+    // If clicking the same article, collapse it
+    if (expandedAnalytics === articleId) {
+      setExpandedAnalytics(null);
+      return;
+    }
+
+    // If we already have the data, just expand it
+    if (analyticsData[articleId]) {
+      setExpandedAnalytics(articleId);
+      return;
+    }
+
+    // Fetch analytics data
+    setLoadingAnalytics(true);
+    setExpandedAnalytics(articleId);
+
+    try {
+      const token = localStorage.getItem('adminToken');
+
+      // Debug logging
+      console.log('Token exists:', !!token);
+      console.log('Token length:', token?.length);
+
+      const slug = articleTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      console.log('Fetching analytics for slug:', slug);
+
+      const [analyticsRes, seoRes] = await Promise.all([
+        fetch(`${API_URL}/api/analytics/article/${slug}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_URL}/api/search-console/article/${slug}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      // Log response statuses
+      console.log('Analytics response status:', analyticsRes.status);
+      console.log('SEO response status:', seoRes.status);
+
+      const analyticsJson = analyticsRes.ok ? await analyticsRes.json() : null;
+      const seoJson = seoRes.ok ? await seoRes.json() : null;
+
+      // Show error if requests failed
+      if (!analyticsRes.ok || !seoRes.ok) {
+        console.error('Analytics request failed:', analyticsRes.status, analyticsRes.statusText);
+        console.error('SEO request failed:', seoRes.status, seoRes.statusText);
+
+        if (analyticsRes.status === 401 || seoRes.status === 401) {
+          setError('Authentication failed. Please log in again.');
+        }
+      }
+
+      setAnalyticsData(prev => ({
+        ...prev,
+        [articleId]: {
+          analytics: analyticsJson?.analytics,
+          seo: seoJson?.seo
+        }
+      }));
+    } catch (err) {
+      console.error('Failed to fetch analytics:', err);
+      setError('Failed to fetch analytics data: ' + err.message);
+    } finally {
+      setLoadingAnalytics(false);
     }
   };
 
@@ -356,6 +427,16 @@ const ArticlesList = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        handleToggleAnalytics(article.id, article.title);
+                      }}
+                      className="flex-1 sm:flex-initial px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors flex items-center justify-center gap-2"
+                      title="View Analytics"
+                    >
+                      📊
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
                         handleToggleFeatured(article.id, article.is_featured);
                       }}
                       className={`flex-1 sm:flex-initial px-6 py-2 text-white text-sm font-semibold rounded-md transition-colors ${
@@ -386,6 +467,98 @@ const ArticlesList = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Analytics Panel */}
+                {expandedAnalytics === article.id && (
+                  <div className="border-t border-gray-700 p-6 bg-gray-900/50">
+                    {loadingAnalytics ? (
+                      <div className="text-center text-white/70 py-8">
+                        <div className="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent rounded-full mb-2"></div>
+                        <p>Loading analytics...</p>
+                      </div>
+                    ) : analyticsData[article.id] ? (
+                      <div>
+                        <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                          📊 Performance Metrics (Last 28 Days)
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Google Analytics */}
+                          {analyticsData[article.id].analytics && (
+                            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                              <h5 className="text-sm font-semibold text-white/90 mb-3 flex items-center gap-2">
+                                📈 Traffic Analytics
+                              </h5>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-white/70">Page Views:</span>
+                                  <span className="font-bold text-white">{analyticsData[article.id].analytics.pageViews.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/70">Unique Visitors:</span>
+                                  <span className="font-bold text-white">{analyticsData[article.id].analytics.uniqueVisitors.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/70">Avg. Time:</span>
+                                  <span className="font-bold text-white">{Math.floor(analyticsData[article.id].analytics.avgTimeOnPage / 60)}m {analyticsData[article.id].analytics.avgTimeOnPage % 60}s</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/70">Bounce Rate:</span>
+                                  <span className="font-bold text-white">{analyticsData[article.id].analytics.bounceRate}%</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Google Search Console */}
+                          {analyticsData[article.id].seo && (
+                            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                              <h5 className="text-sm font-semibold text-white/90 mb-3 flex items-center gap-2">
+                                🔍 SEO Performance
+                              </h5>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-white/70">Clicks:</span>
+                                  <span className="font-bold text-white">{analyticsData[article.id].seo.clicks.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/70">Impressions:</span>
+                                  <span className="font-bold text-white">{analyticsData[article.id].seo.impressions.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/70">CTR:</span>
+                                  <span className="font-bold text-white">{analyticsData[article.id].seo.ctr}%</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/70">Avg. Position:</span>
+                                  <span className="font-bold text-white">#{analyticsData[article.id].seo.position}</span>
+                                </div>
+                              </div>
+
+                              {/* Top Keywords */}
+                              {analyticsData[article.id].seo.topQueries && analyticsData[article.id].seo.topQueries.length > 0 && (
+                                <div className="mt-3 pt-3 border-t border-gray-700">
+                                  <h6 className="text-xs font-semibold text-white/80 mb-2">Top Keywords:</h6>
+                                  <div className="space-y-1.5">
+                                    {analyticsData[article.id].seo.topQueries.map((query, index) => (
+                                      <div key={index} className="flex justify-between items-center text-xs">
+                                        <span className="text-white/70 truncate flex-1">{query.query}</span>
+                                        <span className="text-white font-semibold ml-2">{query.clicks}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center text-white/70 py-4">
+                        No analytics data available for this article
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
