@@ -18,6 +18,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [heroArticle, setHeroArticle] = useState(null);
   const [originals, setOriginals] = useState([]);
+  const [evergreenGuides, setEvergreenGuides] = useState([]);
   const [mixedContent, setMixedContent] = useState([]);
   const [trendingTags, setTrendingTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,9 +53,13 @@ export default function Home() {
         // Filter out the featured article from the grid
         const filteredArticles = sortedArticles.filter(article => article.id !== featuredData.article?.id);
 
-        // Separate originals from regular articles
-        const originalsOnly = filteredArticles.filter(article => article.is_original === true);
-        const regularArticles = filteredArticles.filter(article => !article.is_original);
+        // Separate evergreen guides
+        const evergreenOnly = filteredArticles.filter(article => article.is_evergreen === true);
+        setEvergreenGuides(evergreenOnly.slice(0, 3)); // Show top 3 guides
+
+        // Separate originals from regular articles (excluding evergreen)
+        const originalsOnly = filteredArticles.filter(article => article.is_original === true && !article.is_evergreen);
+        const regularArticles = filteredArticles.filter(article => !article.is_original && !article.is_evergreen);
 
         // Limit originals to 6 (2 rows of 3 articles each)
         setOriginals(originalsOnly.slice(0, 6));
@@ -452,6 +457,80 @@ export default function Home() {
                                   <span
                                     key={index}
                                     className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Evergreen Guides Section */}
+                {evergreenGuides.length > 0 && (
+                  <>
+                    <div className="mb-8">
+                      <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 bg-clip-text text-transparent">
+                        Essential Guides
+                      </h2>
+                      <p className="text-white/60 text-sm mb-4">Everything you need to know about making it in underground hip hop</p>
+                      <div className="h-1 w-24 bg-gradient-to-r from-green-500 to-emerald-500"></div>
+                    </div>
+
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-16">
+                      {evergreenGuides.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
+                          className="bg-white/5 border-2 border-green-500/30 rounded-lg overflow-hidden hover:bg-white/10 hover:border-green-400/70 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-green-500/20"
+                        >
+                          {/* Image */}
+                          {item.image_url && (
+                            <div className="h-48 overflow-hidden relative">
+                              <img
+                                src={item.image_url}
+                                alt={item.title}
+                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                              />
+                              {/* Evergreen Badge Overlay */}
+                              <div className="absolute top-3 right-3 bg-green-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                <span>🌲</span> GUIDE
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Content */}
+                          <div className="p-6">
+                            {/* Category Badge */}
+                            <div className="mb-2">
+                              <span className="px-2 py-1 text-xs font-semibold rounded bg-green-600/20 text-green-400">
+                                {item.category || 'Guide'}
+                              </span>
+                            </div>
+
+                            <h3 className="text-xl font-semibold mb-2 line-clamp-2">
+                              {item.title}
+                            </h3>
+
+                            <p className="text-white/50 text-xs mb-3">
+                              By {item.author} • {new Date(item.created_at).toLocaleDateString()}
+                            </p>
+
+                            <p className="text-white/70 text-sm line-clamp-3 mb-4">
+                              {stripMarkdown(item.content)}
+                            </p>
+
+                            {/* Tags */}
+                            {item.tags && item.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {item.tags.slice(0, 2).map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded"
                                   >
                                     {tag}
                                   </span>

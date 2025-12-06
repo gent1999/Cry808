@@ -20,7 +20,8 @@ const ArticleEdit = () => {
     youtube_url: '',
     soundcloud_url: '',
     category: 'article',
-    is_original: false
+    is_original: false,
+    is_evergreen: false
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -69,7 +70,8 @@ const ArticleEdit = () => {
           youtube_url: article.youtube_url || '',
           soundcloud_url: article.soundcloud_url || '',
           category: article.category || 'article',
-          is_original: article.is_original || false
+          is_original: article.is_original || false,
+          is_evergreen: article.is_evergreen || false
         });
 
         // Set existing image if available
@@ -89,10 +91,17 @@ const ArticleEdit = () => {
 
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData({
+    const updatedFormData = {
       ...formData,
       [e.target.name]: value
-    });
+    };
+
+    // Auto-check evergreen when "Guides" category is selected
+    if (e.target.name === 'category' && value === 'guides') {
+      updatedFormData.is_evergreen = true;
+    }
+
+    setFormData(updatedFormData);
     setError('');
   };
 
@@ -155,6 +164,9 @@ const ArticleEdit = () => {
 
       // Add is_original flag
       formDataToSend.append('is_original', formData.is_original);
+
+      // Add is_evergreen flag
+      formDataToSend.append('is_evergreen', formData.is_evergreen);
 
       // Append new image file if it exists
       if (imageFile) {
@@ -284,8 +296,9 @@ const ArticleEdit = () => {
               >
                 <option value="article">Article</option>
                 <option value="interview">Interview</option>
+                <option value="guides">Guides</option>
               </select>
-              <p className="mt-1 text-sm text-gray-400">Choose whether this is an article or interview</p>
+              <p className="mt-1 text-sm text-gray-400">Choose the article type (Guides = evergreen content)</p>
             </div>
 
             {/* 1of1 Original Toggle */}
@@ -306,6 +319,28 @@ const ArticleEdit = () => {
                 </label>
                 <p className="text-sm text-gray-400">
                   This article will appear in the "1of1 Originals" section instead of "Latest Stories"
+                </p>
+              </div>
+            </div>
+
+            {/* Evergreen Content Toggle */}
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="is_evergreen"
+                  name="is_evergreen"
+                  type="checkbox"
+                  checked={formData.is_evergreen}
+                  onChange={handleChange}
+                  className="w-5 h-5 bg-gray-700 border-gray-600 rounded text-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-gray-800"
+                />
+              </div>
+              <div className="ml-3">
+                <label htmlFor="is_evergreen" className="text-sm font-medium text-gray-300">
+                  Mark as Evergreen Content 🌲
+                </label>
+                <p className="text-sm text-gray-400">
+                  Evergreen articles appear in the "Essential Guides" section and are optimized for SEO
                 </p>
               </div>
             </div>
