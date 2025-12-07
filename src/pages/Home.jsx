@@ -29,6 +29,7 @@ export default function Home() {
   const [stats, setStats] = useState({ articles: 0, interviews: 0, subscribers: 0 });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [adSettings, setAdSettings] = useState({ adsterra_enabled: false });
+  const [currentGuideIndex, setCurrentGuideIndex] = useState(0);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -55,7 +56,7 @@ export default function Home() {
 
         // Separate evergreen guides
         const evergreenOnly = filteredArticles.filter(article => article.is_evergreen === true);
-        setEvergreenGuides(evergreenOnly.slice(0, 3)); // Show top 3 guides
+        setEvergreenGuides(evergreenOnly); // Show all guides with carousel
 
         // Separate originals from regular articles (excluding evergreen)
         const originalsOnly = filteredArticles.filter(article => article.is_original === true && !article.is_evergreen);
@@ -473,73 +474,93 @@ export default function Home() {
                 {/* Evergreen Guides Section */}
                 {evergreenGuides.length > 0 && (
                   <>
-                    <div className="mb-8">
-                      <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 bg-clip-text text-transparent">
+                    <div className="mb-6">
+                      <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 bg-clip-text text-transparent">
                         Essential Guides
                       </h2>
-                      <p className="text-white/60 text-sm mb-4">Everything you need to know about making it in underground hip hop</p>
-                      <div className="h-1 w-24 bg-gradient-to-r from-green-500 to-emerald-500"></div>
+                      <p className="text-white/60 text-xs mb-3">Everything you need to know about making it in underground hip hop</p>
+                      <div className="h-1 w-20 bg-gradient-to-r from-green-500 to-emerald-500"></div>
                     </div>
 
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-16">
-                      {evergreenGuides.map((item) => (
+                    {/* Grid Layout with Carousel */}
+                    <div className="relative mb-16">
+                      {/* Left Arrow */}
+                      {evergreenGuides.length > 4 && currentGuideIndex > 0 && (
+                        <button
+                          onClick={() => setCurrentGuideIndex(currentGuideIndex - 4)}
+                          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-green-500 hover:bg-green-400 text-black p-3 transition-all duration-300 hover:scale-110"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                      )}
+
+                      {/* Right Arrow */}
+                      {evergreenGuides.length > 4 && currentGuideIndex + 4 < evergreenGuides.length && (
+                        <button
+                          onClick={() => setCurrentGuideIndex(currentGuideIndex + 4)}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-green-500 hover:bg-green-400 text-black p-3 transition-all duration-300 hover:scale-110"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      )}
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-500 ease-in-out">
+                        {evergreenGuides.map((item, index) => {
+                          const isVisible = index >= currentGuideIndex && index < currentGuideIndex + 4;
+                          const visibleIndex = index - currentGuideIndex;
+                          return (
                         <div
                           key={item.id}
                           onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
-                          className="bg-white/5 border-2 border-green-500/30 rounded-lg overflow-hidden hover:bg-white/10 hover:border-green-400/70 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-green-500/20"
+                          className={`bg-white/5 border border-green-500/30 overflow-hidden hover:bg-white/10 hover:border-green-400/70 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/20 ${isVisible ? 'animate-fadeInUp' : 'hidden'}`}
+                          style={{ animationDelay: isVisible ? `${visibleIndex * 100}ms` : '0ms' }}
                         >
                           {/* Image */}
                           {item.image_url && (
-                            <div className="h-48 overflow-hidden relative">
+                            <div className="h-32 overflow-hidden relative">
                               <img
                                 src={item.image_url}
                                 alt={item.title}
                                 className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                               />
                               {/* Evergreen Badge Overlay */}
-                              <div className="absolute top-3 right-3 bg-green-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                                <span>🌲</span> GUIDE
+                              <div className="absolute top-2 right-2 bg-green-500 text-black px-2 py-1 text-xs font-bold flex items-center gap-1">
+                                <span>🌲</span>
                               </div>
                             </div>
                           )}
 
                           {/* Content */}
-                          <div className="p-6">
-                            {/* Category Badge */}
-                            <div className="mb-2">
-                              <span className="px-2 py-1 text-xs font-semibold rounded bg-green-600/20 text-green-400">
-                                {item.category || 'Guide'}
-                              </span>
-                            </div>
-
-                            <h3 className="text-xl font-semibold mb-2 line-clamp-2">
+                          <div className="p-3">
+                            <h3 className="text-sm font-semibold mb-2 line-clamp-2 leading-snug">
                               {item.title}
                             </h3>
 
-                            <p className="text-white/50 text-xs mb-3">
-                              By {item.author} • {new Date(item.created_at).toLocaleDateString()}
-                            </p>
-
-                            <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                              {stripMarkdown(item.content)}
+                            <p className="text-white/70 text-xs mb-2 line-clamp-1">
+                              {stripMarkdown(item.content).split('.')[0]}.
                             </p>
 
                             {/* Tags */}
-                            {item.tags && item.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {item.tags.slice(0, 2).map((tag, index) => (
-                                  <span
-                                    key={index}
-                                    className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {item.tags && item.tags.slice(0, 3).map((tag, index) => (
+                                <span key={index} className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+
+                            <p className="text-white/50 text-xs">
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </p>
                           </div>
                         </div>
-                      ))}
+                          );
+                        })}
+                      </div>
                     </div>
                   </>
                 )}
