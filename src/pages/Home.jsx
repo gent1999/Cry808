@@ -244,7 +244,7 @@ export default function Home() {
 
   const SkeletonHero = () => (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-      <div className="relative h-[280px] md:h-[450px] rounded-2xl bg-white/5 animate-pulse overflow-hidden">
+      <div className="relative h-[280px] md:h-[450px] rounded-none bg-white/5 animate-pulse overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent"></div>
         <div className="relative h-full flex items-end p-4 md:p-12">
           <div className="max-w-3xl w-full">
@@ -305,7 +305,7 @@ export default function Home() {
             {/* Hero Article with Overlay */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
               <div className="relative group cursor-pointer" onClick={() => window.location.href = generateArticleUrl(heroArticle.id, heroArticle.title)}>
-                <div className="relative h-[280px] md:h-[450px] rounded-2xl overflow-hidden">
+                <div className="relative h-[280px] md:h-[450px] rounded-none overflow-hidden">
                   {/* Background Image with Gradient Overlay */}
                   <div className="absolute inset-0">
                     {heroArticle.image_url && (
@@ -413,7 +413,7 @@ export default function Home() {
                         <div
                           key={item.id}
                           onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
-                          className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/20"
+                          className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/20"
                         >
                           {/* Image */}
                           {item.image_url && (
@@ -591,7 +591,7 @@ export default function Home() {
                       <div
                         key={item.id}
                         onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
-                        className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
+                        className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
                       >
                         {/* Image */}
                         {item.image_url && (
