@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import { stripMarkdown } from "../utils/markdownUtils";
@@ -11,6 +11,9 @@ export default function Interviews() {
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [visibleCount, setVisibleCount] = useState(20);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRef = useRef(null);
 
   useEffect(() => {
     const fetchInterviews = async () => {
@@ -36,6 +39,32 @@ export default function Interviews() {
 
     fetchInterviews();
   }, []);
+
+  // Incrementally reveal 20 interviews at a time as you scroll
+  useEffect(() => {
+    if (loading || interviews.length === 0) return;
+    const hasMore = visibleCount < interviews.length;
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsLoadingMore(true);
+          setVisibleCount((prev) => Math.min(prev + 20, interviews.length));
+          setTimeout(() => setIsLoadingMore(false), 150);
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [interviews.length, loading, visibleCount]);
+
+  const visibleInterviews = interviews.slice(0, visibleCount);
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
@@ -68,35 +97,43 @@ export default function Interviews() {
           ) : (
             <>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-                {interviews.map((interview) => (
+                {visibleInterviews.map((interview) => (
                   <div
                     key={interview.id}
                     onClick={() => window.location.href = generateArticleUrl(interview.id, interview.title)}
-                    className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
+                    className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-pink-500/50 transition cursor-pointer group"
                   >
                     {/* Interview Image */}
                     {interview.image_url && (
-                      <div className="h-48 overflow-hidden">
+                      <div className="h-48 overflow-hidden relative">
                         <img
                           src={interview.image_url}
                           alt={interview.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
                       </div>
                     )}
 
                     {/* Interview Content */}
                     <div className="p-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wide bg-pink-600/20 text-pink-300">
+                          Interview
+                        </span>
+                        <span className="text-[11px] text-white/50">{new Date(interview.created_at).toLocaleDateString()}</span>
+                      </div>
+
                       <h2 className="text-xl font-semibold mb-2 line-clamp-2">
                         {interview.title}
                       </h2>
 
                       <p className="text-white/50 text-xs mb-3">
-                        By {interview.author} • {new Date(interview.created_at).toLocaleDateString()}
+                        By {interview.author}
                       </p>
 
                       <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                        {stripMarkdown(interview.content)}
+                        {stripMarkdown(interview.content).slice(0, 220)}...
                       </p>
 
                       {/* Tags */}
@@ -105,7 +142,7 @@ export default function Interviews() {
                           {interview.tags.slice(0, 3).map((tag, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
+                              className="px-2 py-1 bg-pink-600/20 text-pink-300 text-xs rounded-none"
                             >
                               {tag}
                             </span>
@@ -116,6 +153,16 @@ export default function Interviews() {
                   </div>
                 ))}
               </div>
+
+              {/* Infinite scroll sentinel */}
+              {visibleCount < interviews.length && (
+                <div
+                  ref={loadMoreRef}
+                  className="flex justify-center items-center py-6 text-white/50 text-sm"
+                >
+                  {isLoadingMore ? 'Loading more...' : 'Scroll to load more'}
+                </div>
+              )}
             </>
           )}
           </div>

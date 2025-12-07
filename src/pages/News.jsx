@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import { stripMarkdown } from "../utils/markdownUtils";
@@ -11,6 +11,9 @@ export default function News() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [visibleCount, setVisibleCount] = useState(20);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRef = useRef(null);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -23,7 +26,14 @@ export default function News() {
 
         const data = await response.json();
         const sortedArticles = data.articles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        setArticles(sortedArticles);
+        // Hide interviews and guides from News
+        const filtered = sortedArticles.filter(article =>
+          article.category !== 'interview' &&
+          article.category !== 'guide' &&
+          article.category !== 'guides' &&
+          !article.is_evergreen
+        );
+        setArticles(filtered);
       } catch (err) {
         setError(err.message || 'Failed to load articles');
       } finally {
@@ -33,6 +43,32 @@ export default function News() {
 
     fetchArticles();
   }, []);
+
+  // Incrementally reveal 20 articles at a time as you scroll
+  useEffect(() => {
+    if (loading || articles.length === 0) return;
+    const hasMore = visibleCount < articles.length;
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsLoadingMore(true);
+          setVisibleCount((prev) => Math.min(prev + 20, articles.length));
+          setTimeout(() => setIsLoadingMore(false), 150); // brief flash so users see we're loading more
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [articles.length, loading, visibleCount]);
+
+  const visibleArticles = articles.slice(0, visibleCount);
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
@@ -65,35 +101,47 @@ export default function News() {
           ) : (
             <>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-                {articles.map((article) => (
+                {visibleArticles.map((article) => (
                   <div
                     key={article.id}
                     onClick={() => window.location.href = generateArticleUrl(article.id, article.title)}
-                    className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
+                    className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-purple-500/50 transition cursor-pointer group"
                   >
                     {/* Article Image */}
                     {article.image_url && (
-                      <div className="h-48 overflow-hidden">
+                      <div className="h-48 overflow-hidden relative">
                         <img
                           src={article.image_url}
                           alt={article.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
                       </div>
                     )}
 
                     {/* Article Content */}
                     <div className="p-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`px-2 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+                          article.category === 'interview'
+                            ? 'bg-pink-600/20 text-pink-300'
+                            : 'bg-purple-600/20 text-purple-300'
+                        }`}>
+                          {article.category === 'interview' ? 'Interview' : 'Article'}
+                        </span>
+                        <span className="text-[11px] text-white/50">{new Date(article.created_at).toLocaleDateString()}</span>
+                      </div>
+
                       <h2 className="text-xl font-semibold mb-2 line-clamp-2">
                         {article.title}
                       </h2>
 
                       <p className="text-white/50 text-xs mb-3">
-                        By {article.author} • {new Date(article.created_at).toLocaleDateString()}
+                        By {article.author}
                       </p>
 
                       <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                        {stripMarkdown(article.content)}
+                        {stripMarkdown(article.content).slice(0, 220)}...
                       </p>
 
                       {/* Tags */}
@@ -102,7 +150,7 @@ export default function News() {
                           {article.tags.slice(0, 3).map((tag, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
+                              className="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-none"
                             >
                               {tag}
                             </span>
@@ -113,6 +161,16 @@ export default function News() {
                   </div>
                 ))}
               </div>
+
+              {/* Infinite scroll sentinel */}
+              {visibleCount < articles.length && (
+                <div
+                  ref={loadMoreRef}
+                  className="flex justify-center items-center py-6 text-white/50 text-sm"
+                >
+                  {isLoadingMore ? 'Loading more...' : 'Scroll to load more'}
+                </div>
+              )}
             </>
           )}
           </div>
