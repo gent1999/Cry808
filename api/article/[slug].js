@@ -33,7 +33,22 @@ export default async function handler(req, res) {
     const response = await fetch(`${apiUrl}/api/articles/${articleId}`);
 
     if (!response.ok) {
-      return res.redirect(307, `/article/${slug}`);
+      // Article not found - return 404 instead of redirect
+      res.status(404).send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article Not Found | Cry808</title>
+  <meta name="robots" content="noindex">
+</head>
+<body>
+  <h1>Article Not Found</h1>
+  <p><a href="/">Return to Cry808 Home</a></p>
+</body>
+</html>`);
+      return;
     }
 
     const data = await response.json();
@@ -127,14 +142,13 @@ export default async function handler(req, res) {
   <meta name="twitter:title" content="${article.title}">
   <meta name="twitter:description" content="${description}">
   ${ogImage ? `<meta name="twitter:image" content="${ogImage}">` : ''}
-
-  <meta http-equiv="refresh" content="0;url=/article/${slug}">
-  <script>window.location.href = '/article/${slug}';</script>
 </head>
 <body>
   <h1>${article.title}</h1>
+  <p>By ${article.author} | ${new Date(article.created_at).toLocaleDateString()}</p>
   <p>${description}</p>
-  <p><a href="/article/${slug}">Click here if you are not redirected</a></p>
+  ${ogImage ? `<img src="${ogImage}" alt="${article.title}" style="max-width: 100%; height: auto;">` : ''}
+  <p><a href="/article/${slug}">Read full article</a></p>
 </body>
 </html>`;
 
@@ -142,6 +156,21 @@ export default async function handler(req, res) {
     res.status(200).send(html);
   } catch (error) {
     console.error('Error fetching article for crawler:', error);
-    return res.redirect(307, `/article/${slug}`);
+    // Return 500 error instead of redirect
+    res.status(500).send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Loading Article | Cry808</title>
+  <meta name="robots" content="noindex">
+</head>
+<body>
+  <h1>Error Loading Article</h1>
+  <p>Sorry, there was an error loading this article. Please try again later.</p>
+  <p><a href="/">Return to Cry808 Home</a></p>
+</body>
+</html>`);
   }
 }
