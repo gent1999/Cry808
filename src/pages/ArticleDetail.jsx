@@ -25,6 +25,8 @@ const ArticleDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [adSettings, setAdSettings] = useState({});
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   // Extract numeric ID from URL (e.g., "123-drake-new-album" -> "123")
   const id = urlId.split('-')[0];
@@ -132,6 +134,16 @@ const ArticleDetail = () => {
 
   const handleTweet = () => {
     window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(article.title)}`, '_blank');
+  };
+
+  const openLightbox = (imageUrl) => {
+    setLightboxImage(imageUrl);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    setLightboxImage(null);
   };
 
   // Generate description from article content
@@ -371,36 +383,49 @@ const ArticleDetail = () => {
           </div>
         )}
 
-        {/* Additional Images */}
+        {/* Additional Images Gallery */}
         {(article.additional_image_1 || article.additional_image_2 || article.additional_image_3) && (
-          <div className="mt-8 space-y-6">
-            {article.additional_image_1 && (
-              <div className="rounded-lg overflow-hidden">
-                <img
-                  src={article.additional_image_1}
-                  alt="Additional content 1"
-                  className="w-full h-auto object-cover"
-                />
+          <div className="mt-8">
+            <div className="flex justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl">
+                {article.additional_image_1 && (
+                  <div
+                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
+                    onClick={() => openLightbox(article.additional_image_1)}
+                  >
+                    <img
+                      src={article.additional_image_1}
+                      alt="Additional content 1"
+                      className="w-full h-64 object-cover"
+                    />
+                  </div>
+                )}
+                {article.additional_image_2 && (
+                  <div
+                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
+                    onClick={() => openLightbox(article.additional_image_2)}
+                  >
+                    <img
+                      src={article.additional_image_2}
+                      alt="Additional content 2"
+                      className="w-full h-64 object-cover"
+                    />
+                  </div>
+                )}
+                {article.additional_image_3 && (
+                  <div
+                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
+                    onClick={() => openLightbox(article.additional_image_3)}
+                  >
+                    <img
+                      src={article.additional_image_3}
+                      alt="Additional content 3"
+                      className="w-full h-64 object-cover"
+                    />
+                  </div>
+                )}
               </div>
-            )}
-            {article.additional_image_2 && (
-              <div className="rounded-lg overflow-hidden">
-                <img
-                  src={article.additional_image_2}
-                  alt="Additional content 2"
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-            )}
-            {article.additional_image_3 && (
-              <div className="rounded-lg overflow-hidden">
-                <img
-                  src={article.additional_image_3}
-                  alt="Additional content 3"
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -510,6 +535,30 @@ const ArticleDetail = () => {
 
       <Footer />
       {HILLTOP_ENABLED && <HilltopPopUnder />}
+
+      {/* Image Lightbox Modal */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4"
+          onClick={closeLightbox}
+        >
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 text-white/70 hover:text-white text-4xl font-light transition-colors"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <div className="relative max-w-7xl max-h-[90vh] flex items-center justify-center">
+            <img
+              src={lightboxImage}
+              alt="Expanded view"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
