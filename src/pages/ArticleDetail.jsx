@@ -390,37 +390,37 @@ const ArticleDetail = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl">
                 {article.additional_image_1 && (
                   <div
-                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
+                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl bg-gray-900 flex items-center justify-center h-64"
                     onClick={() => openLightbox(article.additional_image_1)}
                   >
                     <img
                       src={article.additional_image_1}
                       alt="Additional content 1"
-                      className="w-full h-64 object-cover"
+                      className="max-w-full max-h-full object-contain"
                     />
                   </div>
                 )}
                 {article.additional_image_2 && (
                   <div
-                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
+                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl bg-gray-900 flex items-center justify-center h-64"
                     onClick={() => openLightbox(article.additional_image_2)}
                   >
                     <img
                       src={article.additional_image_2}
                       alt="Additional content 2"
-                      className="w-full h-64 object-cover"
+                      className="max-w-full max-h-full object-contain"
                     />
                   </div>
                 )}
                 {article.additional_image_3 && (
                   <div
-                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
+                    className="rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl bg-gray-900 flex items-center justify-center h-64"
                     onClick={() => openLightbox(article.additional_image_3)}
                   >
                     <img
                       src={article.additional_image_3}
                       alt="Additional content 3"
-                      className="w-full h-64 object-cover"
+                      className="max-w-full max-h-full object-contain"
                     />
                   </div>
                 )}
