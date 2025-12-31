@@ -23,6 +23,12 @@ const ArticleCreate = () => {
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [additionalImage1, setAdditionalImage1] = useState(null);
+  const [additionalImage2, setAdditionalImage2] = useState(null);
+  const [additionalImage3, setAdditionalImage3] = useState(null);
+  const [additionalPreview1, setAdditionalPreview1] = useState(null);
+  const [additionalPreview2, setAdditionalPreview2] = useState(null);
+  const [additionalPreview3, setAdditionalPreview3] = useState(null);
 
   // Markdown editor configuration
   const editorOptions = useMemo(() => ({
@@ -68,6 +74,26 @@ const ArticleCreate = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAdditionalImageChange = (e, imageNumber) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (imageNumber === 1) {
+          setAdditionalImage1(file);
+          setAdditionalPreview1(reader.result);
+        } else if (imageNumber === 2) {
+          setAdditionalImage2(file);
+          setAdditionalPreview2(reader.result);
+        } else if (imageNumber === 3) {
+          setAdditionalImage3(file);
+          setAdditionalPreview3(reader.result);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -123,9 +149,20 @@ const ArticleCreate = () => {
       // Add is_evergreen flag
       formDataToSend.append('is_evergreen', formData.is_evergreen);
 
-      // Append image file if it exists
+      // Append cover image file if it exists
       if (imageFile) {
         formDataToSend.append('image', imageFile);
+      }
+
+      // Append additional images if they exist
+      if (additionalImage1) {
+        formDataToSend.append('additional_image_1', additionalImage1);
+      }
+      if (additionalImage2) {
+        formDataToSend.append('additional_image_2', additionalImage2);
+      }
+      if (additionalImage3) {
+        formDataToSend.append('additional_image_3', additionalImage3);
       }
 
       const response = await fetch(`${API_URL}/api/articles`, {
@@ -292,10 +329,10 @@ const ArticleCreate = () => {
               </div>
             </div>
 
-            {/* Image Upload */}
+            {/* Cover Image Upload */}
             <div>
               <label htmlFor="image" className="block text-sm font-medium text-gray-300 mb-2">
-                Upload Image
+                Cover Image
               </label>
               <input
                 type="file"
@@ -309,11 +346,91 @@ const ArticleCreate = () => {
                 <div className="mt-4">
                   <img
                     src={imagePreview}
-                    alt="Preview"
+                    alt="Cover Preview"
                     className="max-w-full h-auto max-h-64 rounded-md border border-gray-600"
                   />
                 </div>
               )}
+            </div>
+
+            {/* Additional Images */}
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-300">
+                Additional Images (Up to 3)
+                <span className="block text-xs text-gray-400 mt-1">These images will appear after the media embeds on the article page</span>
+              </label>
+
+              {/* Additional Image 1 */}
+              <div>
+                <label htmlFor="additional_image_1" className="block text-xs font-medium text-gray-400 mb-2">
+                  Additional Image 1
+                </label>
+                <input
+                  type="file"
+                  id="additional_image_1"
+                  name="additional_image_1"
+                  accept="image/*"
+                  onChange={(e) => handleAdditionalImageChange(e, 1)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-600/70 file:text-white hover:file:bg-purple-700 file:cursor-pointer"
+                />
+                {additionalPreview1 && (
+                  <div className="mt-3">
+                    <img
+                      src={additionalPreview1}
+                      alt="Additional Preview 1"
+                      className="max-w-full h-auto max-h-48 rounded-md border border-gray-600"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Additional Image 2 */}
+              <div>
+                <label htmlFor="additional_image_2" className="block text-xs font-medium text-gray-400 mb-2">
+                  Additional Image 2
+                </label>
+                <input
+                  type="file"
+                  id="additional_image_2"
+                  name="additional_image_2"
+                  accept="image/*"
+                  onChange={(e) => handleAdditionalImageChange(e, 2)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-600/70 file:text-white hover:file:bg-purple-700 file:cursor-pointer"
+                />
+                {additionalPreview2 && (
+                  <div className="mt-3">
+                    <img
+                      src={additionalPreview2}
+                      alt="Additional Preview 2"
+                      className="max-w-full h-auto max-h-48 rounded-md border border-gray-600"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Additional Image 3 */}
+              <div>
+                <label htmlFor="additional_image_3" className="block text-xs font-medium text-gray-400 mb-2">
+                  Additional Image 3
+                </label>
+                <input
+                  type="file"
+                  id="additional_image_3"
+                  name="additional_image_3"
+                  accept="image/*"
+                  onChange={(e) => handleAdditionalImageChange(e, 3)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-600/70 file:text-white hover:file:bg-purple-700 file:cursor-pointer"
+                />
+                {additionalPreview3 && (
+                  <div className="mt-3">
+                    <img
+                      src={additionalPreview3}
+                      alt="Additional Preview 3"
+                      className="max-w-full h-auto max-h-48 rounded-md border border-gray-600"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Tags */}

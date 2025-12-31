@@ -371,6 +371,39 @@ const ArticleDetail = () => {
           </div>
         )}
 
+        {/* Additional Images */}
+        {(article.additional_image_1 || article.additional_image_2 || article.additional_image_3) && (
+          <div className="mt-8 space-y-6">
+            {article.additional_image_1 && (
+              <div className="rounded-lg overflow-hidden">
+                <img
+                  src={article.additional_image_1}
+                  alt="Additional content 1"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            )}
+            {article.additional_image_2 && (
+              <div className="rounded-lg overflow-hidden">
+                <img
+                  src={article.additional_image_2}
+                  alt="Additional content 2"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            )}
+            {article.additional_image_3 && (
+              <div className="rounded-lg overflow-hidden">
+                <img
+                  src={article.additional_image_3}
+                  alt="Additional content 3"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Desktop Loopcloud Banner - Before Back Button */}
         <BeatportArticleTopBanner className="mt-8" />
 
