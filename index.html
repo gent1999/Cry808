@@ -34,17 +34,37 @@
     <meta property="twitter:description" content="Your source for the latest hip-hop news, exclusive artist interviews, album reviews, and music culture. Stay updated with daily rap & hip-hop content." />
     <meta property="twitter:image" content="https://cry808.com/og-image.png" />
 
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G52B44KQ8J"></script>
+    <!-- Google Analytics 4 - Skip for Instagram in-app browser -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-G52B44KQ8J');
-    </script>
+      // Detect Instagram in-app browser
+      var isInstagram = /Instagram/i.test(navigator.userAgent);
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3253360189362413" crossorigin="anonymous"></script>
+      if (!isInstagram) {
+        // Load Google Analytics only if not Instagram
+        (function() {
+          var script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-G52B44KQ8J';
+          script.onerror = function() { console.log('GA failed to load'); };
+          document.head.appendChild(script);
+
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-G52B44KQ8J');
+        })();
+
+        // Load Google AdSense only if not Instagram
+        (function() {
+          var script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3253360189362413';
+          script.crossOrigin = 'anonymous';
+          script.onerror = function() { console.log('AdSense failed to load'); };
+          document.head.appendChild(script);
+        })();
+      }
+    </script>
 
     <!-- Google Funding Choices (Consent Management) - Disabled for Instagram compatibility -->
     <!-- Instagram's in-app browser has issues with nonce attributes -->
