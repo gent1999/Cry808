@@ -90,16 +90,29 @@
     -->
   </head>
   <body>
-    <!-- Instagram detection and redirect -->
-    <script>
-      // Detect Instagram in-app browser
-      var isInstagram = /Instagram/i.test(navigator.userAgent);
+    <!-- Instagram fallback - shown by default, hidden by JavaScript if not Instagram -->
+    <div id="instagram-message" style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%); color: #fff; font-family: system-ui, -apple-system, sans-serif; padding: 20px; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999;">
+      <div style="text-align: center; max-width: 400px; background: rgba(0,0,0,0.3); padding: 40px; border-radius: 20px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">📱</div>
+        <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 16px;">Cry808</h1>
+        <p style="font-size: 16px; opacity: 0.9; margin-bottom: 24px; line-height: 1.5;">
+          This site works best in your browser.<br><br>
+          Tap the menu <strong>(...)</strong> above and select <strong>"Open in Browser"</strong> to continue.
+        </p>
+        <div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 12px; margin-top: 20px;">
+          <p style="font-size: 14px; margin: 0;">Hip-hop news, interviews & album reviews</p>
+        </div>
+      </div>
+    </div>
 
-      if (isInstagram) {
-        // Show Instagram-specific message
-        document.write('<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%); color: #fff; font-family: system-ui, -apple-system, sans-serif; padding: 20px;"><div style="text-align: center; max-width: 400px; background: rgba(0,0,0,0.3); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px);"><div style="font-size: 48px; margin-bottom: 20px;">📱</div><h1 style="font-size: 28px; font-weight: bold; margin-bottom: 16px;">Cry808</h1><p style="font-size: 16px; opacity: 0.9; margin-bottom: 24px; line-height: 1.5;">Instagram\'s browser doesn\'t support this site. Please tap the menu (...) and select <strong>"Open in Browser"</strong> to continue.</p><div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 12px; margin-top: 20px;"><p style="font-size: 14px; margin: 0;">Your source for hip-hop news, interviews & album reviews</p></div></div></div>');
-        document.close();
-      }
+    <!-- Hide Instagram message immediately if NOT Instagram -->
+    <script>
+      (function() {
+        var isInstagram = /Instagram/i.test(navigator.userAgent);
+        if (!isInstagram) {
+          document.getElementById('instagram-message').style.display = 'none';
+        }
+      })();
     </script>
 
     <div id="root">
@@ -112,30 +125,6 @@
       </div>
     </div>
 
-    <!-- Error catching -->
-    <script>
-      window.addEventListener('error', function(e) {
-        console.error('Error:', e.message, e.filename);
-      });
-
-      window.addEventListener('unhandledrejection', function(e) {
-        console.error('Promise Error:', e.reason);
-      });
-    </script>
-
     <script type="module" src="/src/main.jsx"></script>
-
-    <!-- Fallback if React doesn't load within 10 seconds -->
-    <script>
-      setTimeout(function() {
-        var loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen && loadingScreen.parentElement) {
-          var debugEl = document.getElementById('debug-info');
-          if (debugEl) {
-            debugEl.innerHTML = 'React failed to load after 10s<br>Try opening in external browser';
-          }
-        }
-      }, 10000);
-    </script>
   </body>
 </html>
