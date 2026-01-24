@@ -38,15 +38,12 @@ function AnalyticsTracker() {
 
 export default function App() {
   useEffect(() => {
-    // Skip analytics initialization for Instagram in-app browser
-    const isInstagram = /Instagram/i.test(navigator.userAgent);
-    if (!isInstagram) {
-      // Initialize Google Analytics on app mount
-      try {
-        initGA();
-      } catch (error) {
-        console.error('Failed to initialize GA:', error);
-      }
+    // Initialize Google Analytics on app mount with error handling
+    try {
+      initGA();
+    } catch (error) {
+      console.error('Failed to initialize GA:', error);
+      // Continue loading app even if analytics fails
     }
   }, []);
 
