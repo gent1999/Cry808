@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/src/assets/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <!-- Primary Meta Tags -->
     <title>Cry808 - Hip-Hop News, Interviews & Album Reviews</title>
@@ -44,9 +46,11 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3253360189362413" crossorigin="anonymous"></script>
 
-    <!-- Google Funding Choices (Consent Management) -->
-    <script async src="https://fundingchoicesmessages.google.com/i/pub-3253360189362413?ers=1" nonce="FUNDING_CHOICES_NONCE"></script>
-    <script nonce="FUNDING_CHOICES_NONCE">
+    <!-- Google Funding Choices (Consent Management) - Disabled for Instagram compatibility -->
+    <!-- Instagram's in-app browser has issues with nonce attributes -->
+    <!--
+    <script async src="https://fundingchoicesmessages.google.com/i/pub-3253360189362413?ers=1"></script>
+    <script>
       (function() {
         function signalGooglefcPresent() {
           if (!window.frames['googlefcPresent']) {
@@ -64,6 +68,7 @@
         signalGooglefcPresent();
       })();
     </script>
+    -->
   </head>
   <body>
     <div id="root"></div>
