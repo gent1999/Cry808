@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Test Page</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        p {
+            font-size: 14px;
+            opacity: 0.7;
+            margin: 8px 0;
+        }
+        .info {
+            margin-top: 24px;
+            padding: 16px;
+            background: #222;
+            border-radius: 8px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✓ Basic HTML Works</h1>
+        <p>If you can see this, the server is working correctly.</p>
+        <p>The issue is with React/JavaScript loading.</p>
+        <div class="info">
+            <strong>User Agent:</strong><br>
+            <span id="ua"></span>
+        </div>
+        <p style="margin-top: 24px;">
+            <a href="/" style="color: #4a9eff; text-decoration: none;">← Back to Home</a>
+        </p>
+    </div>
+    <script>
+        document.getElementById('ua').textContent = navigator.userAgent;
+    </script>
+</body>
+</html>
