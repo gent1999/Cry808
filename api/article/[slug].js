@@ -5,26 +5,30 @@ export default async function handler(req, res) {
   // Extract numeric ID from slug (e.g., "123-drake-new-album" -> "123")
   const articleId = slug ? slug.split('-')[0] : null;
 
-  if (!articleId) {
-    return res.redirect(307, '/');
-  }
-
-  // Detect social media crawlers
-  const isCrawler = /bot|crawler|spider|crawling|facebook|twitter|slack|telegram|whatsapp|linkedin|facebookexternalhit|twitterbot|slackbot/i.test(userAgent);
-
-  // If not a crawler, fetch and serve the index.html (loads React app)
-  if (!isCrawler) {
+  // Helper to serve the SPA index.html
+  const serveIndex = async () => {
     try {
-      // Fetch the index.html from the root
       const indexResponse = await fetch(`https://${req.headers.host}/index.html`);
       const indexHtml = await indexResponse.text();
       res.setHeader('Content-Type', 'text/html');
       return res.status(200).send(indexHtml);
     } catch (error) {
       console.error('Error fetching index.html:', error);
-      // Fallback: redirect to home
-      return res.redirect(307, '/');
+      res.setHeader('Content-Type', 'text/html');
+      return res.status(200).send('<html><body><script>window.location.href="/"</script></body></html>');
     }
+  };
+
+  if (!articleId) {
+    return serveIndex();
+  }
+
+  // Only detect social media preview bots (NOT search engine crawlers like Googlebot)
+  const isCrawler = /facebookexternalhit|twitterbot|slackbot|telegrambot|whatsapp|linkedinbot|discordbot|pinterestbot/i.test(userAgent);
+
+  // If not a social media bot, serve the React SPA
+  if (!isCrawler) {
+    return serveIndex();
   }
 
   try {
