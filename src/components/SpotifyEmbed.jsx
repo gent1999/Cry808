@@ -15,7 +15,7 @@ const SpotifyEmbed = ({ pageType = 'home' }) => {
   useEffect(() => {
     const fetchEmbeds = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/spotify-embeds?page_type=${pageType}`);
+        const response = await fetch(`${API_URL}/api/spotify-embeds?page_type=${pageType}&site=cry808`);
         const data = await response.json();
         setEmbeds(data.embeds || []);
       } catch (error) {
