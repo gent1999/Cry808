@@ -44,7 +44,7 @@ const GeniusLyricsPanel = ({ geniusUrl }) => {
   if (!geniusUrl || error) return null;
 
   return (
-    <div className="hidden 2xl:block w-64 flex-shrink-0">
+    <div className="hidden xl:block w-56 flex-shrink-0">
       <div className="sticky top-24">
         <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
           {/* Header */}
