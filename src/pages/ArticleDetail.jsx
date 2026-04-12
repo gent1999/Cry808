@@ -227,7 +227,7 @@ const ArticleDetail = () => {
         {/* Main Content with Ad Sidebar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 flex gap-8 justify-center">
           {/* Genius Lyrics Panel — left side, 2xl screens only */}
-          {article.genius_url && <GeniusLyricsPanel geniusUrl={article.genius_url} />}
+          {article.lyrics && <GeniusLyricsPanel lyrics={article.lyrics} geniusUrl={article.genius_url} />}
 
           <div className="max-w-4xl flex-1">
             {/* Back Button */}

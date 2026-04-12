@@ -20,6 +20,7 @@ const ArticleEdit = () => {
     youtube_url: '',
     soundcloud_url: '',
     genius_url: '',
+    lyrics: '',
     category: 'article',
     is_original: false,
     is_evergreen: false
@@ -80,6 +81,7 @@ const ArticleEdit = () => {
           youtube_url: article.youtube_url || '',
           soundcloud_url: article.soundcloud_url || '',
           genius_url: article.genius_url || '',
+          lyrics: article.lyrics || '',
           category: article.category || 'article',
           is_original: article.is_original || false,
           is_evergreen: article.is_evergreen || false
@@ -208,6 +210,11 @@ const ArticleEdit = () => {
       // Add Genius URL if provided
       if (formData.genius_url) {
         formDataToSend.append('genius_url', formData.genius_url);
+      }
+
+      // Add Lyrics if provided
+      if (formData.lyrics) {
+        formDataToSend.append('lyrics', formData.lyrics);
       }
 
       // Add category
@@ -605,7 +612,24 @@ const ArticleEdit = () => {
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="https://genius.com/Artist-song-title-lyrics"
               />
-              <p className="mt-1 text-sm text-gray-400">Paste a Genius song URL — lyrics will appear beside the article</p>
+              <p className="mt-1 text-sm text-gray-400">Paste a Genius song URL — used as the "Open on Genius" link</p>
+            </div>
+
+            {/* Lyrics */}
+            <div>
+              <label htmlFor="lyrics" className="block text-sm font-medium text-gray-300 mb-2">
+                Lyrics (Optional)
+              </label>
+              <textarea
+                id="lyrics"
+                name="lyrics"
+                value={formData.lyrics}
+                onChange={handleChange}
+                rows={16}
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                placeholder="Paste lyrics here..."
+              />
+              <p className="mt-1 text-sm text-gray-400">Paste the full lyrics — they will appear in the left panel on the article page</p>
             </div>
 
             {/* Content */}
