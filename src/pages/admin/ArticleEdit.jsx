@@ -212,9 +212,22 @@ const ArticleEdit = () => {
         formDataToSend.append('genius_url', formData.genius_url);
       }
 
-      // Add Lyrics if provided
-      if (formData.lyrics) {
-        formDataToSend.append('lyrics', formData.lyrics);
+      // Auto-fetch lyrics when genius_url is set but lyrics are empty
+      let lyricsToSave = formData.lyrics;
+      if (formData.genius_url && !formData.lyrics) {
+        try {
+          const lyricsRes = await fetch(
+            `${API_URL}/api/genius-lyrics?url=${encodeURIComponent(formData.genius_url)}`
+          );
+          if (lyricsRes.ok) {
+            const lyricsData = await lyricsRes.json();
+            if (lyricsData.lyrics) lyricsToSave = lyricsData.lyrics;
+          }
+        } catch (_) {}
+      }
+
+      if (lyricsToSave) {
+        formDataToSend.append('lyrics', lyricsToSave);
       }
 
       // Add category
