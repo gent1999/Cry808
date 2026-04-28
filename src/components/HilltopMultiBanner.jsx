@@ -11,8 +11,10 @@ const HilltopMultiBanner = ({ className = '' }) => {
     if (adRef.current && adRef.current.children.length === 0) {
       const script = document.createElement('script');
       script.type = 'text/javascript';
-      script.src = "//itchytree.com/b.XSVIsgd-GQl_0/YlWucR/aeJmF9GudZxUXlBkdPoTzYh2ZOZTRkY3BN/D/YetxN/j/Yk5PO/TGcc0KNJwh";
+      script.src = "//pricklyassociation.com/bDX/V.sYdjGxlJ0/YAWzcL/Oehme9Zu/ZVUdlSkfPmTLYK2ZOVTLkD3bN/D/YAtDNdjSYm5/OETjc/0tNcwM";
       script.async = true;
+      script.settings = {};
+      script.referrerPolicy = 'no-referrer-when-downgrade';
       script.setAttribute('data-cfasync', 'false');
 
       script.onload = () => console.log('Hilltop desktop ad script loaded');

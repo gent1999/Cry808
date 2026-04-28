@@ -12,8 +12,10 @@ const HilltopMobileBanner = ({ className = '' }) => {
       if (adRef.current && adRef.current.children.length === 0) {
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = "//itchytree.com/bNXzVZs.dEG/lu0YYiWjcs/-eXmQ9buEZlU/lfkpPITJY_3IMSDdA/0/NBjHIwtYNxjjcbwRMmDLQN2gMzwS";
+        script.src = "//pricklyassociation.com/bGXvVas.dwG-lo0IYvWEcl/Bevmz9auaZFU/lxkFPlT/Y/3aMmDdAx0jNfj_I/tnN/j/cSwNMwDpQ/2oMnwT";
         script.async = true;
+        script.settings = {};
+        script.referrerPolicy = 'no-referrer-when-downgrade';
         script.setAttribute('data-cfasync', 'false');
 
         script.onload = () => {
