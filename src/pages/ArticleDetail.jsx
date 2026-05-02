@@ -337,9 +337,9 @@ const ArticleDetail = () => {
             <h2 className="text-2xl font-bold mb-4">Listen on Spotify</h2>
             <div className="rounded-lg overflow-hidden">
               <iframe
-                src={article.spotify_url.replace('open.spotify.com', 'open.spotify.com/embed')}
+                src={article.spotify_url.replace(/open\.spotify\.com\/(intl-[a-z-]+\/)?/, 'open.spotify.com/embed/')}
                 width="100%"
-                height="352"
+                height={/\/(album|playlist|show|episode)\//i.test(article.spotify_url) ? '500' : '152'}
                 frameBorder="0"
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                 loading="lazy"
