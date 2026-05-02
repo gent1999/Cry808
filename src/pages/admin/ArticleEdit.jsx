@@ -37,6 +37,12 @@ const ArticleEdit = () => {
   const [existingAdditionalImage1, setExistingAdditionalImage1] = useState(null);
   const [existingAdditionalImage2, setExistingAdditionalImage2] = useState(null);
   const [existingAdditionalImage3, setExistingAdditionalImage3] = useState(null);
+  const [removeAdditionalImage1, setRemoveAdditionalImage1] = useState(false);
+  const [removeAdditionalImage2, setRemoveAdditionalImage2] = useState(false);
+  const [removeAdditionalImage3, setRemoveAdditionalImage3] = useState(false);
+  const [additionalInputKey1, setAdditionalInputKey1] = useState(0);
+  const [additionalInputKey2, setAdditionalInputKey2] = useState(0);
+  const [additionalInputKey3, setAdditionalInputKey3] = useState(0);
 
   // Markdown editor configuration
   const editorOptions = useMemo(() => ({
@@ -154,15 +160,40 @@ const ArticleEdit = () => {
         if (imageNumber === 1) {
           setAdditionalImage1(file);
           setAdditionalPreview1(reader.result);
+          setRemoveAdditionalImage1(false);
         } else if (imageNumber === 2) {
           setAdditionalImage2(file);
           setAdditionalPreview2(reader.result);
+          setRemoveAdditionalImage2(false);
         } else if (imageNumber === 3) {
           setAdditionalImage3(file);
           setAdditionalPreview3(reader.result);
+          setRemoveAdditionalImage3(false);
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveAdditionalImage = (imageNumber) => {
+    if (imageNumber === 1) {
+      setAdditionalImage1(null);
+      setAdditionalPreview1(null);
+      setExistingAdditionalImage1(null);
+      setRemoveAdditionalImage1(true);
+      setAdditionalInputKey1(k => k + 1);
+    } else if (imageNumber === 2) {
+      setAdditionalImage2(null);
+      setAdditionalPreview2(null);
+      setExistingAdditionalImage2(null);
+      setRemoveAdditionalImage2(true);
+      setAdditionalInputKey2(k => k + 1);
+    } else if (imageNumber === 3) {
+      setAdditionalImage3(null);
+      setAdditionalPreview3(null);
+      setExistingAdditionalImage3(null);
+      setRemoveAdditionalImage3(true);
+      setAdditionalInputKey3(k => k + 1);
     }
   };
 
@@ -254,6 +285,11 @@ const ArticleEdit = () => {
       if (additionalImage3) {
         formDataToSend.append('additional_image_3', additionalImage3);
       }
+
+      // Append remove flags for additional images
+      if (removeAdditionalImage1) formDataToSend.append('remove_additional_image_1', 'true');
+      if (removeAdditionalImage2) formDataToSend.append('remove_additional_image_2', 'true');
+      if (removeAdditionalImage3) formDataToSend.append('remove_additional_image_3', 'true');
 
       const response = await fetch(`${API_URL}/api/articles/${id}`, {
         method: 'PUT',
@@ -467,6 +503,7 @@ const ArticleEdit = () => {
                   Additional Image 1 {existingAdditionalImage1 && '(leave blank to keep current)'}
                 </label>
                 <input
+                  key={additionalInputKey1}
                   type="file"
                   id="additional_image_1"
                   name="additional_image_1"
@@ -484,6 +521,13 @@ const ArticleEdit = () => {
                       alt="Additional Preview 1"
                       className="max-w-full h-auto max-h-48 rounded-md border border-gray-600"
                     />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAdditionalImage(1)}
+                      className="mt-2 px-3 py-1 text-xs bg-red-600/70 hover:bg-red-700 text-white rounded-md transition-colors"
+                    >
+                      Remove Image
+                    </button>
                   </div>
                 )}
               </div>
@@ -494,6 +538,7 @@ const ArticleEdit = () => {
                   Additional Image 2 {existingAdditionalImage2 && '(leave blank to keep current)'}
                 </label>
                 <input
+                  key={additionalInputKey2}
                   type="file"
                   id="additional_image_2"
                   name="additional_image_2"
@@ -511,6 +556,13 @@ const ArticleEdit = () => {
                       alt="Additional Preview 2"
                       className="max-w-full h-auto max-h-48 rounded-md border border-gray-600"
                     />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAdditionalImage(2)}
+                      className="mt-2 px-3 py-1 text-xs bg-red-600/70 hover:bg-red-700 text-white rounded-md transition-colors"
+                    >
+                      Remove Image
+                    </button>
                   </div>
                 )}
               </div>
@@ -521,6 +573,7 @@ const ArticleEdit = () => {
                   Additional Image 3 {existingAdditionalImage3 && '(leave blank to keep current)'}
                 </label>
                 <input
+                  key={additionalInputKey3}
                   type="file"
                   id="additional_image_3"
                   name="additional_image_3"
@@ -538,6 +591,13 @@ const ArticleEdit = () => {
                       alt="Additional Preview 3"
                       className="max-w-full h-auto max-h-48 rounded-md border border-gray-600"
                     />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAdditionalImage(3)}
+                      className="mt-2 px-3 py-1 text-xs bg-red-600/70 hover:bg-red-700 text-white rounded-md transition-colors"
+                    >
+                      Remove Image
+                    </button>
                   </div>
                 )}
               </div>
