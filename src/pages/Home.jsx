@@ -390,7 +390,7 @@ export default function Home() {
             </div>
 
             {/* Mobile Ad - Adsterra Banner */}
-            <AdsterraMobileBanner className="py-4" />
+            {adSettings.adsterra_home_mobile_enabled && <AdsterraMobileBanner className="py-4" />}
 
             {/* Mobile Ad - Beatport/Loopcloud */}
             <BeatportMobileBanner className="py-4" />
@@ -705,7 +705,7 @@ export default function Home() {
                       {
                         order: parseInt(adSettings.adsterra_order || '1'),
                         key: 'adsterra',
-                        component: adSettings.adsterra_enabled && <AdsterraNative key="adsterra" />
+                        component: adSettings.adsterra_home_desktop_enabled && <AdsterraNative key="adsterra" />
                       },
                       {
                         order: parseInt(adSettings.beatport_sidebar_order || '2'),

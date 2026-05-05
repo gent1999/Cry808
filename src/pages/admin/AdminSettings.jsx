@@ -10,6 +10,8 @@ const AdminSettings = () => {
   const [message, setMessage] = useState('');
   const [settings, setSettings] = useState({
     adsterra_enabled: false,
+    adsterra_home_desktop_enabled: true,
+    adsterra_home_mobile_enabled: true,
     hilltop_enabled: true,
     monetag_enabled: false,
     beatport_banner_enabled: false,
@@ -252,6 +254,71 @@ const AdminSettings = () => {
               }`}>
                 {settings.monetag_enabled ? 'Active' : 'Inactive'}
               </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Adsterra Placements Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span className="text-3xl">📣</span>
+            Adsterra Placements
+          </h2>
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Home Desktop Sidebar */}
+              <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-white">Home - Desktop Sidebar</h4>
+                    <p className="text-xs text-gray-400 mt-1">300×250</p>
+                    <p className="text-xs text-gray-500">highperformanceformat.com</p>
+                  </div>
+                  <button
+                    onClick={() => handleToggle('adsterra_home_desktop_enabled')}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.adsterra_home_desktop_enabled ? 'bg-green-600' : 'bg-gray-600'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.adsterra_home_desktop_enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                  settings.adsterra_home_desktop_enabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'
+                }`}>
+                  {settings.adsterra_home_desktop_enabled ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+
+              {/* Home Mobile Banner */}
+              <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-white">Home - Mobile Banner</h4>
+                    <p className="text-xs text-gray-400 mt-1">320×50</p>
+                    <p className="text-xs text-gray-500">highperformanceformat.com</p>
+                  </div>
+                  <button
+                    onClick={() => handleToggle('adsterra_home_mobile_enabled')}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.adsterra_home_mobile_enabled ? 'bg-green-600' : 'bg-gray-600'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.adsterra_home_mobile_enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                  settings.adsterra_home_mobile_enabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'
+                }`}>
+                  {settings.adsterra_home_mobile_enabled ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+
             </div>
           </div>
         </div>
