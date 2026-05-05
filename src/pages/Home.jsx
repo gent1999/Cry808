@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import SpotifyEmbed from "../components/SpotifyEmbed";
 import AdsterraNative from "../components/AdsterraNative";
+import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import Infolinks from "../components/Infolinks";
 import AmazonWidget from "../components/AmazonWidget";
@@ -388,10 +389,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Mobile Ad - Adsterra Native */}
-            <div className="xl:hidden">
-              <AdsterraNative className="py-4" />
-            </div>
+            {/* Mobile Ad - Adsterra Banner */}
+            <AdsterraMobileBanner className="py-4" />
 
             {/* Mobile Ad - Beatport/Loopcloud */}
             <BeatportMobileBanner className="py-4" />

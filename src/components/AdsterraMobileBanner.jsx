@@ -1,67 +1,41 @@
 import { useEffect, useRef } from 'react';
 
-/**
- * Adsterra Mobile Banner Ad Component (320x50)
- *
- * This is optimized for mobile devices and shows at the top of pages
- * for maximum visibility on phones/tablets.
- */
-const AdsterraMobileBanner = ({ position = 'top', className = '' }) => {
+const AdsterraMobileBanner = ({ className = '' }) => {
   const adRef = useRef(null);
 
   useEffect(() => {
-    console.log('📱 AdsterraMobileBanner component mounted');
-
-    // Load Adsterra mobile banner ad
     if (adRef.current && !adRef.current.hasAttribute('data-ad-loaded')) {
       adRef.current.setAttribute('data-ad-loaded', 'true');
 
-      // Create atOptions script
       const atOptionsScript = document.createElement('script');
       atOptionsScript.type = 'text/javascript';
       atOptionsScript.innerHTML = `
         atOptions = {
-          'key': 'ad951cea811b4fbc62cf82ef7b8b0ce8',
+          'key': '38f31b9c6e8ed534955f94a07854e264',
           'format': 'iframe',
-          'height': 50,
-          'width': 320,
+          'height': 600,
+          'width': 160,
           'params': {}
         };
       `;
 
-      // Create invoke script
       const invokeScript = document.createElement('script');
       invokeScript.type = 'text/javascript';
-      invokeScript.src = '//www.highperformanceformat.com/ad951cea811b4fbc62cf82ef7b8b0ce8/invoke.js';
+      invokeScript.src = 'https://www.highperformanceformat.com/38f31b9c6e8ed534955f94a07854e264/invoke.js';
 
-      invokeScript.onload = () => {
-        console.log('✅ Adsterra mobile banner (320x50) script loaded');
-      };
-
-      invokeScript.onerror = () => {
-        console.error('❌ Adsterra mobile banner script failed to load');
-      };
-
-      // Append scripts to ad container
       adRef.current.appendChild(atOptionsScript);
       adRef.current.appendChild(invokeScript);
-
-      console.log('📢 Adsterra mobile banner (320x50) initialization started');
     }
   }, []);
 
   return (
-    <div className={`xl:hidden w-full flex justify-center ${className}`}>
-      <div className="text-xs text-white/40 mb-2 text-center w-full">
-        <div className="mb-1">Advertisement</div>
-        <div
-          ref={adRef}
-          className="flex items-center justify-center min-h-[50px] bg-white/5 border border-white/10 rounded-lg mx-auto"
-          style={{ maxWidth: '320px' }}
-        >
-          {/* Mobile banner ad will load here */}
-        </div>
-      </div>
+    <div className={`xl:hidden w-full flex flex-col items-center ${className}`}>
+      <div className="text-xs text-white/40 mb-2">Advertisement</div>
+      <div
+        ref={adRef}
+        className="flex items-center justify-center bg-white/5 border border-white/10"
+        style={{ width: '160px', minHeight: '600px' }}
+      />
     </div>
   );
 };
