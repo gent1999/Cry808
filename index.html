@@ -114,18 +114,10 @@
         gtag('config', 'G-G52B44KQ8J');
       })();
 
-      // Load Google AdSense asynchronously - won't block app if it fails
-      (function() {
-        var script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3253360189362413';
-        script.crossOrigin = 'anonymous';
-        script.onerror = function() {
-          console.log('AdSense script blocked or failed to load');
-        };
-        document.head.appendChild(script);
-      })();
     </script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3253360189362413" crossorigin="anonymous"></script>
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
