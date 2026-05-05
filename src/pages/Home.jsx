@@ -6,7 +6,6 @@ import AdsterraNative from "../components/AdsterraNative";
 import AdsterraSmartlink from "../components/AdsterraSmartlink";
 import Infolinks from "../components/Infolinks";
 import AmazonWidget from "../components/AmazonWidget";
-import AmazonMobileAd from "../components/AmazonMobileAd";
 import BeatportBanner from "../components/BeatportBanner";
 import BeatportMobileBanner from "../components/BeatportMobileBanner";
 import { stripMarkdown } from "../utils/markdownUtils";
@@ -389,8 +388,10 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Mobile Ad - Amazon Product */}
-            <AmazonMobileAd className="py-4" />
+            {/* Mobile Ad - Adsterra Native */}
+            <div className="xl:hidden">
+              <AdsterraNative className="py-4" />
+            </div>
 
             {/* Mobile Ad - Beatport/Loopcloud */}
             <BeatportMobileBanner className="py-4" />
