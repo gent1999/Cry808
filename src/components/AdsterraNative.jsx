@@ -1,58 +1,28 @@
 import { useEffect, useRef } from 'react';
 
-/**
- * Adsterra Native Banner Ad Component
- *
- * This component displays native ads that blend with your content.
- * Native ads typically have higher CTR (click-through rates) and earnings.
- *
- * Props:
- * - className: Additional CSS classes
- * - showLabel: Whether to show "Advertisement" label (default: true)
- */
-const AdsterraNative = ({ className = '', showLabel = true }) => {
-  const adRef = useRef(null);
+const SCRIPT_SRC = 'https://pl27975526.profitablecpmratenetwork.com/09bd789febed0d52285f37d4273b028e/invoke.js';
+const CONTAINER_ID = 'container-09bd789febed0d52285f37d4273b028e';
+
+const AdsterraNative = ({ className = '' }) => {
+  const loaded = useRef(false);
 
   useEffect(() => {
-    // Load Adsterra 300x250 banner ad
-    if (adRef.current && !adRef.current.hasAttribute('data-ad-loaded')) {
-      adRef.current.setAttribute('data-ad-loaded', 'true');
+    if (loaded.current) return;
+    loaded.current = true;
 
-      // Create atOptions script
-      const atOptionsScript = document.createElement('script');
-      atOptionsScript.type = 'text/javascript';
-      atOptionsScript.innerHTML = `
-        atOptions = {
-          'key': '513c04d634d0a2ba825c8fe0ac47a077',
-          'format': 'iframe',
-          'height': 250,
-          'width': 300,
-          'params': {}
-        };
-      `;
+    if (document.querySelector(`script[src="${SCRIPT_SRC}"]`)) return;
 
-      // Create invoke script
-      const invokeScript = document.createElement('script');
-      invokeScript.type = 'text/javascript';
-      invokeScript.src = '//www.highperformanceformat.com/513c04d634d0a2ba825c8fe0ac47a077/invoke.js';
-
-      // Append scripts to ad container
-      adRef.current.appendChild(atOptionsScript);
-      adRef.current.appendChild(invokeScript);
-    }
+    const script = document.createElement('script');
+    script.async = true;
+    script.setAttribute('data-cfasync', 'false');
+    script.src = SCRIPT_SRC;
+    document.body.appendChild(script);
   }, []);
 
   return (
-    <div className={`adsterra-native-ad ${className}`}>
-      {showLabel && (
-        <div className="text-xs text-white/40 mb-2 text-center">Advertisement</div>
-      )}
-      <div
-        ref={adRef}
-        className="min-h-[250px] bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-center"
-      >
-        {/* Native ad will load here */}
-      </div>
+    <div className={className}>
+      <div className="text-xs text-white/40 mb-2 text-center">Advertisement</div>
+      <div id={CONTAINER_ID} />
     </div>
   );
 };
