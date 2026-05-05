@@ -12,7 +12,6 @@ import SpotifyEmbed from '../components/SpotifyEmbed';
 import GeniusLyricsPanel from '../components/GeniusLyricsPanel';
 import BeatportArticleBanner from '../components/BeatportArticleBanner';
 import BeatportArticleTopBanner from '../components/BeatportArticleTopBanner';
-import AdsterraNative from '../components/AdsterraNative';
 import { HILLTOP_ENABLED } from '../config/ads';
 import { stripMarkdown } from '../utils/markdownUtils';
 import { generateArticleUrl } from '../utils/slugify';
@@ -451,7 +450,6 @@ const ArticleDetail = () => {
           {/* Sidebar */}
           <div className="hidden xl:block w-80 flex-shrink-0">
             <div className="sticky top-24 space-y-6">
-              <AdsterraNative />
               {(() => {
                 // Build array of sidebar components with their order
                 const sidebarComponents = [
