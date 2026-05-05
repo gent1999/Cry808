@@ -127,6 +127,34 @@
       })();
     </script>
 
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Cry808",
+      "url": "https://cry808.com",
+      "description": "Your source for the latest hip-hop news, exclusive artist interviews, album reviews, and music culture.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://cry808.com/?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Cry808",
+        "url": "https://cry808.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://cry808.com/og-image.png"
+        }
+      }
+    }
+    </script>
+
     <!-- Google Funding Choices (Consent Management) - Disabled for Instagram compatibility -->
     <!-- Instagram's in-app browser has issues with nonce attributes -->
     <!--
@@ -187,9 +215,37 @@
     </div>
 
     <noscript>
-      <div style="background: #000; color: #fff; padding: 50px; text-align: center; min-height: 100vh;">
-        <h1>JavaScript Required</h1>
-        <p>Please enable JavaScript or open in your browser.</p>
+      <style>
+        .ns-wrap { background:#000; color:#fff; font-family:-apple-system,system-ui,sans-serif; max-width:900px; margin:0 auto; padding:40px 20px; }
+        .ns-wrap h1 { font-size:2rem; margin-bottom:8px; }
+        .ns-wrap p  { color:#aaa; margin-bottom:24px; }
+        .ns-nav    { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:32px; }
+        .ns-nav a  { color:#fff; background:#222; padding:8px 16px; text-decoration:none; border:1px solid #444; }
+        .ns-nav a:hover { background:#333; }
+        .ns-section { margin-bottom:32px; }
+        .ns-section h2 { font-size:1.2rem; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:16px; }
+        .ns-section p  { color:#bbb; line-height:1.6; }
+      </style>
+      <div class="ns-wrap">
+        <h1>Cry808</h1>
+        <p>Hip-Hop News, Interviews &amp; Album Reviews</p>
+        <nav class="ns-nav">
+          <a href="/">Home</a>
+          <a href="/news">News</a>
+          <a href="/interviews">Interviews</a>
+          <a href="/about">About</a>
+          <a href="/submit-music">Submit Music</a>
+          <a href="/contact">Contact</a>
+          <a href="/privacy-policy">Privacy Policy</a>
+        </nav>
+        <div class="ns-section">
+          <h2>About Cry808</h2>
+          <p>Cry808 is your daily source for hip-hop news, exclusive artist interviews, album reviews, and music culture coverage. We cover the latest in rap music from underground artists to mainstream releases.</p>
+        </div>
+        <div class="ns-section">
+          <h2>Enable JavaScript</h2>
+          <p>This site requires JavaScript to display its full content. Please enable JavaScript in your browser settings to read our articles and features.</p>
+        </div>
       </div>
     </noscript>
 
