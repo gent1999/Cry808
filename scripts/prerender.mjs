@@ -1,14 +1,3 @@
-/**
- * Post-build prerender script.
- * Starts vite preview, renders each route with puppeteer, saves static HTML to dist/.
- *
- * Run after `vite build`:
- *   node scripts/prerender.mjs
- *
- * Or use the combined script:
- *   npm run build:ssr
- */
-
 import { spawn } from 'child_process';
 import { writeFileSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
@@ -17,7 +6,6 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '..', 'dist');
 
-// Routes to pre-render (dynamic article routes are handled by Googlebot's JS rendering)
 const ROUTES = [
   '/',
   '/news',
@@ -51,34 +39,30 @@ function startPreviewServer() {
     });
     server.on('error', reject);
 
-    // Fallback: give it 4s to start
     setTimeout(tryResolve, 4000);
   });
 }
 
 async function prerender() {
-  // Lazy-load puppeteer so missing it doesn't break non-SSR builds
-  let puppeteer;
-  try {
-    puppeteer = (await import('puppeteer')).default;
-  } catch {
-    console.error('puppeteer not installed. Run: npm install --save-dev puppeteer');
-    process.exit(1);
-  }
+  const chromium = (await import('@sparticuz/chromium')).default;
+  const puppeteer = (await import('puppeteer-core')).default;
 
   console.log('Starting preview server...');
   const server = await startPreviewServer();
 
+  const executablePath = await chromium.executablePath();
+  console.log(`Using Chrome at: ${executablePath}`);
+
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath,
     headless: true,
   });
 
   try {
     for (const route of ROUTES) {
       const page = await browser.newPage();
-
-      // Suppress console noise from the page
       page.on('console', () => {});
       page.on('pageerror', () => {});
 
@@ -88,7 +72,6 @@ async function prerender() {
         timeout: 30_000,
       });
 
-      // Wait a bit extra for React to settle
       await new Promise(r => setTimeout(r, 500));
 
       const html = await page.content();

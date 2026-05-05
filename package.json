@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:ssr": "npx puppeteer browsers install chrome && vite build && node scripts/prerender.mjs",
+    "build:ssr": "vite build && node scripts/prerender.mjs",
     "prerender": "node scripts/prerender.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -38,7 +38,8 @@
     "globals": "^16.4.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14",
-    "puppeteer": "^24.0.0",
+    "@sparticuz/chromium": "^133.0.0",
+    "puppeteer-core": "^22.0.0",
     "terser": "^5.46.0",
     "vite": "^7.1.7"
   }
