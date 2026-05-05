@@ -11,17 +11,17 @@ const AdsterraMobileBanner = ({ className = '' }) => {
       atOptionsScript.type = 'text/javascript';
       atOptionsScript.innerHTML = `
         atOptions = {
-          'key': '38f31b9c6e8ed534955f94a07854e264',
+          'key': 'ad951cea811b4fbc62cf82ef7b8b0ce8',
           'format': 'iframe',
-          'height': 600,
-          'width': 160,
+          'height': 50,
+          'width': 320,
           'params': {}
         };
       `;
 
       const invokeScript = document.createElement('script');
       invokeScript.type = 'text/javascript';
-      invokeScript.src = 'https://www.highperformanceformat.com/38f31b9c6e8ed534955f94a07854e264/invoke.js';
+      invokeScript.src = 'https://www.highperformanceformat.com/ad951cea811b4fbc62cf82ef7b8b0ce8/invoke.js';
 
       adRef.current.appendChild(atOptionsScript);
       adRef.current.appendChild(invokeScript);
@@ -34,7 +34,7 @@ const AdsterraMobileBanner = ({ className = '' }) => {
       <div
         ref={adRef}
         className="flex items-center justify-center bg-white/5 border border-white/10"
-        style={{ width: '160px', minHeight: '600px' }}
+        style={{ width: '320px', minHeight: '50px' }}
       />
     </div>
   );
