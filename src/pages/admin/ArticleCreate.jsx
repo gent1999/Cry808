@@ -192,7 +192,19 @@ const ArticleCreate = () => {
         throw new Error(data.message || 'Failed to create article');
       }
 
-      // Redirect to dashboard on success
+      // Wake the local 808engine indexer for this new article
+      const article = data.article;
+      if (article?.id && article?.title) {
+        const slug = article.title.toLowerCase().trim()
+          .replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-');
+        const articleUrl = `https://cry808.com/article/${article.id}-${slug}`;
+        fetch('http://localhost:3001/api/indexer/wake', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: articleUrl }),
+        }).catch(() => {}); // fire-and-forget, silent if 808engine is offline
+      }
+
       navigate('/admin/dashboard');
     } catch (err) {
       setError(err.message || 'Something went wrong');
