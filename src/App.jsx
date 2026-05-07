@@ -25,6 +25,11 @@ import SubmissionsList from "./pages/admin/SubmissionsList";
 import SpotifyManager from "./pages/admin/SpotifyManager";
 import AmazonProducts from "./pages/admin/AmazonProducts";
 import IndexerAgent from "./pages/admin/IndexerAgent";
+import Finance from "./pages/admin/Finance";
+import RevenueLog from "./pages/admin/RevenueLog";
+import Payouts from "./pages/admin/Payouts";
+import Expenses from "./pages/admin/Expenses";
+import RevenueSources from "./pages/admin/RevenueSources";
 
 // Component to track page views
 function AnalyticsTracker() {
@@ -157,6 +162,11 @@ export default function App() {
           <Route path="/admin/spotify" element={<SpotifyManager />} />
           <Route path="/admin/amazon-products" element={<AmazonProducts />} />
           <Route path="/admin/indexer" element={<IndexerAgent />} />
+          <Route path="/admin/finance" element={<Finance />} />
+          <Route path="/admin/finance/revenue" element={<RevenueLog />} />
+          <Route path="/admin/finance/payouts" element={<Payouts />} />
+          <Route path="/admin/finance/expenses" element={<Expenses />} />
+          <Route path="/admin/finance/sources" element={<RevenueSources />} />
         </Routes>
 
         {/* Social Bar Ad - Sticky Footer on All Pages */}

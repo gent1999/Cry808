@@ -423,6 +423,7 @@ const AdminDashboard = () => {
           <div className="bg-gray-800">
             <div className="px-3 py-2 border-b border-gray-700 text-xs text-gray-400 font-medium uppercase tracking-widest">Config</div>
             <div className="divide-y divide-gray-700/50">
+              <Btn onClick={() => navigate('/admin/finance')} color="green">💰 Finance Hub</Btn>
               <Btn onClick={() => navigate('/admin/settings')}>Ad Settings</Btn>
               <Btn onClick={() => navigate('/admin/indexer')} color="blue">Indexer Agent</Btn>
               <Btn onClick={() => navigate('/admin/spotify')} color="green">Spotify Manager</Btn>
