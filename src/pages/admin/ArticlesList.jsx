@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -46,6 +46,79 @@ const SumCard = ({ label, value, accent = 'text-white', border = 'border-l-gray-
 // ── CTR color helper ──────────────────────────────────────────────────────────
 const ctrColor  = v => v >= 5 ? 'text-emerald-400' : v >= 2 ? 'text-amber-400' : 'text-gray-400';
 const posColor  = v => v <= 3 ? 'text-emerald-400' : v <= 10 ? 'text-amber-400' : 'text-gray-400';
+
+const SideIcon = ({ path }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d={path} />
+  </svg>
+);
+
+function ContentSidePanel({ total, submissions = 0 }) {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const active = (to) => pathname === to || (to !== '/admin/dashboard' && pathname.startsWith(to));
+  const groups = [
+    ['Content', [
+      ['New Article', 'M12 5v14M5 12h14', '/admin/articles/create'],
+      ['All Articles', 'M5 6h14M5 12h14M5 18h9', '/admin/articles', total],
+      ['Submissions', 'M4 13h4l2 3h4l2-3h4M5 5h14l1 8v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5l1-8Z', '/admin/submissions', submissions],
+    ]],
+    ['Business & Config', [
+      ['Finance Hub', 'M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6', '/admin/finance'],
+      ['Ad Settings', 'M12 4v16M4 12h16M7 7l10 10M17 7 7 17', '/admin/settings'],
+      ['Spotify Manager', 'M7 18V6l11 6-11 6Z', '/admin/spotify'],
+      ['Amazon Products', 'M5 7h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7Zm4 0a3 3 0 0 1 6 0', '/admin/amazon-products'],
+    ]],
+  ];
+
+  return (
+    <aside className="content-side-panel fixed inset-y-0 left-0 z-30 flex w-[264px] flex-col border-r border-white/[0.07] bg-[#0b1019]/95 px-4 py-5 shadow-[20px_0_80px_rgba(0,0,0,.34)] backdrop-blur-xl">
+      <button onClick={() => navigate('/admin/dashboard')} className="mb-7 flex items-center gap-3 text-left">
+        <span className="grid h-11 w-11 place-items-center bg-gradient-to-br from-violet-500 to-cyan-400 text-sm font-black shadow-[0_14px_34px_rgba(124,58,237,.32)]">C8</span>
+        <span>
+          <span className="block text-[15px] font-semibold tracking-[.16em] text-white">CRY808</span>
+          <span className="block text-[11px] font-medium text-slate-500">Content System</span>
+        </span>
+      </button>
+
+      <nav className="flex-1 space-y-7 overflow-y-auto pr-1">
+        {groups.map(([label, items]) => (
+          <div key={label}>
+            <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[.16em] text-slate-500/90">{label}</div>
+            <div className="space-y-1.5">
+              {items.map(([labelText, icon, to, count]) => {
+                const isActive = active(to);
+                return (
+                  <button
+                    key={labelText}
+                    onClick={() => navigate(to)}
+                    className={`group flex w-full items-center gap-3 border px-3 py-2.5 text-left text-sm transition duration-200 ${
+                      isActive
+                        ? 'border-sky-300/25 bg-sky-300/10 text-white shadow-[0_16px_44px_rgba(14,165,233,.12)]'
+                        : 'border-transparent text-slate-400 hover:border-white/[0.07] hover:bg-white/[0.04] hover:text-slate-100'
+                    }`}
+                  >
+                    <span className={`grid h-8 w-8 place-items-center ${isActive ? 'bg-sky-500/20 text-sky-200' : 'bg-white/[0.04] text-slate-500 group-hover:text-slate-200'}`}>
+                      <SideIcon path={icon} />
+                    </span>
+                    <span className="min-w-0 flex-1 font-medium">{labelText}</span>
+                    {!!count && <span className="bg-white/[0.08] px-2 py-0.5 text-[11px] font-semibold text-slate-300">{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      <div className="border border-white/[0.07] bg-white/[0.035] p-4">
+        <div className="text-[11px] font-semibold uppercase tracking-[.18em] text-sky-300">Library</div>
+        <div className="mt-3 text-3xl font-semibold text-white">{fmt(total)}</div>
+        <div className="mt-1 text-sm text-slate-500">Articles indexed</div>
+      </div>
+    </aside>
+  );
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ArticlesList() {
@@ -174,28 +247,38 @@ export default function ArticlesList() {
   }, [enriched]);
 
   if (artLoading) return (
-    <div className="ml-52 min-h-screen bg-black flex items-center justify-center">
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-        <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Loading content library…</span>
+    <div className="admin-command-center grid min-h-screen place-items-center bg-[#070b12] text-white">
+      <div className="relative w-[360px] border border-white/[0.08] bg-[#0d1421]/90 p-7 shadow-[0_28px_90px_rgba(0,0,0,.45)]">
+        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center border border-white/[0.08] bg-white/[0.04]">
+          <div className="admin-loader-ring" />
+        </div>
+        <div className="text-center text-sm font-semibold uppercase tracking-[.2em] text-white">Loading Library</div>
+        <div className="mt-2 text-center text-sm text-slate-500">Syncing articles and performance data.</div>
+        <div className="mt-6 grid gap-2">
+          <div className="admin-loading-bar" />
+          <div className="admin-loading-bar admin-loading-bar-delay" />
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="ml-52 min-h-screen bg-black text-white">
+    <div className="admin-command-center content-command-center min-h-screen bg-[#070b12] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(59,130,246,.16),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(139,92,246,.14),transparent_30%),linear-gradient(180deg,#070b12_0%,#0a0f1a_48%,#070b12_100%)]" />
+      <ContentSidePanel total={articles.length} />
+      <div className="relative ml-[264px] min-h-screen">
 
       {/* ── Command Bar ──────────────────────────────────────────────────────── */}
-      <header className="bg-[#080b10] border-b border-gray-800/60 sticky top-0 z-20">
-        <div className="px-5 h-11 flex items-center justify-between">
+      <header className="sticky top-0 z-20 border-b border-white/[0.07] bg-[#070b12]/82 px-8 py-3 backdrop-blur-xl">
+        <div className="flex h-8 items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/admin/dashboard')}
-              className="text-[10px] font-mono text-gray-600 hover:text-gray-300 uppercase tracking-wider transition-colors">
+              className="text-xs text-slate-500 hover:text-slate-200 uppercase tracking-[.16em] font-semibold transition-colors">
               ← Dashboard
             </button>
             <span className="text-gray-700">│</span>
-            <span className="text-[11px] font-mono text-blue-400 font-bold uppercase tracking-widest">Content Intelligence</span>
-            <span className="text-[10px] font-mono text-gray-500">{articles.length} records</span>
+            <span className="text-xs text-sky-300 font-bold uppercase tracking-[.18em]">Content Intelligence</span>
+            <span className="border border-white/[0.08] bg-white/[0.055] px-3 py-1 text-xs font-medium text-slate-300">{articles.length} records</span>
           </div>
           <div className="flex items-center gap-2">
             {!anaLoading && (
@@ -216,7 +299,7 @@ export default function ArticlesList() {
         </div>
       </header>
 
-      <main className="px-5 py-5 space-y-4">
+      <main className="content-main px-8 py-7 space-y-5">
 
         {error && (
           <div className="border border-red-800/60 bg-red-950/20 px-4 py-2.5 text-xs font-mono text-red-400 uppercase tracking-wider">
@@ -523,6 +606,7 @@ export default function ArticlesList() {
           </div>
         )}
       </main>
+      </div>
     </div>
   );
 }

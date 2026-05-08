@@ -406,3 +406,60 @@ html, body {
 .finance-subpage .border-gray-800 {
   border-color: rgba(255, 255, 255, 0.07) !important;
 }
+
+/* Content intelligence page */
+.content-command-center .content-main {
+  max-width: 1800px;
+}
+
+.content-command-center .content-main .bg-\[\#0a0e14\],
+.content-command-center .content-main .bg-black,
+.content-command-center .content-main .bg-\[\#0d1420\] {
+  background-color: rgba(17, 24, 39, 0.72) !important;
+}
+
+.content-command-center .content-main .border-gray-800\/60,
+.content-command-center .content-main .border-gray-800\/40,
+.content-command-center .content-main .border-gray-700\/60,
+.content-command-center .content-main .border-gray-700\/50 {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.content-command-center .content-main input,
+.content-command-center .content-main select {
+  background: rgba(255, 255, 255, 0.045) !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  color: rgb(226, 232, 240) !important;
+  border-radius: 0 !important;
+}
+
+.content-command-center .content-main table {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  background: rgba(17, 24, 39, 0.72);
+}
+
+.content-command-center .content-main thead tr {
+  background: rgba(17, 24, 39, 0.92) !important;
+}
+
+.content-command-center .content-main tbody tr {
+  background: transparent !important;
+}
+
+.content-command-center .content-main tbody tr:hover {
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+.content-command-center .content-main th {
+  color: rgb(186, 230, 253) !important;
+}
+
+.content-command-center .content-side-panel button,
+.content-command-center .content-side-panel div,
+.content-command-center .content-main button,
+.content-command-center .content-main img,
+.content-command-center .content-main span,
+.content-command-center .content-main input,
+.content-command-center .content-main select {
+  border-radius: 0 !important;
+}
