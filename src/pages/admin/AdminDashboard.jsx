@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -144,25 +144,6 @@ function Panel({ title, subtitle, icon, right, children, className = '' }) {
       </div>
       {children}
     </section>
-  );
-}
-
-function AlertCard({ icon, title, detail, tone }) {
-  const tones = {
-    green: 'from-emerald-500/14 to-teal-500/5 text-emerald-200 ring-emerald-300/12',
-    blue: 'from-sky-500/14 to-blue-500/5 text-sky-200 ring-sky-300/12',
-    purple: 'from-violet-500/14 to-fuchsia-500/5 text-violet-200 ring-violet-300/12',
-    amber: 'from-amber-500/16 to-orange-500/5 text-amber-200 ring-amber-300/12',
-    rose: 'from-rose-500/16 to-red-500/5 text-rose-200 ring-rose-300/12',
-  };
-  return (
-    <div className={`rounded-3xl bg-gradient-to-br p-[1px] ring-1 ${tones[tone]}`}>
-      <div className="h-full rounded-3xl bg-[#111827]/86 p-4 transition duration-200 hover:bg-[#151f31]/92">
-        <span className="mb-3 grid h-9 w-9 place-items-center rounded-2xl bg-white/[0.06]"><Icon name={icon} size={17} /></span>
-        <div className="text-sm font-semibold text-white">{title}</div>
-        <div className="mt-1 text-sm leading-5 text-slate-400">{detail}</div>
-      </div>
-    </div>
   );
 }
 
@@ -365,28 +346,6 @@ function RecentArticle({ article }) {
   );
 }
 
-function ActivityRow({ item }) {
-  const tone = item.kind === 'expense' ? 'rose' : item.kind === 'submission' ? 'purple' : item.kind === 'article' ? 'blue' : 'green';
-  const colors = {
-    green: 'bg-emerald-400/10 text-emerald-300',
-    blue: 'bg-sky-400/10 text-sky-300',
-    purple: 'bg-violet-400/10 text-violet-300',
-    rose: 'bg-rose-400/10 text-rose-300',
-  };
-  return (
-    <div className="flex gap-3 rounded-2xl p-2 transition hover:bg-white/[0.035]">
-      <span className={`mt-0.5 grid h-8 w-8 flex-shrink-0 place-items-center rounded-xl ${colors[tone]}`}>
-        <Icon name={item.kind === 'article' ? 'list' : item.kind === 'submission' ? 'inbox' : 'finance'} size={15} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-slate-200">{item.label}</div>
-        {item.detail && <div className="mt-0.5 truncate text-xs text-slate-500">{item.detail}</div>}
-      </div>
-      <div className="whitespace-nowrap text-xs text-slate-500">{shortDate(item.created_at)}</div>
-    </div>
-  );
-}
-
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
@@ -396,7 +355,6 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({ total: 0, published: 0, featured: 0, submissions: 0 });
   const [articles, setArticles] = useState([]);
   const [submissions, setSubmissions] = useState([]);
-  const [activity, setActivity] = useState([]);
   const [analytics, setAnalytics] = useState({ current: 0, previous: 0, allTime: 0, average: 0, change: 0, realtime: 0, loading: true, error: null });
   const [seo, setSeo] = useState({ performance: { clicks: 0, impressions: 0, ctr: 0, position: 0 }, topQueries: [], topPages: [], loading: true, error: null });
   const [finance, setFinance] = useState(null);
@@ -471,10 +429,6 @@ export default function AdminDashboard() {
         .then((response) => response.ok ? response.json() : null)
         .then((data) => { if (data) setFinance(data); }).catch(() => {});
 
-      fetch(`${API_URL}/api/finance/activity`, { headers: hdrs() })
-        .then((response) => response.ok ? response.json() : null)
-        .then((data) => { if (data?.activity) setActivity(data.activity); }).catch(() => {});
-
       fetch(`${API_URL}/api/admin/settings`, { headers: hdrs() })
         .then((response) => response.ok ? response.json() : null)
         .then((data) => { if (data?.settings) setAdConfig(data.settings); }).catch(() => {});
@@ -494,12 +448,6 @@ export default function AdminDashboard() {
   const activeAds = adConfig ? ['adsterra_enabled', 'hilltop_enabled', 'beatport_banner_enabled', 'monetag_enabled'].filter(adOn).length : 0;
   const pendingSubmissions = submissions.filter((submission) => !['approved', 'rejected'].includes(submission.submission_status)).length || stats.submissions;
 
-  const recentActivity = useMemo(() => ([
-    ...activity.slice(0, 8).map((item) => ({ ...item, created_at: item.created_at || new Date().toISOString() })),
-    ...articles.slice(0, 3).map((article) => ({ kind: 'article', label: `Article published: ${article.title}`, detail: article.author || 'Cry808', created_at: article.created_at })),
-    ...submissions.slice(0, 3).map((submission) => ({ kind: 'submission', label: `Submission received: ${submission.artist_name || submission.title || 'Untitled'}`, detail: submission.email || submission.submission_status, created_at: submission.created_at })),
-  ]).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 8), [activity, articles, submissions]);
-
   if (loading) {
     return (
       <div className="admin-command-center grid min-h-screen place-items-center bg-[#070b12] text-white">
@@ -518,13 +466,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-  const alertCards = [
-    analytics.change < -15 && { icon: 'chart', title: `Traffic down ${Math.abs(analytics.change)}%`, detail: 'Traffic is below the previous month. Review acquisition channels.', tone: 'amber' },
-    pendingSubmissions > 0 && { icon: 'inbox', title: `${pendingSubmissions} submissions pending`, detail: 'New music submissions are waiting for review.', tone: 'purple' },
-    finance?.upcomingRenewals?.[0]?.daysUntil <= 14 && { icon: 'clock', title: 'Domain renewal due', detail: `${finance.upcomingRenewals[0].name} renews in ${finance.upcomingRenewals[0].daysUntil} days.`, tone: 'rose' },
-    { icon: 'check', title: 'System operational', detail: `${stats.published} published articles, ${activeAds} ad networks active.`, tone: 'green' },
-  ].filter(Boolean);
 
   const queryRows = seo.topQueries.slice(0, 6).map((query) => ({ label: query.query, clicks: query.clicks, impressions: query.impressions, ctr: query.ctr }));
   const pageRows = seo.topPages.slice(0, 6).map((page) => ({ label: page.page?.replace(/^https?:\/\/[^/]+/, '') || '/', clicks: page.clicks, impressions: page.impressions, ctr: page.ctr }));
@@ -552,10 +493,6 @@ export default function AdminDashboard() {
         </header>
 
         <main className="admin-main px-8 py-7">
-          <section className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {alertCards.map((alert) => <AlertCard key={alert.title} {...alert} />)}
-          </section>
-
           <section className="mb-6 grid gap-4 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-9">
             <MetricCard label="Articles" value={num(stats.total)} meta="Total library" tone="blue" />
             <MetricCard label="Published" value={num(stats.published)} meta="Live content" tone="green" />
@@ -620,22 +557,6 @@ export default function AdminDashboard() {
             </Panel>
           </section>
 
-          <section className="grid gap-5 xl:grid-cols-[1fr_.9fr]">
-            <Panel title="Recent Activity Feed" subtitle="Content, finance, and submission operations" icon="pulse">
-              <div className="space-y-1 p-4">
-                {recentActivity.length ? recentActivity.map((item, index) => <ActivityRow key={`${item.kind}-${item.id || index}`} item={item} />) : <div className="py-12 text-center text-sm text-slate-500">No recent activity</div>}
-              </div>
-            </Panel>
-
-            <Panel title="Operational Controls" subtitle="Quick links and account controls" icon="check">
-              <div className="grid gap-3 p-5 sm:grid-cols-2">
-                <button onClick={() => navigate('/admin/settings')} className="rounded-2xl bg-white/[0.045] p-4 text-left transition hover:bg-white/[0.075]"><div className="font-semibold text-white">Ad Settings</div><div className="mt-1 text-sm text-slate-500">{activeAds} ad networks active</div></button>
-                <button onClick={() => navigate('/admin/submissions')} className="rounded-2xl bg-white/[0.045] p-4 text-left transition hover:bg-white/[0.075]"><div className="font-semibold text-white">Submissions</div><div className="mt-1 text-sm text-slate-500">{pendingSubmissions} pending reviews</div></button>
-                <button onClick={() => navigate('/admin/spotify')} className="rounded-2xl bg-white/[0.045] p-4 text-left transition hover:bg-white/[0.075]"><div className="font-semibold text-white">Spotify Manager</div><div className="mt-1 text-sm text-slate-500">Manage embeds</div></button>
-                <button onClick={() => setShowDelete(true)} className="rounded-2xl border border-rose-400/15 bg-rose-400/[0.055] p-4 text-left transition hover:bg-rose-400/10"><div className="font-semibold text-rose-200">Danger Zone</div><div className="mt-1 text-sm text-rose-200/55">Delete admin account</div></button>
-              </div>
-            </Panel>
-          </section>
         </main>
       </div>
 

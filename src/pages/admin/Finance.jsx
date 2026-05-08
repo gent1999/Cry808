@@ -15,37 +15,83 @@ const NAV = [
 export function FinanceHeader({ active }) {
   const navigate = useNavigate();
   return (
-    <header className="bg-black border-b border-gray-800 sticky top-0 z-20">
-      <div className="max-w-7xl mx-auto px-4 h-11 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <>
+      <FinanceSidePanel active={active} summary={null} sources={[]} />
+      <header className="finance-subpage-topbar sticky top-0 z-20 border-b border-white/[0.07] bg-[#070b12]/82 px-8 py-3 backdrop-blur-xl">
+        <div className="flex h-8 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              className="text-xs text-slate-500 hover:text-slate-200 transition-colors font-semibold tracking-[.16em] uppercase"
+            >
+              ? Dashboard
+            </button>
+            <span className="text-white/[0.15]">|</span>
+            <span className="text-xs font-bold text-emerald-300 tracking-[.18em] uppercase">
+              Finance Hub / {active}
+            </span>
+          </div>
+        </div>
+      </header>
+    </>
+  );
+}
+
+export function FinanceSidePanel({ active, summary, sources = [] }) {
+  const navigate = useNavigate();
+  const activeSources = sources.filter(s => s.status === 'active').length;
+
+  const items = [
+    { path: '/admin/finance', label: 'Overview', meta: 'Financial command' },
+    { path: '/admin/finance/revenue', label: 'Revenue', meta: 'Log income' },
+    { path: '/admin/finance/payouts', label: 'Payouts', meta: 'Cashout radar' },
+    { path: '/admin/finance/expenses', label: 'Expenses', meta: 'Costs + renewals' },
+    { path: '/admin/finance/sources', label: 'Sources', meta: 'Revenue channels' },
+  ];
+
+  return (
+    <aside className="finance-side-panel fixed inset-y-0 left-0 z-30 flex w-[264px] flex-col border-r border-white/[0.07] bg-[#0b1019]/95 px-4 py-5 shadow-[20px_0_80px_rgba(0,0,0,.34)] backdrop-blur-xl">
+      <button onClick={() => navigate('/admin/dashboard')} className="mb-7 text-left">
+        <div className="text-[11px] font-semibold uppercase tracking-[.2em] text-slate-500">Back To</div>
+        <div className="mt-1 text-lg font-semibold tracking-tight text-white">Dashboard</div>
+      </button>
+
+      <div className="mb-6 border border-white/[0.07] bg-white/[0.035] p-4">
+        <div className="text-[11px] font-semibold uppercase tracking-[.18em] text-emerald-300">Finance Hub</div>
+        <div className="mt-3 text-3xl font-semibold text-white">{summary ? fmt(summary.totalNetRevenue) : 'Control'}</div>
+        <div className="mt-1 text-sm text-slate-500">{summary ? 'Net revenue tracked' : 'Revenue operations'}</div>
+      </div>
+
+      <nav className="flex-1 space-y-1.5">
+        {items.map(item => (
           <button
-            onClick={() => navigate('/admin/dashboard')}
-            className="text-xs text-gray-600 hover:text-gray-300 transition-colors font-mono tracking-wider uppercase"
+            key={item.path}
+            onClick={() => navigate(item.path)}
+            className={`w-full border px-3 py-3 text-left transition ${
+              active === item.label
+                ? 'border-emerald-300/25 bg-emerald-300/10 text-white shadow-[0_16px_44px_rgba(16,185,129,.12)]'
+                : 'border-transparent text-slate-400 hover:border-white/[0.07] hover:bg-white/[0.04] hover:text-white'
+            }`}
           >
-            ← Dashboard
+            <div className="text-sm font-semibold">{item.label}</div>
+            <div className="mt-0.5 text-xs text-slate-500">{item.meta}</div>
           </button>
-          <span className="text-gray-800">│</span>
-          <span className="text-xs font-mono font-bold text-green-500 tracking-widest uppercase">
-            Revenue Command
+        ))}
+      </nav>
+
+      <div className="border border-white/[0.07] bg-white/[0.035] p-4">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">Active sources</span>
+          <span className="font-semibold text-sky-300">{activeSources}</span>
+        </div>
+        <div className="mt-3 flex items-center justify-between text-sm">
+          <span className="text-slate-500">Month profit</span>
+          <span className={+summary?.currentMonthProfit >= 0 ? 'font-semibold text-emerald-300' : 'font-semibold text-rose-300'}>
+            {summary ? fmt(summary.currentMonthProfit) : '?'}
           </span>
         </div>
-        <nav className="flex">
-          {NAV.map(n => (
-            <button
-              key={n.path}
-              onClick={() => navigate(n.path)}
-              className={`px-4 h-11 text-xs font-mono tracking-wider uppercase transition-colors border-b-2 ${
-                active === n.label
-                  ? 'text-white border-green-500 bg-gray-900'
-                  : 'text-gray-600 border-transparent hover:text-gray-300 hover:border-gray-700'
-              }`}
-            >
-              {n.label}
-            </button>
-          ))}
-        </nav>
       </div>
-    </header>
+    </aside>
   );
 }
 
@@ -451,10 +497,17 @@ export default function Finance() {
   useEffect(() => { load(); }, [load]);
 
   if (loading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-        <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Initializing revenue systems...</span>
+    <div className="admin-command-center grid min-h-screen place-items-center bg-[#070b12] text-white">
+      <div className="relative w-[360px] border border-white/[0.08] bg-[#0d1421]/90 p-7 shadow-[0_28px_90px_rgba(0,0,0,.45)]">
+        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center border border-white/[0.08] bg-white/[0.04]">
+          <div className="admin-loader-ring" />
+        </div>
+        <div className="text-center text-sm font-semibold uppercase tracking-[.2em] text-white">Loading Finance</div>
+        <div className="mt-2 text-center text-sm text-slate-500">Syncing revenue, payouts, expenses, and sources.</div>
+        <div className="mt-6 grid gap-2">
+          <div className="admin-loading-bar" />
+          <div className="admin-loading-bar admin-loading-bar-delay" />
+        </div>
       </div>
     </div>
   );
@@ -474,18 +527,39 @@ export default function Finance() {
     : undefined;
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <FinanceHeader active="Overview" />
-      <StatusBar summary={s} sources={sources} lastUpdate={lastUpdate} />
+    <div className="admin-command-center finance-command-center min-h-screen bg-[#070b12] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_25%_0%,rgba(16,185,129,.12),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,.12),transparent_30%),linear-gradient(180deg,#070b12_0%,#0a0f1a_48%,#070b12_100%)]" />
+      <FinanceSidePanel active="Overview" summary={s} sources={sources} />
 
-      <main className="max-w-7xl mx-auto px-4 py-5 space-y-4">
+      <div className="relative ml-[264px] min-h-screen">
+        <header className="sticky top-0 z-20 border-b border-white/[0.07] bg-[#070b12]/82 px-8 py-3 backdrop-blur-xl">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex items-center gap-2 border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
+                <span className="h-1.5 w-1.5 bg-current shadow-[0_0_10px_currentColor]" /> Online
+              </span>
+              <span className="border border-white/[0.08] bg-white/[0.055] px-3 py-1 text-xs font-medium text-slate-300">Month net {fmt(s.currentMonthRevenue)}</span>
+              <span className="border border-white/[0.08] bg-white/[0.055] px-3 py-1 text-xs font-medium text-slate-300">Pending {fmt(s.pendingRevenue)}</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className={+s.lifetimeProfit >= 0 ? 'border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200' : 'border border-rose-400/20 bg-rose-400/10 px-3 py-1 text-xs font-medium text-rose-200'}>
+                Profit {fmt(s.lifetimeProfit)}
+              </span>
+              <span className="border border-white/[0.08] bg-white/[0.055] px-3 py-1 text-xs font-medium text-slate-300">
+                Updated {lastUpdate ? new Date(lastUpdate).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : '—'}
+              </span>
+            </div>
+          </div>
+        </header>
+
+      <main className="finance-main px-8 py-7 space-y-5">
 
         {/* Alert Strip */}
         <AlertStrip summary={s} sources={sources} />
 
         {/* Mission Summary Grid */}
         <section>
-          <div className="text-[10px] font-mono text-gray-700 uppercase tracking-widest mb-2">Mission Summary</div>
+          <div className="mb-3 text-sm font-semibold uppercase tracking-[.16em] text-slate-500">Overview</div>
           <div className="grid grid-cols-4 gap-px bg-gray-800 sm:grid-cols-2 lg:grid-cols-4">
             <MissionCard label="Gross Revenue"   value={fmt(s.totalGrossRevenue)} borderClass="border-l-gray-600" />
             <MissionCard label="Net Revenue"     value={fmt(s.totalNetRevenue)}   borderClass="border-l-green-700" accentClass="text-green-400" sub="After all fees" />
@@ -518,8 +592,8 @@ export default function Finance() {
             <ActivityFeed activity={activity} />
           </div>
         </div>
-
       </main>
+      </div>
     </div>
   );
 }

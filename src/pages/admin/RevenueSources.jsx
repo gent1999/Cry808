@@ -79,9 +79,10 @@ export default function RevenueSources() {
   const sel = inp + ' cursor-pointer';
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="admin-command-center finance-command-center finance-subpage min-h-screen bg-[#070b12] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_25%_0%,rgba(16,185,129,.12),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,.12),transparent_30%),linear-gradient(180deg,#070b12_0%,#0a0f1a_48%,#070b12_100%)]" />
       <FinanceHeader active="Sources" />
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-4">
+      <main className="finance-main relative ml-[264px] px-8 py-7 space-y-4">
 
         <div className="flex justify-end">
           <button onClick={openAdd} className="bg-blue-700 hover:bg-blue-600 text-white text-sm px-4 py-2 transition-colors">
