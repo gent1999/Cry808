@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// ── helpers ───────────────────────────────────────────────────────────────────
 const slugify = t => t.toLowerCase().trim()
   .replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/--+/g, '-');
 
@@ -12,34 +11,41 @@ const articlePath = a => `/article/${a.id}-${slugify(a.title)}`;
 const fmt  = n => (+n || 0).toLocaleString();
 const fmtD = d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
 
-// ── Tiny shared atoms ─────────────────────────────────────────────────────────
-const Chip = ({ label, value, color = 'text-gray-500', loading }) => (
-  <div className="flex flex-col items-center min-w-[44px]">
-    <span className={`text-[11px] font-mono font-bold leading-none ${loading ? 'text-gray-800' : color}`}>
+// ── Analytics chip (grid view) ────────────────────────────────────────────────
+const Chip = ({ label, value, color = 'text-gray-400', loading }) => (
+  <div className="flex flex-col items-center min-w-[48px]">
+    <span className={`text-xs font-mono font-bold leading-none ${loading ? 'text-gray-700' : color}`}>
       {loading ? '…' : (value ?? '—')}
     </span>
-    <span className="text-[8px] font-mono text-gray-700 uppercase tracking-wider mt-0.5">{label}</span>
+    <span className="text-[9px] font-mono text-gray-600 uppercase tracking-wider mt-0.5">{label}</span>
   </div>
 );
 
-const SkeletonRow = () => (
-  <tr className="border-b border-gray-900 animate-pulse">
-    {Array(10).fill(0).map((_, i) => (
-      <td key={i} className="px-3 py-2.5"><div className="h-3 bg-gray-800 rounded w-full" /></td>
+// ── Skeleton row ──────────────────────────────────────────────────────────────
+const SkeletonRow = ({ idx }) => (
+  <tr className={`border-b border-gray-800/40 animate-pulse ${idx % 2 === 0 ? 'bg-[#0a0e14]' : 'bg-black'}`}>
+    {[null, '60%', '50%', '40%', '40%', '40%', '35%', '35%', '30%', '70%'].map((w, i) => (
+      <td key={i} className="px-4 py-4">
+        <div className={`h-3 bg-gray-800 rounded`} style={{ width: w || '80%' }} />
+      </td>
     ))}
   </tr>
 );
 
 // ── Summary stat card ─────────────────────────────────────────────────────────
 const SumCard = ({ label, value, accent = 'text-white', border = 'border-l-gray-700', loading, sub }) => (
-  <div className={`bg-[#0d1117] border border-gray-900 border-l-2 ${border} px-3 py-2.5`}>
-    <div className="text-[9px] font-mono text-gray-600 uppercase tracking-widest mb-1">{label}</div>
-    <div className={`text-lg font-bold font-mono ${loading ? 'text-gray-800' : accent}`}>
-      {loading ? '…' : value}
+  <div className={`bg-[#0a0e14] border border-gray-800/60 border-l-2 ${border} px-3.5 py-3`}>
+    <div className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mb-1.5">{label}</div>
+    <div className={`text-xl font-bold font-mono ${loading ? 'text-gray-800' : accent}`}>
+      {loading ? '—' : value}
     </div>
-    {sub && <div className="text-[9px] font-mono text-gray-700 mt-0.5 truncate">{sub}</div>}
+    {sub && <div className="text-[10px] font-mono text-gray-600 mt-1 truncate">{sub}</div>}
   </div>
 );
+
+// ── CTR color helper ──────────────────────────────────────────────────────────
+const ctrColor  = v => v >= 5 ? 'text-emerald-400' : v >= 2 ? 'text-amber-400' : 'text-gray-400';
+const posColor  = v => v <= 3 ? 'text-emerald-400' : v <= 10 ? 'text-amber-400' : 'text-gray-400';
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ArticlesList() {
@@ -58,13 +64,11 @@ export default function ArticlesList() {
   const [featuring,   setFeaturing]   = useState(null);
   const [error,       setError]       = useState('');
 
-  // Session cache ref — analytics won't re-fetch on toggle/filter
   const anaCache = useRef({ ga: null, gsc: null });
 
   const token = () => localStorage.getItem('adminToken');
   const hdrs  = () => ({ Authorization: `Bearer ${token()}` });
 
-  // ── Load articles ─────────────────────────────────────────────────────────
   useEffect(() => {
     fetch(`${API_URL}/api/articles`)
       .then(r => r.json())
@@ -73,13 +77,12 @@ export default function ArticlesList() {
       .finally(() => setArtLoading(false));
   }, []);
 
-  // ── Load analytics (auto, parallel) ──────────────────────────────────────
   const loadAnalytics = async () => {
     setAnaLoading(true);
     try {
       const [gaRes, gscRes] = await Promise.all([
-        fetch(`${API_URL}/api/analytics/article-pages`,       { headers: hdrs() }),
-        fetch(`${API_URL}/api/search-console/article-pages`,  { headers: hdrs() }),
+        fetch(`${API_URL}/api/analytics/article-pages`,      { headers: hdrs() }),
+        fetch(`${API_URL}/api/search-console/article-pages`, { headers: hdrs() }),
       ]);
       const ga  = gaRes.ok  ? await gaRes.json()  : {};
       const gsc = gscRes.ok ? await gscRes.json() : {};
@@ -95,19 +98,16 @@ export default function ArticlesList() {
     }
   };
 
-  useEffect(() => {
-    if (!artLoading) loadAnalytics();
-  }, [artLoading]);
+  useEffect(() => { if (!artLoading) loadAnalytics(); }, [artLoading]);
 
-  // ── Per-article analytics helper ──────────────────────────────────────────
   const getAna = (article) => {
     const path = articlePath(article);
-    const ga  = gaPages[path]  || null;
-    const gsc = gscPages[path] || gscPages[`https://cry808.com${path}`] || null;
-    return { ga, gsc };
+    return {
+      ga:  gaPages[path]  || null,
+      gsc: gscPages[path] || gscPages[`https://cry808.com${path}`] || null,
+    };
   };
 
-  // ── Actions ───────────────────────────────────────────────────────────────
   const handleDelete = async (id) => {
     if (!confirm('Delete this article? This cannot be undone.')) return;
     setDeleting(id);
@@ -135,7 +135,6 @@ export default function ArticlesList() {
     setFeaturing(null);
   };
 
-  // ── Derived / filtered list ───────────────────────────────────────────────
   const enriched = useMemo(() => articles.map(a => {
     const { ga, gsc } = getAna(a);
     return { ...a, ga, gsc };
@@ -155,34 +154,30 @@ export default function ArticlesList() {
     switch (sortBy) {
       case 'oldest':    list.sort((a,b) => new Date(a.created_at) - new Date(b.created_at)); break;
       case 'views':     list.sort((a,b) => (b.ga?.pageViews||0) - (a.ga?.pageViews||0)); break;
-      case 'clicks':    list.sort((a,b) => (b.gsc?.clicks||0)    - (a.gsc?.clicks||0)); break;
-      case 'ctr_best':  list.sort((a,b) => (b.gsc?.ctr||0)       - (a.gsc?.ctr||0)); break;
-      case 'ctr_worst': list.sort((a,b) => (a.gsc?.ctr||0)       - (b.gsc?.ctr||0)); break;
-      case 'position':  list.sort((a,b) => {
-        const ap = a.gsc?.position || 999, bp = b.gsc?.position || 999;
-        return ap - bp;
-      }); break;
-      default: list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      case 'clicks':    list.sort((a,b) => (b.gsc?.clicks||0)   - (a.gsc?.clicks||0)); break;
+      case 'ctr_best':  list.sort((a,b) => (b.gsc?.ctr||0)      - (a.gsc?.ctr||0)); break;
+      case 'ctr_worst': list.sort((a,b) => (a.gsc?.ctr||0)      - (b.gsc?.ctr||0)); break;
+      case 'position':  list.sort((a,b) => (a.gsc?.position||999) - (b.gsc?.position||999)); break;
+      default:          list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
     }
     return list;
   }, [enriched, search, sortBy, filterFeat]);
 
-  // ── Summary stats ─────────────────────────────────────────────────────────
   const summary = useMemo(() => {
-    const totalViews   = enriched.reduce((s, a) => s + (a.ga?.pageViews  || 0), 0);
-    const totalClicks  = enriched.reduce((s, a) => s + (a.gsc?.clicks    || 0), 0);
-    const totalImpr    = enriched.reduce((s, a) => s + (a.gsc?.impressions || 0), 0);
-    const featured     = enriched.filter(a => a.is_featured).length;
-    const bestCtr      = [...enriched].filter(a=>a.gsc?.ctr).sort((a,b)=>(b.gsc.ctr||0)-(a.gsc.ctr||0))[0];
-    const topView      = [...enriched].filter(a=>a.ga?.pageViews).sort((a,b)=>(b.ga.pageViews||0)-(a.ga.pageViews||0))[0];
+    const totalViews  = enriched.reduce((s, a) => s + (a.ga?.pageViews    || 0), 0);
+    const totalClicks = enriched.reduce((s, a) => s + (a.gsc?.clicks      || 0), 0);
+    const totalImpr   = enriched.reduce((s, a) => s + (a.gsc?.impressions || 0), 0);
+    const featured    = enriched.filter(a => a.is_featured).length;
+    const bestCtr     = [...enriched].filter(a=>a.gsc?.ctr).sort((a,b)=>(b.gsc.ctr||0)-(a.gsc.ctr||0))[0];
+    const topView     = [...enriched].filter(a=>a.ga?.pageViews).sort((a,b)=>(b.ga.pageViews||0)-(a.ga.pageViews||0))[0];
     return { totalViews, totalClicks, totalImpr, featured, bestCtr, topView };
   }, [enriched]);
 
   if (artLoading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="ml-52 min-h-screen bg-black flex items-center justify-center">
       <div className="flex items-center gap-3">
         <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-        <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest">Loading content library…</span>
+        <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Loading content library…</span>
       </div>
     </div>
   );
@@ -190,75 +185,75 @@ export default function ArticlesList() {
   return (
     <div className="ml-52 min-h-screen bg-black text-white">
 
-      {/* ── Command Bar ──────────────────────────────────────────────────── */}
-      <header className="bg-[#080b10] border-b border-gray-900 sticky top-0 z-10">
+      {/* ── Command Bar ──────────────────────────────────────────────────────── */}
+      <header className="bg-[#080b10] border-b border-gray-800/60 sticky top-0 z-20">
         <div className="px-5 h-11 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/admin/dashboard')}
-              className="text-[10px] font-mono text-gray-700 hover:text-gray-400 uppercase tracking-wider transition-colors">
+              className="text-[10px] font-mono text-gray-600 hover:text-gray-300 uppercase tracking-wider transition-colors">
               ← Dashboard
             </button>
-            <span className="text-gray-800">│</span>
-            <span className="text-[10px] font-mono text-blue-500 font-bold uppercase tracking-widest">Content Intelligence</span>
-            <span className="text-[10px] font-mono text-gray-700">{articles.length} records</span>
+            <span className="text-gray-700">│</span>
+            <span className="text-[11px] font-mono text-blue-400 font-bold uppercase tracking-widest">Content Intelligence</span>
+            <span className="text-[10px] font-mono text-gray-500">{articles.length} records</span>
           </div>
           <div className="flex items-center gap-2">
             {!anaLoading && (
               <button onClick={loadAnalytics}
-                className="text-[9px] font-mono text-gray-700 hover:text-blue-400 uppercase tracking-wider border border-gray-900 hover:border-blue-900 px-2 py-1 transition-colors">
-                ↻ Refresh Analytics
+                className="text-[10px] font-mono text-gray-500 hover:text-blue-300 uppercase tracking-wider border border-gray-800 hover:border-blue-800/60 px-2.5 py-1 transition-colors">
+                ↻ Refresh
               </button>
             )}
             <button onClick={() => setViewMode(v => v === 'list' ? 'grid' : 'list')}
-              className="text-[9px] font-mono text-gray-600 hover:text-white uppercase tracking-wider border border-gray-900 px-2 py-1 transition-colors">
+              className="text-[10px] font-mono text-gray-500 hover:text-gray-200 uppercase tracking-wider border border-gray-800 hover:border-gray-600 px-2.5 py-1 transition-colors">
               {viewMode === 'list' ? '⊞ Grid' : '≡ List'}
             </button>
             <button onClick={() => navigate('/admin/articles/create')}
-              className="text-[9px] font-mono text-blue-400 border border-blue-900 hover:bg-blue-950/30 px-3 py-1 uppercase tracking-wider transition-colors">
+              className="text-[10px] font-mono text-blue-300 border border-blue-800/60 hover:bg-blue-950/30 hover:border-blue-600 px-3 py-1 uppercase tracking-wider transition-colors">
               + New Article
             </button>
           </div>
         </div>
       </header>
 
-      <main className="px-5 py-4 space-y-4">
+      <main className="px-5 py-5 space-y-4">
 
         {error && (
-          <div className="border border-red-900 bg-red-950/20 px-4 py-2 text-[10px] font-mono text-red-400 uppercase tracking-wider">
+          <div className="border border-red-800/60 bg-red-950/20 px-4 py-2.5 text-xs font-mono text-red-400 uppercase tracking-wider">
             {error}
           </div>
         )}
 
-        {/* ── Summary Row ────────────────────────────────────────────────── */}
+        {/* ── Summary Row ──────────────────────────────────────────────────── */}
         <section>
-          <div className="grid grid-cols-8 gap-px bg-gray-900">
-            <SumCard label="Total Articles" value={fmt(articles.length)}       border="border-l-blue-800"   accent="text-blue-400" />
-            <SumCard label="Published"      value={fmt(articles.length)}       border="border-l-green-800"  accent="text-green-400" />
-            <SumCard label="Featured"       value={fmt(summary.featured)}       border="border-l-yellow-700" accent="text-yellow-400" />
-            <SumCard label="Total Views"    value={fmt(summary.totalViews)}     border="border-l-blue-700"   accent="text-blue-300"  loading={anaLoading} />
-            <SumCard label="Total Clicks"   value={fmt(summary.totalClicks)}    border="border-l-green-700"  accent="text-green-400" loading={anaLoading} />
-            <SumCard label="Impressions"    value={fmt(summary.totalImpr)}      border="border-l-gray-700"   accent="text-gray-300"  loading={anaLoading} />
+          <div className="grid grid-cols-8 gap-px bg-gray-800/30">
+            <SumCard label="Total Articles" value={fmt(articles.length)}        border="border-l-blue-700"    accent="text-blue-300" />
+            <SumCard label="Published"      value={fmt(articles.length)}        border="border-l-emerald-700" accent="text-emerald-400" />
+            <SumCard label="Featured"       value={fmt(summary.featured)}       border="border-l-amber-700"   accent="text-amber-400" />
+            <SumCard label="Total Views"    value={fmt(summary.totalViews)}     border="border-l-sky-700"     accent="text-sky-300"   loading={anaLoading} />
+            <SumCard label="Total Clicks"   value={fmt(summary.totalClicks)}    border="border-l-emerald-700" accent="text-emerald-400" loading={anaLoading} />
+            <SumCard label="Impressions"    value={fmt(summary.totalImpr)}      border="border-l-gray-600"    accent="text-gray-300"  loading={anaLoading} />
             <SumCard label="Best CTR"
               value={summary.bestCtr ? `${summary.bestCtr.gsc.ctr}%` : '—'}
-              sub={summary.bestCtr?.title?.slice(0,20)}
-              border="border-l-purple-700" accent="text-purple-400"           loading={anaLoading} />
+              sub={summary.bestCtr?.title?.slice(0,22)}
+              border="border-l-violet-700" accent="text-violet-400"             loading={anaLoading} />
             <SumCard label="Top Viewed"
               value={summary.topView ? fmt(summary.topView.ga.pageViews) : '—'}
-              sub={summary.topView?.title?.slice(0,20)}
-              border="border-l-blue-600" accent="text-blue-400"               loading={anaLoading} />
+              sub={summary.topView?.title?.slice(0,22)}
+              border="border-l-sky-600"   accent="text-sky-300"                loading={anaLoading} />
           </div>
         </section>
 
-        {/* ── Filters ────────────────────────────────────────────────────── */}
+        {/* ── Filter Bar ───────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search title, author, tag…"
-            className="bg-[#0d1117] border border-gray-800 text-sm text-white font-mono px-3 py-1.5 focus:outline-none focus:border-blue-800 placeholder-gray-700 w-64"
+            className="bg-[#0a0e14] border border-gray-700/60 text-sm text-gray-200 font-mono px-3 py-2 focus:outline-none focus:border-blue-700/60 placeholder-gray-600 w-64"
           />
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-            className="bg-[#0d1117] border border-gray-800 text-[11px] text-gray-400 font-mono px-3 py-1.5 focus:outline-none cursor-pointer">
+            className="bg-[#0a0e14] border border-gray-700/60 text-xs text-gray-300 font-mono px-3 py-2 focus:outline-none cursor-pointer">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="views">Most Views</option>
@@ -269,45 +264,45 @@ export default function ArticlesList() {
           </select>
           <button
             onClick={() => setFilterFeat(f => !f)}
-            className={`text-[10px] font-mono uppercase tracking-wider border px-3 py-1.5 transition-colors ${
+            className={`text-[11px] font-mono uppercase tracking-wider border px-3 py-2 transition-colors ${
               filterFeat
-                ? 'border-yellow-800 text-yellow-400 bg-yellow-950/20'
-                : 'border-gray-800 text-gray-600 hover:border-gray-700'
+                ? 'border-amber-700/60 text-amber-400 bg-amber-950/20'
+                : 'border-gray-700/60 text-gray-500 hover:border-gray-600 hover:text-gray-300'
             }`}
           >
             ★ Featured Only
           </button>
-          <span className="text-[10px] font-mono text-gray-700 ml-auto">
+          <span className="text-xs font-mono text-gray-500 ml-auto">
             {filtered.length} / {articles.length}
           </span>
           {anaLoading && (
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-[9px] font-mono text-blue-700 uppercase tracking-widest">Loading analytics…</span>
+              <span className="text-[10px] font-mono text-blue-600 uppercase tracking-widest">Loading analytics…</span>
             </div>
           )}
         </div>
 
-        {/* ── LIST VIEW ──────────────────────────────────────────────────── */}
+        {/* ── LIST VIEW ────────────────────────────────────────────────────── */}
         {viewMode === 'list' ? (
-          <div className="bg-[#0d1117] border border-gray-900">
+          <div className="border border-gray-800/60">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px]">
-                <thead>
-                  <tr className="border-b border-gray-900">
+              <table className="w-full min-w-[1000px]">
+                <thead className="sticky top-11 z-10">
+                  <tr className="bg-[#0d1420] border-b border-gray-700/60">
                     {[
                       { label: 'Article',     w: '' },
-                      { label: 'Author/Date', w: 'w-28' },
-                      { label: 'Tags',        w: 'w-32' },
-                      { label: 'Views',       w: 'w-16' },
-                      { label: 'Clicks',      w: 'w-16' },
-                      { label: 'Impr',        w: 'w-16' },
-                      { label: 'CTR',         w: 'w-14' },
-                      { label: 'Pos',         w: 'w-14' },
-                      { label: 'Status',      w: 'w-16' },
-                      { label: 'Actions',     w: 'w-28' },
+                      { label: 'Author / Date', w: 'w-32' },
+                      { label: 'Tags',          w: 'w-36' },
+                      { label: 'Views',         w: 'w-20' },
+                      { label: 'Clicks',        w: 'w-20' },
+                      { label: 'Impressions',   w: 'w-24' },
+                      { label: 'CTR',           w: 'w-16' },
+                      { label: 'Position',      w: 'w-20' },
+                      { label: 'Status',        w: 'w-20' },
+                      { label: 'Actions',       w: 'w-32' },
                     ].map(h => (
-                      <th key={h.label} className={`px-3 py-2 text-[9px] font-mono text-gray-700 uppercase tracking-widest text-left font-normal ${h.w}`}>
+                      <th key={h.label} className={`px-4 py-2.5 text-[10px] font-mono text-gray-400 uppercase tracking-widest text-left font-semibold ${h.w}`}>
                         {h.label}
                       </th>
                     ))}
@@ -315,28 +310,32 @@ export default function ArticlesList() {
                 </thead>
                 <tbody>
                   {artLoading
-                    ? Array(8).fill(0).map((_, i) => <SkeletonRow key={i} />)
+                    ? Array(8).fill(0).map((_, i) => <SkeletonRow key={i} idx={i} />)
                     : filtered.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="px-4 py-12 text-center text-[10px] font-mono text-gray-700 uppercase tracking-widest">
+                        <td colSpan={10} className="px-4 py-14 text-center text-xs font-mono text-gray-600 uppercase tracking-widest">
                           No articles match filters
                         </td>
                       </tr>
-                    ) : filtered.map(article => {
+                    ) : filtered.map((article, idx) => {
                       const { ga, gsc } = article;
                       return (
-                        <tr key={article.id} className="border-b border-gray-900/60 hover:bg-white/[0.02] transition-colors group">
+                        <tr key={article.id}
+                          className={`border-b border-gray-800/40 transition-colors group ${
+                            idx % 2 === 0 ? 'bg-[#0a0e14]' : 'bg-black'
+                          } hover:bg-[#111827]`}
+                        >
 
                           {/* Article */}
-                          <td className="px-3 py-2.5">
-                            <div className="flex items-center gap-2.5">
+                          <td className="px-4 py-3.5">
+                            <div className="flex items-center gap-3">
                               {article.image_url
-                                ? <img src={article.image_url} alt="" className="w-10 h-7 object-cover flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
-                                : <div className="w-10 h-7 bg-gray-800 flex-shrink-0" />
+                                ? <img src={article.image_url} alt="" className="w-14 h-10 object-cover flex-shrink-0 opacity-70 group-hover:opacity-90 transition-opacity" />
+                                : <div className="w-14 h-10 bg-gray-800/60 flex-shrink-0" />
                               }
                               <button
                                 onClick={() => window.open(`/article/${article.id}`, '_blank')}
-                                className="text-[11px] font-mono text-gray-300 hover:text-white text-left leading-tight line-clamp-2 transition-colors"
+                                className="text-[13px] font-semibold text-gray-100 hover:text-white text-left leading-snug line-clamp-2 transition-colors"
                               >
                                 {article.title}
                               </button>
@@ -344,101 +343,91 @@ export default function ArticlesList() {
                           </td>
 
                           {/* Author / Date */}
-                          <td className="px-3 py-2.5">
-                            <div className="text-[10px] font-mono text-gray-500">{article.author}</div>
-                            <div className="text-[9px] font-mono text-gray-700">{fmtD(article.created_at)}</div>
+                          <td className="px-4 py-3.5">
+                            <div className="text-[11px] font-mono text-gray-400">{article.author}</div>
+                            <div className="text-[10px] font-mono text-gray-600 mt-0.5">{fmtD(article.created_at)}</div>
                           </td>
 
                           {/* Tags */}
-                          <td className="px-3 py-2.5">
+                          <td className="px-4 py-3.5">
                             <div className="flex flex-wrap gap-1">
                               {(article.tags || []).slice(0,2).map((t,i) => (
-                                <span key={i} className="text-[8px] font-mono text-purple-600 border border-purple-900/50 px-1 py-px">{t}</span>
+                                <span key={i} className="text-[9px] font-mono text-gray-500 border border-gray-700/50 px-1.5 py-px">{t}</span>
                               ))}
                               {(article.tags || []).length > 2 && (
-                                <span className="text-[8px] font-mono text-gray-700">+{article.tags.length-2}</span>
+                                <span className="text-[9px] font-mono text-gray-600">+{article.tags.length-2}</span>
                               )}
                             </div>
                           </td>
 
-                          {/* GA Views */}
-                          <td className="px-3 py-2.5 text-[11px] font-mono text-right">
-                            <span className={anaLoading ? 'text-gray-800' : ga ? 'text-blue-400' : 'text-gray-800'}>
-                              {anaLoading ? '…' : ga ? fmt(ga.pageViews) : '—'}
+                          {/* Views */}
+                          <td className="px-4 py-3.5 text-right">
+                            <span className={`text-sm font-mono font-semibold ${anaLoading ? 'text-gray-700' : ga ? 'text-sky-300' : 'text-gray-700'}`}>
+                              {anaLoading ? '—' : ga ? fmt(ga.pageViews) : '—'}
                             </span>
                           </td>
 
-                          {/* GSC Clicks */}
-                          <td className="px-3 py-2.5 text-[11px] font-mono text-right">
-                            <span className={anaLoading ? 'text-gray-800' : gsc ? 'text-green-400' : 'text-gray-800'}>
-                              {anaLoading ? '…' : gsc ? fmt(gsc.clicks) : '—'}
+                          {/* Clicks */}
+                          <td className="px-4 py-3.5 text-right">
+                            <span className={`text-sm font-mono font-semibold ${anaLoading ? 'text-gray-700' : gsc ? 'text-emerald-400' : 'text-gray-700'}`}>
+                              {anaLoading ? '—' : gsc ? fmt(gsc.clicks) : '—'}
                             </span>
                           </td>
 
-                          {/* GSC Impressions */}
-                          <td className="px-3 py-2.5 text-[11px] font-mono text-right">
-                            <span className={anaLoading ? 'text-gray-800' : gsc ? 'text-gray-400' : 'text-gray-800'}>
-                              {anaLoading ? '…' : gsc ? fmt(gsc.impressions) : '—'}
+                          {/* Impressions */}
+                          <td className="px-4 py-3.5 text-right">
+                            <span className={`text-sm font-mono font-semibold ${anaLoading ? 'text-gray-700' : gsc ? 'text-gray-300' : 'text-gray-700'}`}>
+                              {anaLoading ? '—' : gsc ? fmt(gsc.impressions) : '—'}
                             </span>
                           </td>
 
                           {/* CTR */}
-                          <td className="px-3 py-2.5 text-[11px] font-mono text-right">
-                            <span className={
-                              anaLoading ? 'text-gray-800' :
-                              !gsc ? 'text-gray-800' :
-                              gsc.ctr >= 5 ? 'text-green-400' :
-                              gsc.ctr >= 2 ? 'text-yellow-400' : 'text-gray-500'
-                            }>
-                              {anaLoading ? '…' : gsc ? `${gsc.ctr}%` : '—'}
+                          <td className="px-4 py-3.5 text-right">
+                            <span className={`text-sm font-mono font-semibold ${anaLoading ? 'text-gray-700' : !gsc ? 'text-gray-700' : ctrColor(gsc.ctr)}`}>
+                              {anaLoading ? '—' : gsc ? `${gsc.ctr}%` : '—'}
                             </span>
                           </td>
 
                           {/* Position */}
-                          <td className="px-3 py-2.5 text-[11px] font-mono text-right">
-                            <span className={
-                              anaLoading ? 'text-gray-800' :
-                              !gsc ? 'text-gray-800' :
-                              gsc.position <= 3  ? 'text-green-400' :
-                              gsc.position <= 10 ? 'text-yellow-400' : 'text-gray-500'
-                            }>
-                              {anaLoading ? '…' : gsc ? `#${gsc.position}` : '—'}
+                          <td className="px-4 py-3.5 text-right">
+                            <span className={`text-sm font-mono font-semibold ${anaLoading ? 'text-gray-700' : !gsc ? 'text-gray-700' : posColor(gsc.position)}`}>
+                              {anaLoading ? '—' : gsc ? `#${gsc.position}` : '—'}
                             </span>
                           </td>
 
                           {/* Status */}
-                          <td className="px-3 py-2.5">
+                          <td className="px-4 py-3.5">
                             {article.is_featured
-                              ? <span className="text-[8px] font-mono font-bold text-yellow-400 border border-yellow-900 px-1.5 py-px">FEATURED</span>
-                              : <span className="text-[8px] font-mono text-gray-700 border border-gray-800 px-1.5 py-px">PUBLISHED</span>
+                              ? <span className="text-[9px] font-mono font-bold text-amber-400 border border-amber-800/60 px-2 py-1">FEATURED</span>
+                              : <span className="text-[9px] font-mono text-gray-500 border border-gray-700/40 px-2 py-1">PUBLISHED</span>
                             }
                           </td>
 
                           {/* Actions */}
-                          <td className="px-3 py-2.5">
-                            <div className="flex items-center gap-1">
+                          <td className="px-4 py-3.5">
+                            <div className="flex items-center gap-1.5">
                               <button
                                 onClick={() => handleFeature(article.id, article.is_featured)}
                                 disabled={featuring === article.id}
                                 title={article.is_featured ? 'Remove featured' : 'Set featured'}
-                                className={`text-[10px] px-1.5 py-1 border transition-colors disabled:opacity-40 ${
+                                className={`text-sm px-2 py-1.5 border transition-colors disabled:opacity-40 ${
                                   article.is_featured
-                                    ? 'border-yellow-800 text-yellow-500 hover:bg-yellow-950/20'
-                                    : 'border-gray-800 text-gray-600 hover:border-yellow-900 hover:text-yellow-600'
+                                    ? 'border-amber-700/60 text-amber-400 hover:bg-amber-950/30'
+                                    : 'border-gray-700/50 text-gray-600 hover:border-amber-800/60 hover:text-amber-500'
                                 }`}
                               >
                                 ★
                               </button>
                               <button
                                 onClick={() => navigate(`/admin/articles/edit/${article.id}`)}
-                                className="text-[9px] font-mono px-1.5 py-1 border border-gray-800 text-gray-600 hover:border-blue-900 hover:text-blue-400 transition-colors uppercase"
+                                className="text-[10px] font-mono px-2.5 py-1.5 border border-gray-700/50 text-gray-400 hover:border-blue-700/60 hover:text-blue-300 transition-colors uppercase tracking-wide"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDelete(article.id)}
                                 disabled={deleting === article.id}
-                                className="text-[9px] font-mono px-1.5 py-1 border border-gray-800 text-gray-700 hover:border-red-900 hover:text-red-500 transition-colors disabled:opacity-40 uppercase"
+                                className="text-[10px] font-mono px-2.5 py-1.5 border border-gray-700/50 text-gray-500 hover:border-red-800/60 hover:text-red-400 transition-colors disabled:opacity-40 uppercase tracking-wide"
                               >
                                 {deleting === article.id ? '…' : 'Del'}
                               </button>
@@ -454,76 +443,78 @@ export default function ArticlesList() {
           </div>
 
         ) : (
-          /* ── GRID VIEW ─────────────────────────────────────────────────── */
+          /* ── GRID VIEW ───────────────────────────────────────────────────── */
           <div className="grid grid-cols-3 gap-3 xl:grid-cols-4">
             {filtered.map(article => {
               const { ga, gsc } = article;
               return (
                 <div
                   key={article.id}
-                  className={`bg-[#0d1117] border flex flex-col transition-colors ${
-                    article.is_featured ? 'border-yellow-900/60' : 'border-gray-900 hover:border-blue-900/50'
+                  className={`bg-[#0a0e14] border flex flex-col transition-colors ${
+                    article.is_featured ? 'border-amber-800/50' : 'border-gray-800/60 hover:border-gray-700/80'
                   }`}
                 >
                   {/* Image */}
                   <div className="relative">
                     {article.image_url
                       ? <img src={article.image_url} alt={article.title}
-                          className="w-full h-28 object-cover opacity-75" />
+                          className="w-full h-28 object-cover opacity-80" />
                       : <div className="w-full h-28 bg-gradient-to-br from-blue-950 to-gray-900" />
                     }
                     {article.is_featured && (
-                      <span className="absolute top-1.5 right-1.5 text-[8px] font-mono font-bold text-yellow-400 bg-black/80 border border-yellow-900 px-1.5 py-px">
+                      <span className="absolute top-1.5 right-1.5 text-[9px] font-mono font-bold text-amber-400 bg-black/80 border border-amber-800/60 px-1.5 py-px">
                         ★ FEATURED
                       </span>
                     )}
                   </div>
 
                   {/* Content */}
-                  <div className="px-3 py-2.5 flex-1">
+                  <div className="px-3.5 py-3 flex-1">
                     <button
                       onClick={() => window.open(`/article/${article.id}`, '_blank')}
-                      className="text-[11px] font-mono text-gray-200 hover:text-white text-left leading-tight line-clamp-2 mb-1.5 transition-colors w-full"
+                      className="text-[13px] font-semibold text-gray-100 hover:text-white text-left leading-snug line-clamp-2 mb-1.5 transition-colors w-full"
                     >
                       {article.title}
                     </button>
-                    <div className="text-[9px] font-mono text-gray-600 mb-2">
+                    <div className="text-[10px] font-mono text-gray-500 mb-2.5">
                       {article.author} · {fmtD(article.created_at)}
                     </div>
+
                     {/* Analytics chips */}
-                    <div className="flex gap-3 border-t border-gray-800/60 pt-2">
-                      <Chip label="Views" value={ga ? fmt(ga.pageViews)       : '—'} color="text-blue-400"   loading={anaLoading} />
-                      <Chip label="Clicks" value={gsc ? fmt(gsc.clicks)       : '—'} color="text-green-400"  loading={anaLoading} />
-                      <Chip label="CTR"   value={gsc ? `${gsc.ctr}%`          : '—'} color={gsc?.ctr>=5?'text-green-400':gsc?.ctr>=2?'text-yellow-400':'text-gray-500'} loading={anaLoading} />
-                      <Chip label="Pos"   value={gsc ? `#${gsc.position}`     : '—'} color={gsc?.position<=3?'text-green-400':gsc?.position<=10?'text-yellow-400':'text-gray-500'} loading={anaLoading} />
+                    <div className="flex gap-3 border-t border-gray-800/50 pt-2.5">
+                      <Chip label="Views"  value={ga  ? fmt(ga.pageViews)   : '—'} color="text-sky-300"   loading={anaLoading} />
+                      <Chip label="Clicks" value={gsc ? fmt(gsc.clicks)     : '—'} color="text-emerald-400" loading={anaLoading} />
+                      <Chip label="CTR"    value={gsc ? `${gsc.ctr}%`       : '—'} color={gsc?.ctr ? ctrColor(gsc.ctr) : 'text-gray-500'} loading={anaLoading} />
+                      <Chip label="Pos"    value={gsc ? `#${gsc.position}`  : '—'} color={gsc?.position ? posColor(gsc.position) : 'text-gray-500'} loading={anaLoading} />
                     </div>
+
                     {/* Tags */}
                     {(article.tags||[]).length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-1 mt-2.5">
                         {article.tags.slice(0,3).map((t,i) => (
-                          <span key={i} className="text-[8px] font-mono text-purple-700 border border-purple-900/40 px-1 py-px">{t}</span>
+                          <span key={i} className="text-[9px] font-mono text-gray-500 border border-gray-700/50 px-1.5 py-px">{t}</span>
                         ))}
                       </div>
                     )}
                   </div>
 
                   {/* Actions */}
-                  <div className="flex border-t border-gray-900">
+                  <div className="flex border-t border-gray-800/50">
                     <button
                       onClick={() => handleFeature(article.id, article.is_featured)}
                       disabled={featuring === article.id}
-                      className={`flex-1 py-2 text-[9px] font-mono uppercase tracking-wider transition-colors border-r border-gray-900 ${
-                        article.is_featured ? 'text-yellow-500 hover:bg-yellow-950/20' : 'text-gray-700 hover:text-yellow-500'
+                      className={`flex-1 py-2.5 text-sm transition-colors border-r border-gray-800/50 ${
+                        article.is_featured ? 'text-amber-400 hover:bg-amber-950/20' : 'text-gray-600 hover:text-amber-500 hover:bg-amber-950/10'
                       } disabled:opacity-40`}
                     >★</button>
                     <button
                       onClick={() => navigate(`/admin/articles/edit/${article.id}`)}
-                      className="flex-1 py-2 text-[9px] font-mono text-gray-600 hover:text-blue-400 uppercase tracking-wider transition-colors border-r border-gray-900"
+                      className="flex-1 py-2.5 text-[10px] font-mono text-gray-500 hover:text-blue-300 hover:bg-blue-950/10 uppercase tracking-wide transition-colors border-r border-gray-800/50"
                     >Edit</button>
                     <button
                       onClick={() => handleDelete(article.id)}
                       disabled={deleting === article.id}
-                      className="flex-1 py-2 text-[9px] font-mono text-gray-700 hover:text-red-500 uppercase tracking-wider transition-colors disabled:opacity-40"
+                      className="flex-1 py-2.5 text-[10px] font-mono text-gray-600 hover:text-red-400 hover:bg-red-950/10 uppercase tracking-wide transition-colors disabled:opacity-40"
                     >{deleting === article.id ? '…' : 'Del'}</button>
                   </div>
                 </div>
