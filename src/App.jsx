@@ -24,7 +24,6 @@ import ArticlesList from "./pages/admin/ArticlesList";
 import SubmissionsList from "./pages/admin/SubmissionsList";
 import SpotifyManager from "./pages/admin/SpotifyManager";
 import AmazonProducts from "./pages/admin/AmazonProducts";
-import IndexerAgent from "./pages/admin/IndexerAgent";
 import Finance from "./pages/admin/Finance";
 import RevenueLog from "./pages/admin/RevenueLog";
 import Payouts from "./pages/admin/Payouts";
@@ -161,7 +160,6 @@ export default function App() {
           <Route path="/admin/submissions" element={<SubmissionsList />} />
           <Route path="/admin/spotify" element={<SpotifyManager />} />
           <Route path="/admin/amazon-products" element={<AmazonProducts />} />
-          <Route path="/admin/indexer" element={<IndexerAgent />} />
           <Route path="/admin/finance" element={<Finance />} />
           <Route path="/admin/finance/revenue" element={<RevenueLog />} />
           <Route path="/admin/finance/payouts" element={<Payouts />} />
