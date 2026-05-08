@@ -29,9 +29,10 @@ export default function Expenses() {
       const r = await fetch(`${API_URL}/api/finance/expenses`, { headers: hdrs() });
       if (r.status === 401) { navigate('/admin/login'); return; }
       const d = await r.json();
+      if (!r.ok) throw new Error(d.message || `Server error ${r.status}`);
       setExpenses(d.expenses || []);
       setTotals(d.totals || { total: 0, monthly: 0, yearly: 0 });
-    } catch { /* ignore */ }
+    } catch (e) { console.error('[Expenses] load failed:', e.message); }
     setLoading(false);
   }, [navigate]);
 
@@ -50,8 +51,10 @@ export default function Expenses() {
       const url    = mode === 'add' ? `${API_URL}/api/finance/expenses` : `${API_URL}/api/finance/expenses/${data.id}`;
       const method = mode === 'add' ? 'POST' : 'PUT';
       const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify(data) });
-      if (!r.ok) { const d = await r.json(); alert(d.message); }
-      setModal(null); load();
+      const d = await r.json();
+      if (!r.ok) { alert(d.message || `Save failed (${r.status})`); setSaving(false); return; }
+      setModal(null);
+      load();
     } catch (e) { alert(e.message); }
     setSaving(false);
   };
