@@ -63,6 +63,9 @@ function ContentSidePanel({ total, submissions = 0 }) {
       ['All Articles', 'M5 6h14M5 12h14M5 18h9', '/admin/articles', total],
       ['Submissions', 'M4 13h4l2 3h4l2-3h4M5 5h14l1 8v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5l1-8Z', '/admin/submissions', submissions],
     ]],
+    ['Intelligence', [
+      ['Cortex', 'M12 2a5 5 0 0 1 5 5c0 2.4-1.7 4.4-4 4.9V21h-2v-9.1C8.7 11.4 7 9.4 7 7a5 5 0 0 1 5-5Z', '/admin/cortex'],
+    ]],
     ['Business & Config', [
       ['Finance Hub', 'M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6', '/admin/finance'],
       ['Ad Settings', 'M12 4v16M4 12h16M7 7l10 10M17 7 7 17', '/admin/settings'],
