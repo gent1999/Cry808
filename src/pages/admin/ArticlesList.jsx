@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import logo from '../../assets/cry808_logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -77,7 +78,9 @@ function ContentSidePanel({ total, submissions = 0 }) {
   return (
     <aside className="content-side-panel fixed inset-y-0 left-0 z-30 flex w-[264px] flex-col border-r border-white/[0.07] bg-[#0b1019]/95 px-4 py-5 shadow-[20px_0_80px_rgba(0,0,0,.34)] backdrop-blur-xl">
       <button onClick={() => navigate('/admin/dashboard')} className="mb-7 flex items-center gap-3 text-left">
-        <span className="grid h-11 w-11 place-items-center bg-gradient-to-br from-violet-500 to-cyan-400 text-sm font-black shadow-[0_14px_34px_rgba(124,58,237,.32)]">C8</span>
+        <span className="grid h-11 w-11 place-items-center overflow-hidden bg-transparent shadow-[0_14px_34px_rgba(124,58,237,.18)]">
+          <img src={logo} alt="Cry808" className="h-full w-full object-contain" />
+        </span>
         <span>
           <span className="block text-[15px] font-semibold tracking-[.16em] text-white">CRY808</span>
           <span className="block text-[11px] font-medium text-slate-500">Content System</span>
