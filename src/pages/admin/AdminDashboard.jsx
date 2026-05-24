@@ -362,6 +362,7 @@ export default function AdminDashboard() {
   const [seo, setSeo] = useState({ performance: { clicks: 0, impressions: 0, ctr: 0, position: 0 }, topQueries: [], topPages: [], loading: true, error: null });
   const [finance, setFinance] = useState(null);
   const [adConfig, setAdConfig] = useState(null);
+  const [neon, setNeon] = useState({ loading: true, error: null });
   const [now, setNow] = useState(new Date());
 
   const token = () => localStorage.getItem('adminToken');
@@ -435,6 +436,11 @@ export default function AdminDashboard() {
       fetch(`${API_URL}/api/admin/settings`, { headers: hdrs() })
         .then((response) => response.ok ? response.json() : null)
         .then((data) => { if (data?.settings) setAdConfig(data.settings); }).catch(() => {});
+
+      fetch(`${API_URL}/api/neon/usage`, { headers: hdrs() })
+        .then((r) => r.ok ? r.json() : r.json().then(d => Promise.reject(d)))
+        .then((data) => setNeon({ ...data, loading: false, error: null }))
+        .catch((err) => setNeon({ loading: false, error: err?.message || 'Failed to load' }));
     };
 
     init();
@@ -556,6 +562,89 @@ export default function AdminDashboard() {
             <Panel title="Recent Articles" subtitle="Latest content with tags and publishing context" icon="list" right={<button onClick={() => navigate('/admin/articles')} className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.1]">View All</button>}>
               <div className="space-y-1 p-4">
                 {articles.slice(0, 5).length ? articles.slice(0, 5).map((article) => <RecentArticle key={article.id} article={article} />) : <div className="py-12 text-center text-sm text-slate-500">No articles found</div>}
+              </div>
+            </Panel>
+          </section>
+
+          {/* ── Infrastructure ── */}
+          <section className="mb-6">
+            <Panel
+              title="Database · Neon"
+              subtitle="Compute usage for the current billing period"
+              icon="pulse"
+              right={
+                <a
+                  href="https://console.neon.tech"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.1]"
+                >
+                  <Icon name="external" size={12} /> Neon Console
+                </a>
+              }
+            >
+              <div className="p-5">
+                {neon.loading ? (
+                  <div className="py-6 text-center text-sm text-slate-500">Loading Neon stats…</div>
+                ) : neon.error ? (
+                  <div className="py-6 text-center text-sm text-rose-400">{neon.error === 'NEON_PROJECT_ID or NEON_API_KEY not configured' ? 'Add NEON_PROJECT_ID + NEON_API_KEY env vars to enable.' : neon.error}</div>
+                ) : (
+                  <div className="grid gap-5 sm:grid-cols-[1fr_auto]">
+                    {/* Progress bar + headline */}
+                    <div className="min-w-0">
+                      <div className="mb-1.5 flex items-end justify-between gap-2">
+                        <span className="text-2xl font-bold text-white">
+                          {neon.cuHoursUsed}
+                          <span className="ml-1 text-sm font-normal text-slate-400">/ {neon.cuHoursLimit} CU-hrs</span>
+                        </span>
+                        <span className={`text-sm font-semibold tabular-nums ${
+                          neon.percentUsed >= 90 ? 'text-rose-400' :
+                          neon.percentUsed >= 70 ? 'text-amber-400' : 'text-emerald-400'
+                        }`}>
+                          {neon.percentUsed}%
+                        </span>
+                      </div>
+                      {/* Bar */}
+                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.07]">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${
+                            neon.percentUsed >= 90 ? 'bg-rose-500' :
+                            neon.percentUsed >= 70 ? 'bg-amber-400' :
+                            neon.percentUsed >= 40 ? 'bg-sky-400' : 'bg-emerald-400'
+                          }`}
+                          style={{ width: `${neon.percentUsed}%` }}
+                        />
+                      </div>
+                      <div className="mt-1.5 text-xs text-slate-500">
+                        {neon.cuHoursLimit - neon.cuHoursUsed > 0
+                          ? `${(neon.cuHoursLimit - neon.cuHoursUsed).toFixed(1)} CU-hrs remaining`
+                          : 'Allowance exhausted — compute suspended'}
+                      </div>
+                    </div>
+
+                    {/* Stat pills */}
+                    <div className="flex flex-wrap gap-2 sm:flex-col sm:items-end sm:justify-center">
+                      {neon.daysLeft !== null && (
+                        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-center">
+                          <div className="text-lg font-bold text-white">{neon.daysLeft}d</div>
+                          <div className="text-[10px] text-slate-500 uppercase tracking-wider">until reset</div>
+                        </div>
+                      )}
+                      {neon.dataStorageGBHour !== null && (
+                        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-center">
+                          <div className="text-sm font-semibold text-white">{neon.dataStorageGBHour} GB·hr</div>
+                          <div className="text-[10px] text-slate-500 uppercase tracking-wider">storage</div>
+                        </div>
+                      )}
+                      {neon.dataTransferGB !== null && (
+                        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-center">
+                          <div className="text-sm font-semibold text-white">{neon.dataTransferGB} GB</div>
+                          <div className="text-[10px] text-slate-500 uppercase tracking-wider">data transfer</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </Panel>
           </section>
