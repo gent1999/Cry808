@@ -107,6 +107,38 @@ html, body {
   opacity: 0;
 }
 
+/* Hero carousel progress bar */
+@keyframes heroProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* News Ticker scrolling animation */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker 40s linear infinite;
+  will-change: transform;
+  display: inline-flex;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* Hide scrollbar for horizontal scroll strips */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Cry808 admin command center density pass */
 .admin-command-center,
 .admin-command-center * {

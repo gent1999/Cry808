@@ -198,18 +198,29 @@ export default function ArticlesList() {
     setDeleting(null);
   };
 
+  const MAX_CAROUSEL = 5;
+
   const handleFeature = async (id, current) => {
+    // Guard: cap at 5 featured
+    if (!current && articles.filter(a => a.is_featured).length >= MAX_CAROUSEL) {
+      setError(`Carousel is full — max ${MAX_CAROUSEL} featured articles. Remove one first.`);
+      setTimeout(() => setError(''), 5000);
+      return;
+    }
     setFeaturing(id);
     try {
       const r = await fetch(`${API_URL}/api/featured/${id}`, {
         method: current ? 'DELETE' : 'PUT',
         headers: hdrs(),
       });
-      if (!r.ok) throw new Error('Feature toggle failed');
-      setArticles(prev => prev.map(a => ({
-        ...a,
-        is_featured: current ? false : a.id === id,
-      })));
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        throw new Error(body.message || 'Feature toggle failed');
+      }
+      // Toggle only this article — don't touch others
+      setArticles(prev => prev.map(a =>
+        a.id === id ? { ...a, is_featured: !current } : a
+      ));
     } catch (e) { setError(e.message); }
     setFeaturing(null);
   };
@@ -318,7 +329,7 @@ export default function ArticlesList() {
           <div className="grid grid-cols-8 gap-px bg-gray-800/30">
             <SumCard label="Total Articles" value={fmt(articles.length)}        border="border-l-blue-700"    accent="text-blue-300" />
             <SumCard label="Published"      value={fmt(articles.length)}        border="border-l-emerald-700" accent="text-emerald-400" />
-            <SumCard label="Featured"       value={fmt(summary.featured)}       border="border-l-amber-700"   accent="text-amber-400" />
+            <SumCard label="In Carousel"    value={`${fmt(summary.featured)}/5`} border="border-l-amber-700"   accent="text-amber-400" />
             <SumCard label="Total Views"    value={fmt(summary.totalViews)}     border="border-l-sky-700"     accent="text-sky-300"   loading={anaLoading} />
             <SumCard label="Total Clicks"   value={fmt(summary.totalClicks)}    border="border-l-emerald-700" accent="text-emerald-400" loading={anaLoading} />
             <SumCard label="Impressions"    value={fmt(summary.totalImpr)}      border="border-l-gray-600"    accent="text-gray-300"  loading={anaLoading} />

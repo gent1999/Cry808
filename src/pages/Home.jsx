@@ -16,32 +16,27 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
   const navigate = useNavigate();
-  const [heroArticle, setHeroArticle] = useState(null);
+  const [heroArticles, setHeroArticles] = useState([]);
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [heroAutoPaused, setHeroAutoPaused] = useState(false);
   const [originals, setOriginals] = useState([]);
   const [evergreenGuides, setEvergreenGuides] = useState([]);
   const [mixedContent, setMixedContent] = useState([]);
+  const [interviewsSpotlight, setInterviewsSpotlight] = useState([]);
+  const [onTheRadar, setOnTheRadar] = useState([]);
   const [trendingTags, setTrendingTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [stats, setStats] = useState({ articles: 0, interviews: 0, subscribers: 0 });
-  const [hasAnimated, setHasAnimated] = useState(false);
   const [adSettings, setAdSettings] = useState({ adsterra_enabled: false });
   const [currentGuideIndex, setCurrentGuideIndex] = useState(0);
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        // Fetch featured article
-        const featuredResponse = await fetch(`${API_URL}/api/articles/featured/article`);
-        const featuredData = await featuredResponse.json();
-
-        // Set featured article as hero
-        setHeroArticle(featuredData.article);
-
-        // Fetch all articles
+        // Single fetch — /api/articles already includes is_featured on every article
         const response = await fetch(`${API_URL}/api/articles`);
 
         if (!response.ok) {
@@ -51,12 +46,19 @@ export default function Home() {
         const data = await response.json();
         const sortedArticles = data.articles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        // Filter out the featured article from the grid
-        const filteredArticles = sortedArticles.filter(article => article.id !== featuredData.article?.id);
+        // Build carousel from all featured articles (sorted newest-featured first)
+        const featuredList = sortedArticles.filter(a => a.is_featured === true);
+        // Fall back to the single latest article if nothing is explicitly featured
+        const heroList = featuredList.length > 0 ? featuredList : sortedArticles.slice(0, 1);
+        setHeroArticles(heroList);
+
+        // Exclude carousel articles from all grids below
+        const featuredIds = new Set(heroList.map(a => a.id));
+        const filteredArticles = sortedArticles.filter(article => !featuredIds.has(article.id));
 
         // Separate evergreen guides
         const evergreenOnly = filteredArticles.filter(article => article.is_evergreen === true);
-        setEvergreenGuides(evergreenOnly); // Show all guides with carousel
+        setEvergreenGuides(evergreenOnly);
 
         // Separate originals from regular articles (excluding evergreen)
         const originalsOnly = filteredArticles.filter(article => article.is_original === true && !article.is_evergreen);
@@ -67,6 +69,16 @@ export default function Home() {
 
         // Limit regular articles to 6 (2 rows of 3 articles each)
         setMixedContent(regularArticles.slice(0, 6));
+
+        // Interviews spotlight (up to 8)
+        const interviewArticles = sortedArticles.filter(
+          a => a.category === 'interview' && !featuredIds.has(a.id)
+        );
+        setInterviewsSpotlight(interviewArticles.slice(0, 8));
+
+        // On the Radar - latest non-evergreen drops (up to 10)
+        const radarItems = filteredArticles.filter(a => !a.is_evergreen).slice(0, 10);
+        setOnTheRadar(radarItems);
 
         // Extract and count tags for trending section
         const tagCounts = {};
@@ -86,26 +98,7 @@ export default function Home() {
 
         setTrendingTags(sortedTags);
 
-        // Calculate stats
-        const articlesCount = sortedArticles.filter(a => a.category !== 'interview').length;
-        const interviewsCount = sortedArticles.filter(a => a.category === 'interview').length;
 
-        // Fetch subscriber count
-        try {
-          const subsResponse = await fetch(`${API_URL}/api/newsletter/subscribers`);
-          const subsData = await subsResponse.json();
-          setStats({
-            articles: articlesCount,
-            interviews: interviewsCount,
-            subscribers: subsData.active_count || 0
-          });
-        } catch {
-          setStats({
-            articles: articlesCount,
-            interviews: interviewsCount,
-            subscribers: 0
-          });
-        }
       } catch (err) {
         setError(err.message || 'Failed to load articles');
       } finally {
@@ -115,6 +108,15 @@ export default function Home() {
 
     fetchArticles();
   }, []);
+
+  // Auto-advance hero carousel
+  useEffect(() => {
+    if (heroArticles.length <= 1 || heroAutoPaused) return;
+    const timer = setInterval(() => {
+      setCurrentHeroIndex(i => (i + 1) % heroArticles.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [heroArticles.length, heroAutoPaused]);
 
   // Load ad settings from API
   useEffect(() => {
@@ -172,60 +174,8 @@ export default function Home() {
       setError('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
-      // Clear status after 5 seconds
       setTimeout(() => setNewsletterStatus(''), 5000);
     }
-  };
-
-  // Animated counter component
-  const AnimatedCounter = ({ end, duration = 2000, label, icon }) => {
-    const [count, setCount] = useState(0);
-    const countRef = React.useRef(null);
-
-    useEffect(() => {
-      if (!hasAnimated) return;
-
-      let startTime;
-      const animate = (timestamp) => {
-        if (!startTime) startTime = timestamp;
-        const progress = Math.min((timestamp - startTime) / duration, 1);
-        setCount(Math.floor(progress * end));
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      };
-
-      requestAnimationFrame(animate);
-    }, [end, duration, hasAnimated]);
-
-    useEffect(() => {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && !hasAnimated) {
-            setHasAnimated(true);
-          }
-        },
-        { threshold: 0.5 }
-      );
-
-      if (countRef.current) {
-        observer.observe(countRef.current);
-      }
-
-      return () => observer.disconnect();
-    }, []);
-
-    return (
-      <div ref={countRef} className="text-center">
-        <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-          {icon} {count.toLocaleString()}+
-        </div>
-        <div className="text-white/60 text-sm md:text-base uppercase tracking-wider">
-          {label}
-        </div>
-      </div>
-    );
   };
 
   // Skeleton loader component
@@ -296,88 +246,183 @@ export default function Home() {
           <div className="text-center py-12">
             <div className="text-red-400 text-lg">{error}</div>
           </div>
-        ) : !heroArticle ? (
+        ) : heroArticles.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-white/70 text-lg">No content available yet.</div>
           </div>
         ) : (
           <>
-            {/* Hero Article with Overlay */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-              <div className="relative group cursor-pointer" onClick={() => window.location.href = generateArticleUrl(heroArticle.id, heroArticle.title)}>
-                <div className="relative h-[280px] md:h-[450px] rounded-none overflow-hidden">
-                  {/* Background Image with Gradient Overlay */}
-                  <div className="absolute inset-0">
-                    {heroArticle.image_url && (
+            {/* ─── HERO CAROUSEL ────────────────────────────────────────── */}
+            <div
+              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8"
+              onMouseEnter={() => setHeroAutoPaused(true)}
+              onMouseLeave={() => setHeroAutoPaused(false)}
+            >
+              <div className="relative h-[280px] md:h-[450px] overflow-hidden">
+
+                {/* Slides */}
+                {heroArticles.map((article, index) => (
+                  <div
+                    key={article.id}
+                    className={`absolute inset-0 transition-opacity duration-700 ${
+                      index === currentHeroIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                    onClick={() => window.location.href = generateArticleUrl(article.id, article.title)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {/* Background image */}
+                    {article.image_url && (
                       <img
-                        src={heroArticle.image_url}
-                        alt={heroArticle.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        src={article.image_url}
+                        alt={article.title}
+                        className={`w-full h-full object-cover transition-transform duration-700 ${
+                          index === currentHeroIndex ? 'scale-105' : 'scale-100'
+                        }`}
                       />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/20"></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-900/30 to-pink-900/30 mix-blend-multiply"></div>
-                  </div>
 
-                  {/* Hero Content */}
-                  <div className="relative h-full flex flex-col justify-end p-4 md:p-12">
-                    <div className="max-w-3xl">
-                      {/* Title */}
-                      <h1 className="text-2xl md:text-5xl font-bold mb-2 md:mb-3 leading-tight text-white drop-shadow-lg">
-                        {heroArticle.title}
-                      </h1>
+                    {/* Content */}
+                    <div className="absolute inset-0 flex flex-col justify-end p-4 md:p-12">
+                      <div className="max-w-3xl">
+                        <h1 className="text-2xl md:text-5xl font-bold mb-2 md:mb-3 leading-tight text-white drop-shadow-lg">
+                          {article.title}
+                        </h1>
+                        <p className="text-white/90 text-xs md:text-base mb-3 md:mb-4 drop-shadow-md">
+                          By {article.author} • {new Date(article.created_at).toLocaleDateString()}
+                        </p>
+                        <p className="hidden md:block text-white/80 text-base mb-5 line-clamp-2 drop-shadow-md">
+                          {stripMarkdown(article.content).substring(0, 200).trim()}...
+                        </p>
+                        <button className="px-4 py-2 md:px-8 md:py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs md:text-base font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
+                          Read Full Story
+                        </button>
+                      </div>
+                    </div>
 
-                      {/* Meta */}
-                      <p className="text-white/90 text-xs md:text-base mb-3 md:mb-4 drop-shadow-md">
-                        By {heroArticle.author} • {new Date(heroArticle.created_at).toLocaleDateString()}
-                      </p>
-
-                      {/* Excerpt - Hidden on mobile, shown on larger screens */}
-                      <p className="hidden md:block text-white/80 text-base mb-5 line-clamp-2 drop-shadow-md">
-                        {stripMarkdown(heroArticle.content).substring(0, 200).trim()}...
-                      </p>
-
-                      {/* Read More Button */}
-                      <button className="px-4 py-2 md:px-8 md:py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs md:text-base font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
-                        Read Full Story
-                      </button>
+                    {/* Category badge */}
+                    <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20">
+                      <span className="inline-block px-2 py-1 md:px-3 md:py-1.5 bg-purple-600/90 backdrop-blur-sm text-white text-xs md:text-sm font-semibold rounded-full uppercase tracking-wider shadow-lg">
+                        {article.category === 'interview' ? '🎤 Interview' : '📰 Latest'}
+                      </span>
                     </div>
                   </div>
-                </div>
+                ))}
 
-                {/* Category Badge - Outside image container */}
-                <div className="absolute top-3 right-3 md:top-4 md:right-16">
-                  <span className="inline-block px-2 py-1 md:px-3 md:py-1.5 bg-purple-600/90 backdrop-blur-sm text-white text-xs md:text-sm font-semibold rounded-full uppercase tracking-wider shadow-lg">
-                    {heroArticle.category === 'interview' ? '🎤 Interview' : '📰 Latest'}
-                  </span>
-                </div>
+                {/* Prev / Next arrows — only when multiple slides */}
+                {heroArticles.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setCurrentHeroIndex(i => (i - 1 + heroArticles.length) % heroArticles.length); }}
+                      className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 bg-black/50 hover:bg-black/80 border border-white/20 hover:border-white/50 flex items-center justify-center transition-all"
+                      aria-label="Previous"
+                    >
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setCurrentHeroIndex(i => (i + 1) % heroArticles.length); }}
+                      className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 bg-black/50 hover:bg-black/80 border border-white/20 hover:border-white/50 flex items-center justify-center transition-all"
+                      aria-label="Next"
+                    >
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+
+                {/* Dot indicators */}
+                {heroArticles.length > 1 && (
+                  <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+                    {heroArticles.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={(e) => { e.stopPropagation(); setCurrentHeroIndex(i); }}
+                        className={`transition-all duration-300 rounded-none ${
+                          i === currentHeroIndex
+                            ? 'w-6 h-1.5 bg-white'
+                            : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'
+                        }`}
+                        aria-label={`Go to slide ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Progress bar — auto-advance indicator */}
+                {heroArticles.length > 1 && !heroAutoPaused && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10 z-20 overflow-hidden">
+                    <div
+                      key={currentHeroIndex}
+                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                      style={{ animation: 'heroProgress 6s linear forwards' }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Trending Tags Section */}
-            {trendingTags.length > 0 && (
-              <div className="border-b border-white/10 bg-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-6">
-                  <div className="flex flex-wrap items-center gap-2 md:gap-4">
-                    <span className="text-white/50 font-semibold uppercase text-xs md:text-sm tracking-wider">
-                      🔥 Trending:
-                    </span>
-                    <div className="flex flex-wrap gap-2 md:gap-3">
-                      {trendingTags.map((tag, index) => (
-                        <button
-                          key={index}
-                          className="px-3 py-1.5 md:px-4 md:py-2 bg-white/10 hover:bg-purple-600/30 border border-white/20 hover:border-purple-500/50 text-white text-xs md:text-sm rounded-full transition-all"
-                        >
-                          {tag}
-                        </button>
-                      ))}
+            {/* ─── LIVE TICKER + TRENDING TAGS (unified bar) ───────────── */}
+            {(originals.length > 0 || mixedContent.length > 0 || trendingTags.length > 0) && (
+              <div className="border-b border-white/10 bg-black">
+                {/* Row 1 — ticker */}
+                {(originals.length > 0 || mixedContent.length > 0) && (
+                  <div className="flex items-stretch border-b border-white/[0.06] overflow-hidden">
+                    <div className="flex-shrink-0 bg-gradient-to-r from-purple-600 to-pink-600 px-3 md:px-5 flex items-center self-stretch">
+                      <span className="text-white text-[10px] md:text-xs font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                        LIVE
+                      </span>
+                    </div>
+                    <div className="overflow-hidden flex-1 flex items-center">
+                      <div className="animate-ticker inline-flex gap-12 whitespace-nowrap py-2.5 md:py-3">
+                        {[...originals, ...mixedContent, ...interviewsSpotlight, ...originals, ...mixedContent, ...interviewsSpotlight]
+                          .slice(0, 20)
+                          .map((item, i) => (
+                            <span
+                              key={i}
+                              onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
+                              className="text-white/55 hover:text-white text-xs md:text-sm cursor-pointer transition-colors inline-flex items-center gap-2"
+                            >
+                              <span className="text-purple-400/70">◆</span>
+                              {item.title}
+                            </span>
+                          ))}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {/* Row 2 — trending tags */}
+                {trendingTags.length > 0 && (
+                  <div className="flex items-stretch">
+                    <div className="flex-shrink-0 bg-white/[0.04] border-r border-white/[0.06] px-3 md:px-5 flex items-center self-stretch">
+                      <span className="text-white/40 text-[10px] md:text-xs font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-1.5">
+                        <span className="text-base leading-none">🔥</span>
+                        <span className="hidden md:inline">Trending</span>
+                      </span>
+                    </div>
+                    <div className="flex-1 px-3 md:px-5 py-2.5 md:py-3 overflow-x-auto scrollbar-hide">
+                      <div className="flex items-center gap-2 md:gap-2.5 whitespace-nowrap">
+                        {trendingTags.map((tag, index) => (
+                          <button
+                            key={index}
+                            className="flex-shrink-0 px-3 py-1 md:px-3.5 md:py-1.5 bg-white/[0.06] hover:bg-purple-600/25 border border-white/10 hover:border-purple-500/40 text-white/70 hover:text-white text-[11px] md:text-xs font-medium transition-all duration-200"
+                          >
+                            # {tag}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Submit Music CTA - Mobile Only */}
+{/* Submit Music CTA - Mobile Only */}
             <div className="md:hidden border-b border-white/10 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <button
@@ -395,10 +440,11 @@ export default function Home() {
             {/* Mobile Ad - Beatport/Loopcloud */}
             <BeatportMobileBanner className="py-4" />
 
-            {/* Main Content Grid */}
+            {/* ─── MAIN CONTENT + SIDEBAR ──────────────────────────────── */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 flex gap-8 justify-center">
-              <div className="flex-1">
-                {/* 1of1 Originals Section */}
+              <div className="flex-1 min-w-0">
+
+                {/* ── 1of1 Originals ─────────────────────────────────────── */}
                 {originals.length > 0 && (
                   <>
                     <div className="mb-8">
@@ -415,7 +461,6 @@ export default function Home() {
                           onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
                           className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/20"
                         >
-                          {/* Image */}
                           {item.image_url && (
                             <div className="h-48 overflow-hidden">
                               <img
@@ -425,10 +470,7 @@ export default function Home() {
                               />
                             </div>
                           )}
-
-                          {/* Content */}
                           <div className="p-6">
-                            {/* Category Badge */}
                             <div className="mb-2">
                               <span className={`px-2 py-1 text-xs font-semibold rounded ${
                                 item.category === 'interview'
@@ -438,27 +480,17 @@ export default function Home() {
                                 {item.category === 'interview' ? 'Interview' : 'Original'}
                               </span>
                             </div>
-
-                            <h3 className="text-xl font-semibold mb-2 line-clamp-2">
-                              {item.title}
-                            </h3>
-
+                            <h3 className="text-xl font-semibold mb-2 line-clamp-2">{item.title}</h3>
                             <p className="text-white/50 text-xs mb-3">
                               By {item.author} • {new Date(item.created_at).toLocaleDateString()}
                             </p>
-
                             <p className="text-white/70 text-sm line-clamp-3 mb-4">
                               {stripMarkdown(item.content)}
                             </p>
-
-                            {/* Tags */}
                             {item.tags && item.tags.length > 0 && (
                               <div className="flex flex-wrap gap-2">
                                 {item.tags.slice(0, 2).map((tag, index) => (
-                                  <span
-                                    key={index}
-                                    className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded"
-                                  >
+                                  <span key={index} className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded">
                                     {tag}
                                   </span>
                                 ))}
@@ -471,7 +503,65 @@ export default function Home() {
                   </>
                 )}
 
-                {/* Evergreen Guides Section */}
+                {/* ── [NEW] INTERVIEWS SPOTLIGHT ─────────────────────────── */}
+                {interviewsSpotlight.length > 0 && (
+                  <div className="mb-16">
+                    <div className="mb-6 flex items-end justify-between">
+                      <div>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-1 bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                          Artist Spotlights
+                        </h2>
+                        <p className="text-white/40 text-xs mb-3">In conversation with underground hip-hop's finest</p>
+                        <div className="h-1 w-20 bg-gradient-to-r from-pink-500 to-rose-500"></div>
+                      </div>
+                      <a
+                        href="/interviews"
+                        className="text-pink-400 hover:text-pink-300 text-sm font-medium transition-colors whitespace-nowrap"
+                      >
+                        View All →
+                      </a>
+                    </div>
+
+                    <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                      {interviewsSpotlight.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
+                          className="flex-shrink-0 w-56 md:w-64 bg-white/5 border border-pink-500/20 overflow-hidden hover:border-pink-500/60 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
+                        >
+                          {item.image_url ? (
+                            <div className="h-44 overflow-hidden relative">
+                              <img
+                                src={item.image_url}
+                                alt={item.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                              <div className="absolute inset-0 bg-gradient-to-r from-pink-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                              <span className="absolute bottom-2 left-2 px-2 py-1 bg-pink-600 text-white text-[10px] font-bold uppercase tracking-wider">
+                                🎤 Interview
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="h-44 bg-gradient-to-br from-pink-900/30 to-rose-900/20 flex items-center justify-center">
+                              <span className="text-5xl">🎤</span>
+                            </div>
+                          )}
+                          <div className="p-4">
+                            <h3 className="text-sm font-semibold line-clamp-2 mb-2 group-hover:text-pink-300 transition-colors">
+                              {item.title}
+                            </h3>
+                            <p className="text-white/40 text-xs">
+                              By {item.author} • {new Date(item.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Evergreen Guides ────────────────────────────────────── */}
                 {evergreenGuides.length > 0 && (
                   <>
                     <div className="mb-6">
@@ -482,9 +572,7 @@ export default function Home() {
                       <div className="h-1 w-20 bg-gradient-to-r from-green-500 to-emerald-500"></div>
                     </div>
 
-                    {/* Grid Layout with Carousel */}
                     <div className="relative mb-16">
-                      {/* Left Arrow */}
                       {evergreenGuides.length > 4 && currentGuideIndex > 0 && (
                         <button
                           onClick={() => setCurrentGuideIndex(currentGuideIndex - 4)}
@@ -495,8 +583,6 @@ export default function Home() {
                           </svg>
                         </button>
                       )}
-
-                      {/* Right Arrow */}
                       {evergreenGuides.length > 4 && currentGuideIndex + 4 < evergreenGuides.length && (
                         <button
                           onClick={() => setCurrentGuideIndex(currentGuideIndex + 4)}
@@ -513,51 +599,43 @@ export default function Home() {
                           const isVisible = index >= currentGuideIndex && index < currentGuideIndex + 4;
                           const visibleIndex = index - currentGuideIndex;
                           return (
-                        <div
-                          key={item.id}
-                          onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
-                          className={`bg-white/5 border border-green-500/30 overflow-hidden hover:bg-white/10 hover:border-green-400/70 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/20 ${isVisible ? 'animate-fadeInUp' : 'hidden'}`}
-                          style={{ animationDelay: isVisible ? `${visibleIndex * 100}ms` : '0ms' }}
-                        >
-                          {/* Image */}
-                          {item.image_url && (
-                            <div className="h-32 overflow-hidden relative">
-                              <img
-                                src={item.image_url}
-                                alt={item.title}
-                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                              />
-                              {/* Evergreen Badge Overlay */}
-                              <div className="absolute top-2 right-2 bg-green-500 text-black px-2 py-1 text-xs font-bold flex items-center gap-1">
-                                <span>🌲</span>
+                            <div
+                              key={item.id}
+                              onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
+                              className={`bg-white/5 border border-green-500/30 overflow-hidden hover:bg-white/10 hover:border-green-400/70 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/20 ${isVisible ? 'animate-fadeInUp' : 'hidden'}`}
+                              style={{ animationDelay: isVisible ? `${visibleIndex * 100}ms` : '0ms' }}
+                            >
+                              {item.image_url && (
+                                <div className="h-32 overflow-hidden relative">
+                                  <img
+                                    src={item.image_url}
+                                    alt={item.title}
+                                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                                  />
+                                  <div className="absolute top-2 right-2 bg-green-500 text-black px-2 py-1 text-xs font-bold flex items-center gap-1">
+                                    <span>🌲</span>
+                                  </div>
+                                </div>
+                              )}
+                              <div className="p-3">
+                                <h3 className="text-sm font-semibold mb-2 line-clamp-2 leading-snug">
+                                  {item.title}
+                                </h3>
+                                <p className="text-white/70 text-xs mb-2 line-clamp-1">
+                                  {stripMarkdown(item.content).split('.')[0]}.
+                                </p>
+                                <div className="flex flex-wrap gap-1 mb-2">
+                                  {item.tags && item.tags.slice(0, 3).map((tag, idx) => (
+                                    <span key={idx} className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                                <p className="text-white/50 text-xs">
+                                  {new Date(item.created_at).toLocaleDateString()}
+                                </p>
                               </div>
                             </div>
-                          )}
-
-                          {/* Content */}
-                          <div className="p-3">
-                            <h3 className="text-sm font-semibold mb-2 line-clamp-2 leading-snug">
-                              {item.title}
-                            </h3>
-
-                            <p className="text-white/70 text-xs mb-2 line-clamp-1">
-                              {stripMarkdown(item.content).split('.')[0]}.
-                            </p>
-
-                            {/* Tags */}
-                            <div className="flex flex-wrap gap-1 mb-2">
-                              {item.tags && item.tags.slice(0, 3).map((tag, index) => (
-                                <span key={index} className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-
-                            <p className="text-white/50 text-xs">
-                              {new Date(item.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
                           );
                         })}
                       </div>
@@ -565,7 +643,7 @@ export default function Home() {
                   </>
                 )}
 
-                {/* Promotional Banner */}
+{/* ── Promotional Banner ──────────────────────────────────── */}
                 <div className="mb-12">
                   <a href="/submit-music" className="block">
                     <img
@@ -576,7 +654,7 @@ export default function Home() {
                   </a>
                 </div>
 
-                {/* Latest Stories Header */}
+                {/* ── Latest Stories ──────────────────────────────────────── */}
                 <div className="mb-8">
                   <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                     Latest Stories
@@ -584,7 +662,6 @@ export default function Home() {
                   <div className="h-1 w-24 bg-gradient-to-r from-purple-500 to-pink-500"></div>
                 </div>
 
-                {/* Mixed Grid */}
                 {mixedContent.length > 0 ? (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-16">
                     {mixedContent.map((item) => (
@@ -593,7 +670,6 @@ export default function Home() {
                         onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
                         className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
                       >
-                        {/* Image */}
                         {item.image_url && (
                           <div className="h-48 overflow-hidden">
                             <img
@@ -603,10 +679,7 @@ export default function Home() {
                             />
                           </div>
                         )}
-
-                        {/* Content */}
                         <div className="p-6">
-                          {/* Category Badge */}
                           <div className="mb-2">
                             <span className={`px-2 py-1 text-xs font-semibold rounded ${
                               item.category === 'interview'
@@ -616,27 +689,17 @@ export default function Home() {
                               {item.category === 'interview' ? 'Interview' : 'Article'}
                             </span>
                           </div>
-
-                          <h3 className="text-xl font-semibold mb-2 line-clamp-2">
-                            {item.title}
-                          </h3>
-
+                          <h3 className="text-xl font-semibold mb-2 line-clamp-2">{item.title}</h3>
                           <p className="text-white/50 text-xs mb-3">
                             By {item.author} • {new Date(item.created_at).toLocaleDateString()}
                           </p>
-
                           <p className="text-white/70 text-sm line-clamp-3 mb-4">
                             {stripMarkdown(item.content)}
                           </p>
-
-                          {/* Tags */}
                           {item.tags && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                               {item.tags.slice(0, 2).map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded"
-                                >
+                                <span key={index} className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded">
                                   {tag}
                                 </span>
                               ))}
@@ -647,17 +710,108 @@ export default function Home() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12 text-white/50">
+                  <div className="text-center py-12 text-white/50 mb-16">
                     No more stories available.
                   </div>
                 )}
 
-                {/* Newsletter CTA */}
-                <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-sm">
+                {/* ── [NEW] ON THE RADAR ──────────────────────────────────── */}
+                {onTheRadar.length > 0 && (
+                  <div className="mb-16">
+                    <div className="mb-6 flex items-end justify-between">
+                      <div>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-1 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                          📡 On The Radar
+                        </h2>
+                        <p className="text-white/40 text-xs mb-3">Fresh drops hitting your feed right now</p>
+                        <div className="h-1 w-20 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                      {onTheRadar.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
+                          className="flex-shrink-0 w-44 md:w-52 cursor-pointer group"
+                        >
+                          {item.image_url ? (
+                            <div className="h-32 md:h-36 overflow-hidden relative mb-3 border border-cyan-500/20 group-hover:border-cyan-500/60 transition-all">
+                              <img
+                                src={item.image_url}
+                                alt={item.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                              <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 transition-all"></div>
+                            </div>
+                          ) : (
+                            <div className="h-32 md:h-36 bg-white/5 border border-cyan-500/20 group-hover:border-cyan-500/60 mb-3 flex items-center justify-center transition-all">
+                              <span className="text-4xl">🎵</span>
+                            </div>
+                          )}
+                          <h3 className="text-xs font-semibold line-clamp-2 text-white/80 group-hover:text-white transition-colors leading-snug">
+                            {item.title}
+                          </h3>
+                          <p className="text-white/30 text-[10px] mt-1">
+                            {new Date(item.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── [NEW] SUBMIT MUSIC FULL CTA ─────────────────────────── */}
+                <div className="mb-16 relative overflow-hidden border border-purple-500/30">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-black to-pink-950"></div>
+                  <div
+                    className="absolute inset-0 opacity-40"
+                    style={{
+                      backgroundImage:
+                        'radial-gradient(circle at 15% 50%, rgba(168,85,247,0.4) 0%, transparent 50%), radial-gradient(circle at 85% 50%, rgba(236,72,153,0.4) 0%, transparent 50%)',
+                    }}
+                  ></div>
+                  {/* Decorative grid lines */}
+                  <div
+                    className="absolute inset-0 opacity-5"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+                      backgroundSize: '40px 40px',
+                    }}
+                  ></div>
+
+                  <div className="relative z-10 p-8 md:p-14 text-center">
+                    <div className="text-5xl md:text-7xl mb-5">🎵</div>
+                    <h2 className="text-3xl md:text-5xl font-black mb-4 bg-gradient-to-r from-purple-300 via-white to-pink-300 bg-clip-text text-transparent leading-tight">
+                      Are You a 1of1?
+                    </h2>
+                    <p className="text-white/60 text-base md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
+                      Submit your music, project, or story to Cry808. We cover the underground —{' '}
+                      <span className="text-white/90">if you've got something real, we want to hear it.</span>
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <a
+                        href="/submit-music"
+                        className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-base md:text-lg rounded-lg transition-all transform hover:scale-105 shadow-lg shadow-purple-500/30"
+                      >
+                        Submit Your Music
+                      </a>
+                      <a
+                        href="/about"
+                        className="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/50 text-white font-bold text-base md:text-lg rounded-lg transition-all"
+                      >
+                        Learn About Us
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Newsletter CTA ──────────────────────────────────────── */}
+                <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-sm mb-16">
                   <div className="max-w-2xl mx-auto text-center">
-                    <h3 className="text-3xl md:text-4xl font-bold mb-4">
-                      Stay in the Loop
-                    </h3>
+                    <h3 className="text-3xl md:text-4xl font-bold mb-4">Stay in the Loop</h3>
                     <p className="text-white/70 text-lg mb-8">
                       Get the latest hip-hop news, exclusive interviews, and album reviews delivered straight to your inbox.
                     </p>
@@ -681,7 +835,6 @@ export default function Home() {
                       </button>
                     </form>
 
-                    {/* Status Messages */}
                     {newsletterStatus === 'success' && (
                       <div className="mt-4 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400">
                         🎉 Successfully subscribed! Check your inbox for updates.
@@ -694,13 +847,83 @@ export default function Home() {
                     )}
                   </div>
                 </div>
+
+                {/* ── [NEW] COMMUNITY / SOCIAL ────────────────────────────── */}
+                <div className="border border-white/10 bg-white/3 p-8 md:p-10 mb-4">
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-2">Join the Community</h2>
+                    <p className="text-white/40 text-sm">Stay connected with the underground — follow us everywhere</p>
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+                    {/* Instagram */}
+                    <a
+                      href="https://instagram.com/pluggpress"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-5 py-4 bg-white/5 hover:bg-gradient-to-br hover:from-purple-900/40 hover:to-pink-900/40 border border-white/10 hover:border-pink-500/40 transition-all group"
+                    >
+                      <svg className="w-6 h-6 text-pink-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                      <div>
+                        <div className="text-white font-semibold text-sm group-hover:text-pink-300 transition-colors">Instagram</div>
+                        <div className="text-white/40 text-xs">@pluggpress</div>
+                      </div>
+                    </a>
+
+                    {/* TikTok */}
+                    <a
+                      href="https://tiktok.com/@pluggpress"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-5 py-4 bg-white/5 hover:bg-gradient-to-br hover:from-cyan-900/30 hover:to-black border border-white/10 hover:border-cyan-500/40 transition-all group"
+                    >
+                      <svg className="w-6 h-6 text-cyan-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.22 8.22 0 004.81 1.54V6.78a4.85 4.85 0 01-1.04-.09z"/>
+                      </svg>
+                      <div>
+                        <div className="text-white font-semibold text-sm group-hover:text-cyan-300 transition-colors">TikTok</div>
+                        <div className="text-white/40 text-xs">@pluggpress</div>
+                      </div>
+                    </a>
+
+                    {/* Twitter / X */}
+                    <a
+                      href="https://twitter.com/pluggpress"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-5 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 transition-all group"
+                    >
+                      <svg className="w-6 h-6 text-white/70 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                      <div>
+                        <div className="text-white font-semibold text-sm group-hover:text-white transition-colors">X / Twitter</div>
+                        <div className="text-white/40 text-xs">@pluggpress</div>
+                      </div>
+                    </a>
+
+                    {/* Submit Music CTA card */}
+                    <a
+                      href="/submit-music"
+                      className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-purple-900/40 to-pink-900/40 hover:from-purple-800/50 hover:to-pink-800/50 border border-purple-500/30 hover:border-purple-400/60 transition-all group"
+                    >
+                      <span className="text-2xl flex-shrink-0">🎵</span>
+                      <div>
+                        <div className="text-white font-semibold text-sm group-hover:text-purple-300 transition-colors">Submit Music</div>
+                        <div className="text-white/40 text-xs">Get featured on Cry808</div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+
               </div>
 
-              {/* Sidebar */}
+              {/* ── SIDEBAR ─────────────────────────────────────────────── */}
               <div className="hidden xl:block w-80 flex-shrink-0">
                 <div className="sticky top-24 space-y-6">
                   {(() => {
-                    // Build array of sidebar components with their order
                     const sidebarComponents = [
                       {
                         order: parseInt(adSettings.adsterra_order || '1'),
@@ -724,7 +947,6 @@ export default function Home() {
                       }
                     ];
 
-                    // Sort by order and render
                     return sidebarComponents
                       .sort((a, b) => a.order - b.order)
                       .map(item => item.component)
