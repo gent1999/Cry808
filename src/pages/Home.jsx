@@ -371,7 +371,7 @@ export default function Home() {
                 {/* Row 1 — ticker */}
                 {(originals.length > 0 || mixedContent.length > 0) && (
                   <div className="flex items-stretch border-b border-white/[0.06] overflow-hidden">
-                    <div className="flex-shrink-0 bg-gradient-to-r from-purple-600 to-pink-600 px-3 md:px-5 flex items-center self-stretch">
+                    <div className="flex-shrink-0 w-[72px] md:w-[108px] bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center self-stretch">
                       <span className="text-white text-[10px] md:text-xs font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
                         LIVE
@@ -399,7 +399,7 @@ export default function Home() {
                 {/* Row 2 — trending tags */}
                 {trendingTags.length > 0 && (
                   <div className="flex items-stretch">
-                    <div className="flex-shrink-0 bg-white/[0.04] border-r border-white/[0.06] px-3 md:px-5 flex items-center self-stretch">
+                    <div className="flex-shrink-0 w-[72px] md:w-[108px] bg-white/[0.04] border-r border-white/[0.06] flex items-center justify-center self-stretch">
                       <span className="text-white/40 text-[10px] md:text-xs font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-1.5">
                         <span className="text-base leading-none">🔥</span>
                         <span className="hidden md:inline">Trending</span>
@@ -440,72 +440,149 @@ export default function Home() {
             {/* Mobile Ad - Beatport/Loopcloud */}
             <BeatportMobileBanner className="py-4" />
 
-            {/* ─── MAIN CONTENT + SIDEBAR ──────────────────────────────── */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 flex gap-8 justify-center">
+            {/* ─── 3-PANEL CONTAINED LAYOUT ───────────────────────────────── */}
+            {/* LEFT = newsletter, CENTER = articles, RIGHT = ads/sidebar     */}
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-16 xl:px-24">
+              <div className="flex gap-4 xl:gap-6 items-start pt-4 pb-8">
+
+              {/* ── LEFT: Newsletter ───────────────────────────────────────── */}
+              <div className="hidden lg:block w-52 flex-shrink-0">
+                <div className="sticky top-20">
+                  <div className="bg-gradient-to-b from-purple-950/60 to-black border border-purple-500/20 overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-purple-500/20 px-4 py-3">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-purple-400 mb-0.5">Newsletter</p>
+                      <h3 className="text-sm font-bold text-white leading-snug">Stay in the Loop</h3>
+                    </div>
+                    <div className="px-4 py-4">
+                      <p className="text-white/45 text-[11px] leading-relaxed mb-3">
+                        Underground drops &amp; interviews, straight to your inbox.
+                      </p>
+                      <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          required
+                          disabled={isSubmitting}
+                          className="w-full px-3 py-2 bg-black/60 border border-white/10 text-white text-xs placeholder-white/30 focus:outline-none focus:border-purple-500/50 transition-colors disabled:opacity-50"
+                        />
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isSubmitting ? 'Subscribing…' : 'Subscribe Free'}
+                        </button>
+                      </form>
+                      {newsletterStatus === 'success' && (
+                        <div className="mt-2 p-2 bg-green-500/15 border border-green-500/30 text-green-400 text-[11px]">
+                          🎉 You're in!
+                        </div>
+                      )}
+                      {newsletterStatus === 'error' && (
+                        <div className="mt-2 p-2 bg-red-500/15 border border-red-500/30 text-red-400 text-[11px]">
+                          {error}
+                        </div>
+                      )}
+                      <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                        <p className="text-white/25 text-[9px] uppercase tracking-widest mb-2">Find us on</p>
+                        <a href="https://instagram.com/pluggpress" target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-pink-900/30 border border-white/10 hover:border-pink-500/40 transition-all">
+                          <svg className="w-3.5 h-3.5 text-pink-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                          </svg>
+                          <span className="text-white/50 text-[11px]">@pluggpress</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Submit Music card ── */}
+                  <div className="mt-3 bg-gradient-to-b from-purple-950/40 to-black border border-purple-500/20 overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-purple-500/20 px-4 py-3">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-purple-400 mb-0.5">Submit Music</p>
+                      <h3 className="text-sm font-bold text-white leading-snug">Are You a 1of1?</h3>
+                    </div>
+                    <div className="px-4 py-4">
+                      <p className="text-white/45 text-[11px] leading-relaxed mb-3">
+                        We cover the underground. Got something real? We want to hear it.
+                      </p>
+                      <a
+                        href="/submit-music"
+                        className="block w-full py-2 text-center bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-semibold transition-all"
+                      >
+                        Submit Your Music 🎵
+                      </a>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* ── CENTER: All article content ────────────────────────────── */}
               <div className="flex-1 min-w-0">
 
-                {/* ── 1of1 Originals ─────────────────────────────────────── */}
+                {/* ── 1of1 Originals ── */}
                 {originals.length > 0 && (
-                  <>
-                    <div className="mb-8">
-                      <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                  <div className="mb-10">
+                    <div className="mb-5">
+                      <h2 className="text-2xl md:text-3xl font-bold mb-1.5 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
                         1of1 Originals
                       </h2>
-                      <div className="h-1 w-24 bg-gradient-to-r from-yellow-500 to-orange-500"></div>
+                      <div className="h-0.5 w-16 bg-gradient-to-r from-yellow-500 to-orange-500"></div>
                     </div>
-
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-16">
+                    <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
                       {originals.map((item) => (
                         <div
                           key={item.id}
                           onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
-                          className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/20"
+                          className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer group"
                         >
-                          {item.image_url && (
-                            <div className="h-48 overflow-hidden">
+                          <div className="h-36 overflow-hidden relative bg-gradient-to-br from-gray-900 via-purple-950/40 to-gray-900">
+                            {/* Fallback — always behind, revealed when img fails or is absent */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                              <span className="text-2xl opacity-40">
+                                {item.category === 'interview' ? '🎤' : '🎵'}
+                              </span>
+                              <span className="text-white/20 text-[9px] uppercase tracking-widest font-medium">
+                                {item.category || 'article'}
+                              </span>
+                            </div>
+                            {item.image_url && (
                               <img
                                 src={item.image_url}
                                 alt={item.title}
-                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
                               />
-                            </div>
-                          )}
-                          <div className="p-6">
-                            <div className="mb-2">
-                              <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                                item.category === 'interview'
-                                  ? 'bg-pink-600/20 text-pink-400'
-                                  : 'bg-yellow-600/20 text-yellow-400'
-                              }`}>
-                                {item.category === 'interview' ? 'Interview' : 'Original'}
-                              </span>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-2 line-clamp-2">{item.title}</h3>
-                            <p className="text-white/50 text-xs mb-3">
-                              By {item.author} • {new Date(item.created_at).toLocaleDateString()}
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <span className={`inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded mb-1.5 ${
+                              item.category === 'interview'
+                                ? 'bg-pink-600/20 text-pink-400'
+                                : 'bg-yellow-600/20 text-yellow-400'
+                            }`}>
+                              {item.category === 'interview' ? 'Interview' : 'Original'}
+                            </span>
+                            <h3 className="text-sm font-semibold mb-1 line-clamp-2 leading-snug">{item.title}</h3>
+                            <p className="text-white/40 text-[10px] mb-2">
+                              {item.author} · {new Date(item.created_at).toLocaleDateString()}
                             </p>
-                            <p className="text-white/70 text-sm line-clamp-3 mb-4">
+                            <p className="text-white/60 text-xs line-clamp-2">
                               {stripMarkdown(item.content)}
                             </p>
-                            {item.tags && item.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {item.tags.slice(0, 2).map((tag, index) => (
-                                  <span key={index} className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded">
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
                       ))}
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {/* ── [NEW] INTERVIEWS SPOTLIGHT ─────────────────────────── */}
                 {interviewsSpotlight.length > 0 && (
-                  <div className="mb-16">
+                  <div className="mb-10">
                     <div className="mb-6 flex items-end justify-between">
                       <div>
                         <h2 className="text-2xl md:text-3xl font-bold mb-1 bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
@@ -572,7 +649,7 @@ export default function Home() {
                       <div className="h-1 w-20 bg-gradient-to-r from-green-500 to-emerald-500"></div>
                     </div>
 
-                    <div className="relative mb-16">
+                    <div className="relative mb-10">
                       {evergreenGuides.length > 4 && currentGuideIndex > 0 && (
                         <button
                           onClick={() => setCurrentGuideIndex(currentGuideIndex - 4)}
@@ -644,7 +721,7 @@ export default function Home() {
                 )}
 
 {/* ── Promotional Banner ──────────────────────────────────── */}
-                <div className="mb-12">
+                <div className="mb-8">
                   <a href="/submit-music" className="block">
                     <img
                       src="/promo_banner_1_.png"
@@ -655,7 +732,7 @@ export default function Home() {
                 </div>
 
                 {/* ── Latest Stories ──────────────────────────────────────── */}
-                <div className="mb-8">
+                <div className="mb-5">
                   <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                     Latest Stories
                   </h2>
@@ -663,22 +740,31 @@ export default function Home() {
                 </div>
 
                 {mixedContent.length > 0 ? (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-16">
+                  <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 mb-10">
                     {mixedContent.map((item) => (
                       <div
                         key={item.id}
                         onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
                         className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
                       >
-                        {item.image_url && (
-                          <div className="h-48 overflow-hidden">
+                        <div className="h-40 overflow-hidden relative bg-gradient-to-br from-gray-900 via-purple-950/40 to-gray-900">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                            <span className="text-2xl opacity-40">
+                              {item.category === 'interview' ? '🎤' : '🎵'}
+                            </span>
+                            <span className="text-white/20 text-[9px] uppercase tracking-widest font-medium">
+                              {item.category || 'article'}
+                            </span>
+                          </div>
+                          {item.image_url && (
                             <img
                               src={item.image_url}
                               alt={item.title}
-                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
-                          </div>
-                        )}
+                          )}
+                        </div>
                         <div className="p-6">
                           <div className="mb-2">
                             <span className={`px-2 py-1 text-xs font-semibold rounded ${
@@ -717,7 +803,7 @@ export default function Home() {
 
                 {/* ── [NEW] ON THE RADAR ──────────────────────────────────── */}
                 {onTheRadar.length > 0 && (
-                  <div className="mb-16">
+                  <div className="mb-10">
                     <div className="mb-6 flex items-end justify-between">
                       <div>
                         <h2 className="text-2xl md:text-3xl font-bold mb-1 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
@@ -763,7 +849,7 @@ export default function Home() {
                 )}
 
                 {/* ── [NEW] SUBMIT MUSIC FULL CTA ─────────────────────────── */}
-                <div className="mb-16 relative overflow-hidden border border-purple-500/30">
+                <div className="mb-10 relative overflow-hidden border border-purple-500/30">
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-black to-pink-950"></div>
                   <div
                     className="absolute inset-0 opacity-40"
@@ -808,8 +894,8 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* ── Newsletter CTA ──────────────────────────────────────── */}
-                <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-sm mb-16">
+                {/* ── Newsletter CTA — hidden on lg+ (left panel handles it) ── */}
+                <div className="lg:hidden bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-sm mb-10">
                   <div className="max-w-2xl mx-auto text-center">
                     <h3 className="text-3xl md:text-4xl font-bold mb-4">Stay in the Loop</h3>
                     <p className="text-white/70 text-lg mb-8">
@@ -872,38 +958,6 @@ export default function Home() {
                       </div>
                     </a>
 
-                    {/* TikTok */}
-                    <a
-                      href="https://tiktok.com/@pluggpress"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 px-5 py-4 bg-white/5 hover:bg-gradient-to-br hover:from-cyan-900/30 hover:to-black border border-white/10 hover:border-cyan-500/40 transition-all group"
-                    >
-                      <svg className="w-6 h-6 text-cyan-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.22 8.22 0 004.81 1.54V6.78a4.85 4.85 0 01-1.04-.09z"/>
-                      </svg>
-                      <div>
-                        <div className="text-white font-semibold text-sm group-hover:text-cyan-300 transition-colors">TikTok</div>
-                        <div className="text-white/40 text-xs">@pluggpress</div>
-                      </div>
-                    </a>
-
-                    {/* Twitter / X */}
-                    <a
-                      href="https://twitter.com/pluggpress"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 px-5 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 transition-all group"
-                    >
-                      <svg className="w-6 h-6 text-white/70 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                      </svg>
-                      <div>
-                        <div className="text-white font-semibold text-sm group-hover:text-white transition-colors">X / Twitter</div>
-                        <div className="text-white/40 text-xs">@pluggpress</div>
-                      </div>
-                    </a>
-
                     {/* Submit Music CTA card */}
                     <a
                       href="/submit-music"
@@ -920,7 +974,7 @@ export default function Home() {
 
               </div>
 
-              {/* ── SIDEBAR ─────────────────────────────────────────────── */}
+              {/* ── RIGHT: Ads/Spotify ─────────────────────────────────────── */}
               <div className="hidden xl:block w-80 flex-shrink-0">
                 <div className="sticky top-24 space-y-6">
                   {(() => {
@@ -953,6 +1007,8 @@ export default function Home() {
                       .filter(Boolean);
                   })()}
                 </div>
+              </div>
+
               </div>
             </div>
           </>
