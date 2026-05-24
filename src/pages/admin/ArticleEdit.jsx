@@ -248,7 +248,8 @@ const ArticleEdit = () => {
       if (formData.genius_url && !formData.lyrics) {
         try {
           const lyricsRes = await fetch(
-            `${API_URL}/api/genius-lyrics?url=${encodeURIComponent(formData.genius_url)}`
+            `${API_URL}/api/genius-lyrics?url=${encodeURIComponent(formData.genius_url)}`,
+            { headers: { Authorization: `Bearer ${token}` } }
           );
           if (lyricsRes.ok) {
             const lyricsData = await lyricsRes.json();
