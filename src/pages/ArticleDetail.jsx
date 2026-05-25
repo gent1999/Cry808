@@ -653,53 +653,64 @@ const ArticleDetail = () => {
 
       {/* More Articles Section */}
       {moreArticles.length > 0 && (
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 py-16 border-t border-white/10">
-          <h2 className="text-3xl font-bold mb-8">More Articles</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {moreArticles.slice(0, 3).map((article) => (
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 py-14 border-t border-white/[0.07]">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mb-0.5">Keep Reading</p>
+              <h2 className="text-2xl font-bold text-white leading-tight">More Articles</h2>
+            </div>
+            <div className="flex-1 h-px bg-white/[0.06]" />
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {moreArticles.slice(0, 3).map((a) => (
               <div
-                key={article.id}
-                onClick={() => window.location.href = generateArticleUrl(article.id, article.title)}
-                className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition cursor-pointer"
+                key={a.id}
+                onClick={() => window.location.href = generateArticleUrl(a.id, a.title)}
+                className="group cursor-pointer bg-white/[0.03] border border-white/[0.08] hover:border-purple-500/40 hover:bg-white/[0.06] transition-all duration-300 overflow-hidden flex flex-col"
               >
-                {/* Article Image */}
-                {article.image_url && (
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      src={article.image_url}
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                    />
+                {/* Image with fallback */}
+                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-900 via-purple-950/40 to-gray-900 flex-shrink-0">
+                  {/* Fallback */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+                    <span className="text-4xl opacity-25">{a.category === 'interview' ? '🎤' : '🎵'}</span>
+                    <span className="text-white/15 text-[10px] uppercase tracking-widest font-medium">{a.category || 'article'}</span>
                   </div>
-                )}
-
-                {/* Article Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2 line-clamp-2">
-                    {article.title}
-                  </h3>
-
-                  <p className="text-white/50 text-xs mb-3">
-                    By {article.author} • {new Date(article.created_at).toLocaleDateString()}
-                  </p>
-
-                  <p className="text-white/70 text-sm line-clamp-3 mb-4">
-                    {stripMarkdown(article.content)}
-                  </p>
-
-                  {/* Tags */}
-                  {article.tags && article.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {article.tags.slice(0, 3).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-md"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                  {/* Cover photo — hides on error, revealing fallback */}
+                  {a.image_url && (
+                    <img
+                      src={a.image_url}
+                      alt={a.title}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
                   )}
+                  {/* Category badge overlaid on image */}
+                  <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/70 to-transparent" />
+                  <span className={`absolute bottom-2.5 left-3 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ${a.category === 'interview' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'}`}>
+                    {a.category === 'interview' ? 'Interview' : 'Original'}
+                  </span>
+                </div>
+
+                {/* Content */}
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="text-base font-bold text-white/90 leading-snug line-clamp-2 group-hover:text-white transition-colors mb-2">
+                    {a.title}
+                  </h3>
+                  <p className="text-white/40 text-xs mb-3">
+                    {a.author} · {new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                  <p className="text-white/55 text-sm line-clamp-2 leading-relaxed flex-1">
+                    {stripMarkdown(a.content)}
+                  </p>
+                  {/* Read more nudge */}
+                  <div className="mt-4 flex items-center gap-1 text-purple-400 text-xs font-semibold group-hover:gap-2 transition-all">
+                    Read Article
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  </div>
                 </div>
               </div>
             ))}
