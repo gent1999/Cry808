@@ -9,7 +9,6 @@ import HilltopMobileBanner from '../components/HilltopMobileBanner';
 import HilltopPopUnder from '../components/HilltopPopUnder';
 import AmazonWidget from '../components/AmazonWidget';
 import SpotifyEmbed from '../components/SpotifyEmbed';
-import GeniusLyricsPanel from '../components/GeniusLyricsPanel';
 import BeatportArticleBanner from '../components/BeatportArticleBanner';
 import BeatportArticleTopBanner from '../components/BeatportArticleTopBanner';
 import { HILLTOP_ENABLED } from '../config/ads';
@@ -252,9 +251,9 @@ const ArticleDetail = () => {
         {/* Main Content with Ad Sidebar */}
         <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 pb-12 flex gap-6 items-start">
 
-          {/* Left Panel — Newsletter + Submit Music */}
+          {/* Left Panel — Newsletter + Submit Music + Lyrics */}
           <div className="hidden lg:block w-52 flex-shrink-0">
-            <div className="sticky top-20">
+            <div className="sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto scrollbar-hide">
               {/* Newsletter */}
               <div className="bg-gradient-to-b from-purple-950/60 to-black border border-purple-500/20 overflow-hidden">
                 <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-purple-500/20 px-4 py-3">
@@ -324,11 +323,35 @@ const ArticleDetail = () => {
                   </a>
                 </div>
               </div>
+
+              {/* Lyrics — shown below Submit Music when article has them */}
+              {article.lyrics && (
+                <div className="mt-3 bg-gradient-to-b from-gray-900/80 to-black border border-white/10 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 bg-white/[0.04] border-b border-white/10">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-yellow-400">Lyrics</p>
+                    {article.genius_url && (
+                      <a
+                        href={article.genius_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/30 hover:text-yellow-400 transition-colors"
+                        title="Open on Genius"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                  <div className="px-3 py-3 max-h-[420px] overflow-y-auto scrollbar-hide">
+                    <pre className="text-white/70 text-[10px] leading-relaxed font-sans whitespace-pre-wrap break-words">
+                      {article.lyrics}
+                    </pre>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Genius Lyrics Panel — left side, 2xl screens only */}
-          {article.lyrics && <GeniusLyricsPanel lyrics={article.lyrics} geniusUrl={article.genius_url} />}
 
           <div className="max-w-4xl flex-1">
             {/* Back Button */}
