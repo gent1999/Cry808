@@ -80,8 +80,8 @@ const ArticleDetail = () => {
     const measure = () => {
       if (!articleRef.current) return;
       const articleHeight = articleRef.current.offsetHeight;
-      const adsHeight = 520;       // rough height of Hilltop + Amazon + Spotify
-      const cardHeight = 205;      // h-36 image (144px) + text block (~61px)
+      const adsHeight = 580;       // rough height of Hilltop + Amazon + Spotify + buffer
+      const cardHeight = 220;      // h-36 image (144px) + text block (~68px) + space-y-2 gap (8px)
       const available = articleHeight - adsHeight;
       const count = Math.max(1, Math.min(8, Math.floor(available / cardHeight)));
       setSidebarArticleCount(count);
