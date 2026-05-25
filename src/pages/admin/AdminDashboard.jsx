@@ -583,69 +583,52 @@ export default function AdminDashboard() {
                 </a>
               }
             >
-              <div className="p-5">
-                {neon.loading ? (
-                  <div className="py-6 text-center text-sm text-slate-500">Loading Neon stats…</div>
-                ) : neon.error ? (
-                  <div className="py-6 text-center text-sm text-rose-400">{neon.error === 'NEON_PROJECT_ID or NEON_API_KEY not configured' ? 'Add NEON_PROJECT_ID + NEON_API_KEY env vars to enable.' : neon.error}</div>
-                ) : (
-                  <div className="grid gap-5 sm:grid-cols-[1fr_auto]">
-                    {/* Progress bar + headline */}
-                    <div className="min-w-0">
-                      <div className="mb-1.5 flex items-end justify-between gap-2">
-                        <span className="text-2xl font-bold text-white">
-                          {neon.cuHoursUsed}
-                          <span className="ml-1 text-sm font-normal text-slate-400">/ {neon.cuHoursLimit} CU-hrs</span>
+              {neon.loading ? (
+                <div className="px-5 py-10 text-center text-sm text-slate-500">Loading Neon stats…</div>
+              ) : neon.error ? (
+                <div className="px-5 py-10 text-center text-sm text-rose-400">
+                  {neon.error.includes('not configured') ? 'Add NEON_PROJECT_ID + NEON_API_KEY env vars to enable.' : neon.error}
+                </div>
+              ) : (() => {
+                const barColor = neon.percentUsed >= 90 ? 'bg-rose-500' : neon.percentUsed >= 70 ? 'bg-amber-400' : neon.percentUsed >= 40 ? 'bg-sky-400' : 'bg-emerald-400';
+                const textColor = neon.percentUsed >= 90 ? 'text-rose-400' : neon.percentUsed >= 70 ? 'text-amber-300' : 'text-emerald-400';
+                const remaining = Math.max(0, neon.cuHoursLimit - neon.cuHoursUsed).toFixed(1);
+                return (
+                  <div>
+                    {/* Progress bar */}
+                    <div className="px-5 pt-5 pb-4">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-sm text-slate-400">
+                          <span className="text-xl font-bold text-white">{neon.cuHoursUsed}</span>
+                          {' '}/ {neon.cuHoursLimit} CU-hrs used
                         </span>
-                        <span className={`text-sm font-semibold tabular-nums ${
-                          neon.percentUsed >= 90 ? 'text-rose-400' :
-                          neon.percentUsed >= 70 ? 'text-amber-400' : 'text-emerald-400'
-                        }`}>
-                          {neon.percentUsed}%
-                        </span>
+                        <span className={`text-sm font-bold tabular-nums ${textColor}`}>{neon.percentUsed}%</span>
                       </div>
-                      {/* Bar */}
-                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.07]">
-                        <div
-                          className={`h-full rounded-full transition-all duration-700 ${
-                            neon.percentUsed >= 90 ? 'bg-rose-500' :
-                            neon.percentUsed >= 70 ? 'bg-amber-400' :
-                            neon.percentUsed >= 40 ? 'bg-sky-400' : 'bg-emerald-400'
-                          }`}
-                          style={{ width: `${neon.percentUsed}%` }}
-                        />
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.07]">
+                        <div className={`h-full rounded-full transition-all duration-700 ${barColor}`} style={{ width: `${neon.percentUsed}%` }} />
                       </div>
                       <div className="mt-1.5 text-xs text-slate-500">
-                        {neon.cuHoursLimit - neon.cuHoursUsed > 0
-                          ? `${(neon.cuHoursLimit - neon.cuHoursUsed).toFixed(1)} CU-hrs remaining`
-                          : 'Allowance exhausted — compute suspended'}
+                        {+remaining > 0 ? `${remaining} CU-hrs remaining this period` : 'Allowance exhausted — compute suspended until reset'}
                       </div>
                     </div>
 
-                    {/* Stat pills */}
-                    <div className="flex flex-wrap gap-2 sm:flex-col sm:items-end sm:justify-center">
-                      {neon.daysLeft !== null && (
-                        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-center">
-                          <div className="text-lg font-bold text-white">{neon.daysLeft}d</div>
-                          <div className="text-[10px] text-slate-500 uppercase tracking-wider">until reset</div>
+                    {/* Stat grid */}
+                    <div className="grid grid-cols-2 gap-3 px-5 pb-5 sm:grid-cols-4">
+                      {[
+                        ['CU-hrs Used',   `${neon.cuHoursUsed}`,                                 textColor],
+                        ['Remaining',     `${remaining}`,                                         'text-white'],
+                        ['Resets In',     neon.daysLeft !== null ? `${neon.daysLeft} days` : '—', 'text-sky-300'],
+                        ['Storage',       neon.dataStorageGBHour !== null ? `${neon.dataStorageGBHour} GB·hr` : '—', 'text-violet-300'],
+                      ].map(([label, value, color]) => (
+                        <div key={label} className="rounded-2xl bg-white/[0.035] p-3">
+                          <div className="text-xs text-slate-500">{label}</div>
+                          <div className={`mt-1 text-xl font-semibold ${color}`}>{value}</div>
                         </div>
-                      )}
-                      {neon.dataStorageGBHour !== null && (
-                        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-center">
-                          <div className="text-sm font-semibold text-white">{neon.dataStorageGBHour} GB·hr</div>
-                          <div className="text-[10px] text-slate-500 uppercase tracking-wider">storage</div>
-                        </div>
-                      )}
-                      {neon.dataTransferGB !== null && (
-                        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-center">
-                          <div className="text-sm font-semibold text-white">{neon.dataTransferGB} GB</div>
-                          <div className="text-[10px] text-slate-500 uppercase tracking-wider">data transfer</div>
-                        </div>
-                      )}
+                      ))}
                     </div>
                   </div>
-                )}
-              </div>
+                );
+              })()}
             </Panel>
           </section>
 
