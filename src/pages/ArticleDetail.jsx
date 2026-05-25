@@ -253,7 +253,7 @@ const ArticleDetail = () => {
 
           {/* Left Panel — Newsletter + Submit Music + Lyrics */}
           <div className="hidden lg:block w-52 flex-shrink-0">
-            <div className="sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto scrollbar-hide">
+            <div className="sticky top-20">
               {/* Newsletter */}
               <div className="bg-gradient-to-b from-purple-950/60 to-black border border-purple-500/20 overflow-hidden">
                 <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-purple-500/20 px-4 py-3">
@@ -343,7 +343,7 @@ const ArticleDetail = () => {
                       </a>
                     )}
                   </div>
-                  <div className="px-3 py-3 max-h-[420px] overflow-y-auto scrollbar-hide">
+                  <div className="px-3 py-3">
                     <pre className="text-white/70 text-[10px] leading-relaxed font-sans whitespace-pre-wrap break-words">
                       {article.lyrics}
                     </pre>
