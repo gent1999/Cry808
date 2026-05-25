@@ -388,7 +388,7 @@ export default function ArticlesList() {
           <div className="border border-gray-800/60">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1000px]">
-                <thead className="sticky top-11 z-10">
+                <thead className="sticky top-14 z-10">
                   <tr className="bg-[#0d1420] border-b border-gray-700/60">
                     {[
                       { label: 'Article',     w: '' },
