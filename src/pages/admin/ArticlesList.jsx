@@ -385,10 +385,9 @@ export default function ArticlesList() {
 
         {/* ── LIST VIEW ────────────────────────────────────────────────────── */}
         {viewMode === 'list' ? (
-          <div className="border border-gray-800/60">
-            <div className="overflow-x-auto">
+          <div className="border border-gray-800/60 overflow-auto max-h-[calc(100vh-260px)]">
               <table className="w-full min-w-[1000px]">
-                <thead className="sticky top-14 z-10">
+                <thead className="sticky top-0 z-10">
                   <tr className="bg-[#0d1420] border-b border-gray-700/60">
                     {[
                       { label: 'Article',     w: '' },
@@ -539,7 +538,6 @@ export default function ArticlesList() {
                   }
                 </tbody>
               </table>
-            </div>
           </div>
 
         ) : (
