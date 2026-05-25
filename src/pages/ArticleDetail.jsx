@@ -57,10 +57,10 @@ const ArticleDetail = () => {
         const response = await fetch(`${API_URL}/api/articles`);
         if (response.ok) {
           const data = await response.json();
-          // Filter out current article and get 3 random articles
+          // Filter out current article and get 8 random articles
           const otherArticles = data.articles.filter(article => article.id !== parseInt(id));
           const shuffled = otherArticles.sort(() => 0.5 - Math.random());
-          setMoreArticles(shuffled.slice(0, 3));
+          setMoreArticles(shuffled.slice(0, 8));
         }
       } catch (err) {
         console.error('Failed to fetch more articles:', err);
@@ -600,6 +600,52 @@ const ArticleDetail = () => {
                   .map(item => item.component)
                   .filter(Boolean);
               })()}
+
+              {/* More to Read — fills remaining sidebar height */}
+              {moreArticles.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">More to Read</span>
+                    <div className="flex-1 h-px bg-white/[0.06]" />
+                  </div>
+                  <div className="space-y-1">
+                    {moreArticles.map((a) => (
+                      <div
+                        key={a.id}
+                        onClick={() => window.location.href = generateArticleUrl(a.id, a.title)}
+                        className="flex gap-3 p-2 cursor-pointer group hover:bg-white/[0.04] transition-colors"
+                      >
+                        {/* Thumbnail */}
+                        <div className="relative w-16 h-14 flex-shrink-0 overflow-hidden bg-gradient-to-br from-gray-900 via-purple-950/30 to-gray-900">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-lg opacity-20">{a.category === 'interview' ? '🎤' : '🎵'}</span>
+                          </div>
+                          {a.image_url && (
+                            <img
+                              src={a.image_url}
+                              alt={a.title}
+                              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          )}
+                        </div>
+                        {/* Text */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                          {a.category && (
+                            <span className={`inline-block mb-0.5 text-[9px] font-bold uppercase tracking-wider ${a.category === 'interview' ? 'text-yellow-500' : 'text-purple-400'}`}>
+                              {a.category === 'interview' ? 'Interview' : 'Original'}
+                            </span>
+                          )}
+                          <h4 className="text-xs font-semibold text-white/90 leading-snug line-clamp-2 group-hover:text-white transition-colors">
+                            {a.title}
+                          </h4>
+                          <p className="mt-0.5 text-[10px] text-white/30">{a.author}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -610,7 +656,7 @@ const ArticleDetail = () => {
         <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 py-16 border-t border-white/10">
           <h2 className="text-3xl font-bold mb-8">More Articles</h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {moreArticles.map((article) => (
+            {moreArticles.slice(0, 3).map((article) => (
               <div
                 key={article.id}
                 onClick={() => window.location.href = generateArticleUrl(article.id, article.title)}
