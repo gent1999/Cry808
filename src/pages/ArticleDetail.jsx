@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ReactMarkdown from 'react-markdown';
@@ -22,6 +22,8 @@ const ArticleDetail = () => {
   const navigate = useNavigate();
   const [article, setArticle] = useState(null);
   const [moreArticles, setMoreArticles] = useState([]);
+  const [sidebarArticleCount, setSidebarArticleCount] = useState(4);
+  const articleRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [adSettings, setAdSettings] = useState({});
@@ -70,6 +72,24 @@ const ArticleDetail = () => {
     fetchArticle();
     fetchMoreArticles();
   }, [id]);
+
+  // After article loads, measure its height and cap sidebar article count
+  // so it doesn't overflow and create whitespace next to short articles.
+  useEffect(() => {
+    if (!article) return;
+    const measure = () => {
+      if (!articleRef.current) return;
+      const articleHeight = articleRef.current.offsetHeight;
+      const adsHeight = 520;       // rough height of Hilltop + Amazon + Spotify
+      const cardHeight = 205;      // h-36 image (144px) + text block (~61px)
+      const available = articleHeight - adsHeight;
+      const count = Math.max(1, Math.min(8, Math.floor(available / cardHeight)));
+      setSidebarArticleCount(count);
+    };
+    // Small delay so the DOM has painted
+    const t = setTimeout(measure, 150);
+    return () => clearTimeout(t);
+  }, [article]);
 
   // Load ad settings from API
   useEffect(() => {
@@ -353,7 +373,7 @@ const ArticleDetail = () => {
             </div>
           </div>
 
-          <div className="max-w-4xl flex-1">
+          <div className="max-w-4xl flex-1" ref={articleRef}>
             {/* Back Button */}
             <button
               onClick={() => navigate('/')}
@@ -611,7 +631,7 @@ const ArticleDetail = () => {
                     <div className="flex-1 h-px bg-white/[0.06]" />
                   </div>
                   <div className="space-y-2">
-                    {moreArticles.map((a) => (
+                    {moreArticles.slice(0, sidebarArticleCount).map((a) => (
                       <div
                         key={a.id}
                         onClick={() => window.location.href = generateArticleUrl(a.id, a.title)}
