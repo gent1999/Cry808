@@ -608,17 +608,17 @@ const ArticleDetail = () => {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">More to Read</span>
                     <div className="flex-1 h-px bg-white/[0.06]" />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {moreArticles.map((a) => (
                       <div
                         key={a.id}
                         onClick={() => window.location.href = generateArticleUrl(a.id, a.title)}
-                        className="flex gap-3 p-2 cursor-pointer group hover:bg-white/[0.04] transition-colors"
+                        className="cursor-pointer group hover:bg-white/[0.04] border border-transparent hover:border-white/10 transition-all overflow-hidden"
                       >
-                        {/* Thumbnail */}
-                        <div className="relative w-16 h-14 flex-shrink-0 overflow-hidden bg-gradient-to-br from-gray-900 via-purple-950/30 to-gray-900">
+                        {/* Full-width thumbnail */}
+                        <div className="relative w-full h-36 overflow-hidden bg-gradient-to-br from-gray-900 via-purple-950/30 to-gray-900">
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-lg opacity-20">{a.category === 'interview' ? '🎤' : '🎵'}</span>
+                            <span className="text-3xl opacity-20">{a.category === 'interview' ? '🎤' : '🎵'}</span>
                           </div>
                           {a.image_url && (
                             <img
@@ -630,16 +630,16 @@ const ArticleDetail = () => {
                           )}
                         </div>
                         {/* Text */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        <div className="px-3 py-2.5">
                           {a.category && (
-                            <span className={`inline-block mb-0.5 text-[9px] font-bold uppercase tracking-wider ${a.category === 'interview' ? 'text-yellow-500' : 'text-purple-400'}`}>
+                            <span className={`inline-block mb-1 text-[10px] font-bold uppercase tracking-wider ${a.category === 'interview' ? 'text-yellow-500' : 'text-purple-400'}`}>
                               {a.category === 'interview' ? 'Interview' : 'Original'}
                             </span>
                           )}
-                          <h4 className="text-xs font-semibold text-white/90 leading-snug line-clamp-2 group-hover:text-white transition-colors">
+                          <h4 className="text-sm font-semibold text-white/90 leading-snug line-clamp-2 group-hover:text-white transition-colors">
                             {a.title}
                           </h4>
-                          <p className="mt-0.5 text-[10px] text-white/30">{a.author}</p>
+                          <p className="mt-1 text-xs text-white/35">{a.author}</p>
                         </div>
                       </div>
                     ))}
