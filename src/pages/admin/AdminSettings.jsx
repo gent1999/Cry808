@@ -19,6 +19,8 @@ const AdminSettings = () => {
     beatport_home_mobile_enabled: false,
     beatport_article_desktop_enabled: false,
     beatport_article_bottom_enabled: false,
+    amazon_home_enabled: true,
+    amazon_article_enabled: true,
     adsterra_order: '1',
     beatport_sidebar_order: '2',
     spotify_order: '3',
@@ -237,6 +239,11 @@ const AdminSettings = () => {
           { label: 'Home — Mobile Banner',     size: '300×50',   settingKey: 'beatport_home_mobile_enabled' },
           { label: 'Article — Top Banner',     size: '1916×260', settingKey: 'beatport_article_desktop_enabled' },
           { label: 'Article — Bottom Banner',  size: '970×90',   settingKey: 'beatport_article_bottom_enabled' },
+        ]} />
+
+        <AdTable title="Amazon" rows={[
+          { label: 'Home — Sidebar Widget',    size: 'Product cards', settingKey: 'amazon_home_enabled' },
+          { label: 'Article — Sidebar Widget', size: 'Product cards', settingKey: 'amazon_article_enabled' },
         ]} />
 
         <div className="grid grid-cols-2 gap-6">

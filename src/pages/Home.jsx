@@ -997,7 +997,9 @@ export default function Home() {
                       {
                         order: parseInt(adSettings.amazon_order || '4'),
                         key: 'amazon',
-                        component: <AmazonWidget key="amazon" page="home" />
+                        component: adSettings.amazon_home_enabled !== false && adSettings.amazon_home_enabled !== 'false'
+                          ? <AmazonWidget key="amazon" page="home" />
+                          : null
                       }
                     ];
 

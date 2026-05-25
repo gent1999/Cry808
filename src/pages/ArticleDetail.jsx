@@ -585,7 +585,9 @@ const ArticleDetail = () => {
                   {
                     order: parseInt(adSettings.amazon_article_order || '2'),
                     key: 'amazon',
-                    component: <AmazonWidget key="amazon" page="article" />
+                    component: adSettings.amazon_article_enabled !== false && adSettings.amazon_article_enabled !== 'false'
+                      ? <AmazonWidget key="amazon" page="article" />
+                      : null
                   },
                   {
                     order: parseInt(adSettings.spotify_article_order || '3'),
