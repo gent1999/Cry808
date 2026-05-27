@@ -9,7 +9,7 @@
       "destination": "/api/article/:slug"
     },
     {
-      "source": "/((?!api).*)",
+      "source": "/((?!api|ads\\.txt|robots\\.txt).*)",
       "destination": "/index.html"
     }
   ],
