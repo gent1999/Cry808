@@ -27,13 +27,9 @@ export default function ReferralAdWidget() {
           <div className="relative">
             <img
               src={ad.image_url}
-              alt={ad.title || 'Sponsored'}
+              alt={ad.title || 'Ad'}
               className="w-full aspect-square object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-200"
             />
-            {/* Sponsored label */}
-            <span className="absolute bottom-1.5 right-1.5 text-[8px] font-mono uppercase tracking-widest text-white/40 bg-black/60 px-1.5 py-0.5">
-              Sponsored
-            </span>
           </div>
           {ad.title && (
             <div className="px-3 py-2 bg-white/[0.03]">
