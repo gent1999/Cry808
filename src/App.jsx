@@ -30,6 +30,7 @@ import Payouts from "./pages/admin/Payouts";
 import Expenses from "./pages/admin/Expenses";
 import RevenueSources from "./pages/admin/RevenueSources";
 import Cortex from "./pages/admin/Cortex";
+import ReferralAds from "./pages/admin/ReferralAds";
 
 // Component to track page views
 function AnalyticsTracker() {
@@ -167,6 +168,7 @@ export default function App() {
           <Route path="/admin/finance/expenses" element={<Expenses />} />
           <Route path="/admin/finance/sources" element={<RevenueSources />} />
           <Route path="/admin/cortex" element={<Cortex />} />
+          <Route path="/admin/referral-ads" element={<ReferralAds />} />
         </Routes>
 
         {/* Social Bar Ad - Sticky Footer on All Pages */}

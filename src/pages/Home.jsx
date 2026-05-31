@@ -11,6 +11,7 @@ import BeatportBanner from "../components/BeatportBanner";
 import BeatportMobileBanner from "../components/BeatportMobileBanner";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
+import ReferralAdWidget from "../components/ReferralAdWidget";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -516,6 +517,9 @@ export default function Home() {
                       </a>
                     </div>
                   </div>
+
+                  {/* ── Referral Ads ── */}
+                  <ReferralAdWidget />
 
                 </div>
               </div>
