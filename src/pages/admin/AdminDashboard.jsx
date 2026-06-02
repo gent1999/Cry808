@@ -51,6 +51,7 @@ function Sidebar({ admin, stats, onLogout }) {
       ['Finance Hub',     'finance', '/admin/finance'],
       ['Ad Settings',     'ads',     '/admin/settings'],
       ['Referral Ads',    'scout',   '/admin/referral-ads'],
+      ['Newsletter',      'pulse',   '/admin/newsletter'],
       ['Spotify Manager', 'spotify', '/admin/spotify'],
       ['Amazon Products', 'amazon',  '/admin/amazon-products'],
     ]],
