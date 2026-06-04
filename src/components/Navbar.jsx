@@ -141,6 +141,17 @@ export default function Navbar() {
                 Interviews
               </Link>
               <Link
+                to="/reviews"
+                onClick={handleNavClick('/reviews')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+                  isActive('/reviews')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Reviews
+              </Link>
+              <Link
                 to="/about"
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
                   isActive('/about')
@@ -241,6 +252,17 @@ export default function Navbar() {
                 Interviews
               </Link>
               <Link
+                to="/reviews"
+                className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  isActive('/reviews')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                onClick={handleNavClick('/reviews')}
+              >
+                Reviews
+              </Link>
+              <Link
                 to="/about"
                 className={`px-4 py-3 rounded-lg font-medium transition-all ${
                   isActive('/about')
@@ -297,7 +319,9 @@ export default function Navbar() {
                   >
                     <div className="font-medium text-white line-clamp-1">{result.title}</div>
                     <div className="text-xs text-white/50 mt-1">
-                      {result.category === 'interview' ? '🎤 Interview' : '📰 Article'} • By {result.author}
+                      {(result.categories || [result.category]).includes('interview') ? '🎤 Interview'
+                        : (result.categories || [result.category]).includes('review') ? '⭐ Review'
+                        : '📰 Article'} • By {result.author}
                     </div>
                   </div>
                 ))}

@@ -659,6 +659,12 @@ export default function Home() {
                         <p className="text-white/40 text-xs mb-3">In-depth breakdowns of the latest projects</p>
                         <div className="h-1 w-20 bg-gradient-to-r from-amber-500 to-yellow-400"></div>
                       </div>
+                      <a
+                        href="/reviews"
+                        className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors whitespace-nowrap"
+                      >
+                        View All →
+                      </a>
                     </div>
 
                     <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">

@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import News from "./pages/News";
 import Interviews from "./pages/Interviews";
+import Reviews from "./pages/Reviews";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import SubmitMusic from "./pages/SubmitMusic";
 import DMCA from "./pages/DMCA";
@@ -93,6 +94,15 @@ export default function App() {
               <>
                 <Navbar />
                 <Interviews />
+              </>
+            }
+          />
+          <Route
+            path="/reviews"
+            element={
+              <>
+                <Navbar />
+                <Reviews />
               </>
             }
           />
