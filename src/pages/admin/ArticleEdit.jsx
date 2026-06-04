@@ -21,7 +21,7 @@ const ArticleEdit = () => {
     soundcloud_url: '',
     genius_url: '',
     lyrics: '',
-    category: 'article',
+    categories: ['article'],
     is_original: false,
     is_evergreen: false
   });
@@ -78,6 +78,14 @@ const ArticleEdit = () => {
         const article = data.article;
 
         // Populate form with existing article data
+        // Prefer categories array; fall back to wrapping legacy single category
+        const loadedCategories =
+          Array.isArray(article.categories) && article.categories.length > 0
+            ? article.categories
+            : article.category
+              ? [article.category]
+              : ['article'];
+
         setFormData({
           title: article.title || '',
           author: article.author || '',
@@ -88,7 +96,7 @@ const ArticleEdit = () => {
           soundcloud_url: article.soundcloud_url || '',
           genius_url: article.genius_url || '',
           lyrics: article.lyrics || '',
-          category: article.category || 'article',
+          categories: loadedCategories,
           is_original: article.is_original || false,
           is_evergreen: article.is_evergreen || false
         });
@@ -125,17 +133,19 @@ const ArticleEdit = () => {
 
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    const updatedFormData = {
-      ...formData,
-      [e.target.name]: value
-    };
+    setFormData({ ...formData, [e.target.name]: value });
+    setError('');
+  };
 
-    // Auto-check evergreen when "Guides" category is selected
-    if (e.target.name === 'category' && value === 'guides') {
-      updatedFormData.is_evergreen = true;
-    }
-
-    setFormData(updatedFormData);
+  const handleCategoryToggle = (cat) => {
+    setFormData(prev => {
+      const current = prev.categories || [];
+      const next = current.includes(cat)
+        ? current.filter(c => c !== cat)
+        : [...current, cat];
+      if (next.length === 0) return prev;
+      return { ...prev, categories: next, is_evergreen: next.includes('guides') ? true : prev.is_evergreen };
+    });
     setError('');
   };
 
@@ -262,8 +272,9 @@ const ArticleEdit = () => {
         formDataToSend.append('lyrics', lyricsToSave);
       }
 
-      // Add category
-      formDataToSend.append('category', formData.category);
+      // Add categories (array) + legacy single category
+      formDataToSend.append('categories', JSON.stringify(formData.categories || ['article']));
+      formDataToSend.append('category', (formData.categories || ['article'])[0]);
 
       // Add is_original flag
       formDataToSend.append('is_original', formData.is_original);
@@ -400,24 +411,36 @@ const ArticleEdit = () => {
               />
             </div>
 
-            {/* Category */}
+            {/* Categories */}
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-2">
-                Category *
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Categories * <span className="text-gray-500 font-normal">(select all that apply)</span>
               </label>
-              <select
-                id="category"
-                name="category"
-                required
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option value="article">Article</option>
-                <option value="interview">Interview</option>
-                <option value="guides">Guides</option>
-              </select>
-              <p className="mt-1 text-sm text-gray-400">Choose the article type (Guides = evergreen content)</p>
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { value: 'article', label: '📰 Article' },
+                  { value: 'interview', label: '🎤 Interview' },
+                  { value: 'review', label: '⭐ Review' },
+                  { value: 'guides', label: '🌲 Guides' },
+                ].map(({ value, label }) => {
+                  const selected = (formData.categories || []).includes(value);
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => handleCategoryToggle(value)}
+                      className={`px-4 py-2 rounded-md text-sm font-medium border transition-all ${
+                        selected
+                          ? 'bg-purple-600 border-purple-500 text-white'
+                          : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-purple-500/50'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1 text-sm text-gray-400">Guides auto-enables Evergreen. At least one required.</p>
             </div>
 
             {/* 1of1 Original Toggle */}

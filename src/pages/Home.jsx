@@ -22,6 +22,7 @@ export default function Home() {
   const [evergreenGuides, setEvergreenGuides] = useState([]);
   const [mixedContent, setMixedContent] = useState([]);
   const [interviewsSpotlight, setInterviewsSpotlight] = useState([]);
+  const [reviewArticles, setReviewArticles] = useState([]);
   const [onTheRadar, setOnTheRadar] = useState([]);
   const [trendingTags, setTrendingTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,9 +72,17 @@ export default function Home() {
 
         // Interviews spotlight (up to 8)
         const interviewArticles = sortedArticles.filter(
-          a => a.category === 'interview' && !featuredIds.has(a.id)
+          a => !featuredIds.has(a.id) &&
+               (a.category === 'interview' || (Array.isArray(a.categories) && a.categories.includes('interview')))
         );
         setInterviewsSpotlight(interviewArticles.slice(0, 8));
+
+        // Reviews section (up to 8)
+        const reviewsList = sortedArticles.filter(
+          a => !featuredIds.has(a.id) &&
+               (a.category === 'review' || (Array.isArray(a.categories) && a.categories.includes('review')))
+        );
+        setReviewArticles(reviewsList.slice(0, 8));
 
         // On the Radar - latest non-evergreen drops (up to 10)
         const radarItems = filteredArticles.filter(a => !a.is_evergreen).slice(0, 10);
@@ -300,7 +309,9 @@ export default function Home() {
                     {/* Category badge */}
                     <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20">
                       <span className="inline-block px-2 py-1 md:px-3 md:py-1.5 bg-purple-600/90 backdrop-blur-sm text-white text-xs md:text-sm font-semibold rounded-full uppercase tracking-wider shadow-lg">
-                        {article.category === 'interview' ? '🎤 Interview' : '📰 Latest'}
+                        {(article.categories || [article.category]).includes('interview') ? '🎤 Interview'
+                          : (article.categories || [article.category]).includes('review') ? '⭐ Review'
+                          : '📰 Latest'}
                       </span>
                     </div>
                   </div>
@@ -625,6 +636,58 @@ export default function Home() {
                           )}
                           <div className="p-4">
                             <h3 className="text-sm font-semibold line-clamp-2 mb-2 group-hover:text-pink-300 transition-colors">
+                              {item.title}
+                            </h3>
+                            <p className="text-white/40 text-xs">
+                              By {item.author} • {new Date(item.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Reviews ─────────────────────────────────────────────── */}
+                {reviewArticles.length > 0 && (
+                  <div className="mb-10">
+                    <div className="mb-6 flex items-end justify-between">
+                      <div>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-1 bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
+                          ⭐ Reviews
+                        </h2>
+                        <p className="text-white/40 text-xs mb-3">In-depth breakdowns of the latest projects</p>
+                        <div className="h-1 w-20 bg-gradient-to-r from-amber-500 to-yellow-400"></div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                      {reviewArticles.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
+                          className="flex-shrink-0 w-56 md:w-64 bg-white/5 border border-amber-500/20 overflow-hidden hover:border-amber-500/60 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
+                        >
+                          {item.image_url ? (
+                            <div className="h-44 overflow-hidden relative">
+                              <img
+                                src={item.image_url}
+                                alt={item.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                              <div className="absolute inset-0 bg-gradient-to-r from-amber-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                              <span className="absolute bottom-2 left-2 px-2 py-1 bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider">
+                                ⭐ Review
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="h-44 bg-gradient-to-br from-amber-900/30 to-yellow-900/20 flex items-center justify-center">
+                              <span className="text-5xl">⭐</span>
+                            </div>
+                          )}
+                          <div className="p-4">
+                            <h3 className="text-sm font-semibold line-clamp-2 mb-2 group-hover:text-amber-300 transition-colors">
                               {item.title}
                             </h3>
                             <p className="text-white/40 text-xs">
