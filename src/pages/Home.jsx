@@ -4,8 +4,6 @@ import Footer from "../components/Footer";
 import SpotifyEmbed from "../components/SpotifyEmbed";
 import AdsterraNative from "../components/AdsterraNative";
 import AdsterraMobileBanner from "../components/AdsterraMobileBanner";
-import AdsterraSmartlink from "../components/AdsterraSmartlink";
-import Infolinks from "../components/Infolinks";
 import AmazonWidget from "../components/AmazonWidget";
 import BeatportBanner from "../components/BeatportBanner";
 import BeatportMobileBanner from "../components/BeatportMobileBanner";
@@ -211,9 +209,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col overflow-x-hidden">
-      {/* Infolinks - loads once for entire page */}
-      <Infolinks />
-
       <div className="flex-1">
         {loading ? (
           <>

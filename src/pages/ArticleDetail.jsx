@@ -6,7 +6,6 @@ import remarkGfm from 'remark-gfm';
 import Footer from '../components/Footer';
 import HilltopAdSidebar from '../components/HilltopAdSidebar';
 import HilltopMobileBanner from '../components/HilltopMobileBanner';
-import HilltopPopUnder from '../components/HilltopPopUnder';
 import AmazonWidget from '../components/AmazonWidget';
 import SpotifyEmbed from '../components/SpotifyEmbed';
 import BeatportArticleBanner from '../components/BeatportArticleBanner';
@@ -741,8 +740,6 @@ const ArticleDetail = () => {
       )}
 
       <Footer />
-      {HILLTOP_ENABLED && <HilltopPopUnder />}
-
       {/* Image Lightbox Modal */}
       {lightboxOpen && (
         <div

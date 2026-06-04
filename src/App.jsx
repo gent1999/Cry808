@@ -2,8 +2,6 @@ import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Navbar from "./components/Navbar";
-import AdsterraSocialBar from "./components/AdsterraSocialBar";
-import { ADSTERRA_ENABLED } from "./config/ads";
 import { initGA, logPageView } from "./utils/analytics";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -173,8 +171,6 @@ export default function App() {
           <Route path="/admin/newsletter" element={<Newsletter />} />
         </Routes>
 
-        {/* Social Bar Ad - Sticky Footer on All Pages */}
-        {ADSTERRA_ENABLED && <AdsterraSocialBar />}
       </div>
     </Router>
     </HelmetProvider>
