@@ -1,597 +1,488 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import logo from '../../assets/cry808_logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// ── Side panel ────────────────────────────────────────────────────────────────
+const SideIcon = ({ path }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d={path} />
+  </svg>
+);
+
+function SidePanel() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const active = (to) => pathname === to || (to !== '/admin/dashboard' && pathname.startsWith(to));
+
+  const groups = [
+    ['Content', [
+      ['New Article',   'M12 5v14M5 12h14',       '/admin/articles/create'],
+      ['All Articles',  'M5 6h14M5 12h14M5 18h9',  '/admin/articles'],
+      ['Submissions',   'M4 13h4l2 3h4l2-3h4M5 5h14l1 8v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5l1-8Z', '/admin/submissions'],
+    ]],
+    ['Intelligence', [
+      ['Cortex', 'M12 2a5 5 0 0 1 5 5c0 2.4-1.7 4.4-4 4.9V21h-2v-9.1C8.7 11.4 7 9.4 7 7a5 5 0 0 1 5-5Z', '/admin/cortex'],
+    ]],
+    ['Business & Config', [
+      ['Finance Hub',     'M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6',                '/admin/finance'],
+      ['Ad Settings',     'M12 4v16M4 12h16M7 7l10 10M17 7 7 17',                             '/admin/settings'],
+      ['Referral Ads',    'M4 5h16v4H4zM4 11h6v8H4zM12 11h8v8h-8z',                          '/admin/referral-ads'],
+      ['Newsletter',      'M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z', '/admin/newsletter'],
+      ['Spotify Manager', 'M7 18V6l11 6-11 6Z',                                               '/admin/spotify'],
+      ['Amazon Products', 'M5 7h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7Zm4 0a3 3 0 0 1 6 0',  '/admin/amazon-products'],
+    ]],
+  ];
+
+  return (
+    <aside className="content-side-panel fixed inset-y-0 left-0 z-30 flex w-[264px] flex-col border-r border-white/[0.07] bg-[#0b1019]/95 px-4 py-5 shadow-[20px_0_80px_rgba(0,0,0,.34)] backdrop-blur-xl">
+      <button onClick={() => navigate('/admin/dashboard')} className="mb-7 flex items-center gap-3 text-left">
+        <span className="grid h-11 w-11 place-items-center overflow-hidden bg-transparent">
+          <img src={logo} alt="Cry808" className="h-full w-full object-contain" />
+        </span>
+        <span>
+          <span className="block text-[15px] font-semibold tracking-[.16em] text-white">CRY808</span>
+          <span className="block text-[11px] font-medium text-slate-500">Content System</span>
+        </span>
+      </button>
+      <nav className="flex-1 space-y-7 overflow-y-auto pr-1">
+        {groups.map(([label, items]) => (
+          <div key={label}>
+            <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[.16em] text-slate-500/90">{label}</div>
+            <div className="space-y-1.5">
+              {items.map(([labelText, icon, to]) => {
+                const isActive = active(to);
+                return (
+                  <button key={labelText} onClick={() => navigate(to)}
+                    className={`group flex w-full items-center gap-3 border px-3 py-2.5 text-left text-sm transition duration-200 ${
+                      isActive
+                        ? 'border-sky-300/25 bg-sky-300/10 text-white'
+                        : 'border-transparent text-slate-400 hover:border-white/[0.07] hover:bg-white/[0.04] hover:text-slate-100'
+                    }`}
+                  >
+                    <span className={`grid h-8 w-8 place-items-center ${isActive ? 'bg-sky-500/20 text-sky-200' : 'bg-white/[0.04] text-slate-500 group-hover:text-slate-200'}`}>
+                      <SideIcon path={icon} />
+                    </span>
+                    <span className="min-w-0 flex-1 font-medium">{labelText}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+    </aside>
+  );
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fmtPrice  = cents => `$${(cents / 100).toFixed(2)}`;
+const fmtDate   = d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+const fmtFull   = d => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+const statusStyle = {
+  pending:  'text-amber-400 border-amber-700/60',
+  approved: 'text-emerald-400 border-emerald-700/60',
+  rejected: 'text-red-400 border-red-800/60',
+};
+
+const typeStyle = {
+  featured: 'text-yellow-400 border-yellow-700/60',
+  regular:  'text-sky-400 border-sky-800/60',
+};
+
+// ── Main component ─────────────────────────────────────────────────────────────
 const SubmissionsList = () => {
   const navigate = useNavigate();
-  const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [publishingId, setPublishingId] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [submissions,       setSubmissions]       = useState([]);
+  const [loading,           setLoading]           = useState(true);
+  const [error,             setError]             = useState('');
+  const [successMessage,    setSuccessMessage]    = useState('');
+  const [selectedSubmission,setSelectedSubmission]= useState(null);
+  const [publishingId,      setPublishingId]      = useState(null);
+  const [filterStatus,      setFilterStatus]      = useState('all');
 
   useEffect(() => {
-    const fetchSubmissions = async () => {
-      try {
-        const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('adminToken');
+    if (!token) { navigate('/admin/login'); return; }
 
-        if (!token) {
-          navigate('/admin/login');
-          return;
-        }
-
-        const response = await fetch(`${API_URL}/api/submissions`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            navigate('/admin/login');
-            return;
-          }
-          throw new Error('Failed to fetch submissions');
-        }
-
-        const data = await response.json();
-        setSubmissions(data.submissions);
-      } catch (err) {
-        setError(err.message || 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubmissions();
+    fetch(`${API_URL}/api/submissions`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => {
+        if (r.status === 401) { navigate('/admin/login'); return null; }
+        if (!r.ok) throw new Error('Failed to fetch submissions');
+        return r.json();
+      })
+      .then(d => d && setSubmissions(d.submissions))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
   }, [navigate]);
 
-  const formatPrice = (cents) => {
-    return `$${(cents / 100).toFixed(2)}`;
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getSubmissionTypeLabel = (type) => {
-    return type === 'featured' ? '🏆 Featured Article' : '📰 Regular Article';
-  };
-
-  const getSubmissionTypeColor = (type) => {
-    return type === 'featured' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500' : 'bg-blue-500/20 text-blue-400 border-blue-500';
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-500/20 text-yellow-400';
-      case 'approved':
-        return 'bg-green-500/20 text-green-400';
-      case 'rejected':
-        return 'bg-red-500/20 text-red-400';
-      default:
-        return 'bg-gray-500/20 text-gray-400';
-    }
-  };
-
-  const handlePublishSubmission = async (submissionId) => {
-    if (!window.confirm('Are you sure you want to publish this submission as an article?')) {
-      return;
-    }
-
-    setPublishingId(submissionId);
+  const handlePublish = async (id) => {
+    if (!window.confirm('Publish this submission as an article?')) return;
+    setPublishingId(id);
     setError('');
-
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_URL}/api/submissions/${submissionId}/publish`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+      const r = await fetch(`${API_URL}/api/submissions/${id}/publish`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` },
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to publish submission');
-      }
-
-      // Update submission status in local state
-      setSubmissions(submissions.map(sub =>
-        sub.id === submissionId
-          ? { ...sub, submission_status: 'approved' }
-          : sub
-      ));
-
-      if (selectedSubmission && selectedSubmission.id === submissionId) {
-        setSelectedSubmission({ ...selectedSubmission, submission_status: 'approved' });
-      }
-
-      setSuccessMessage(`Article "${data.article.title}" published successfully!`);
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.message || 'Failed to publish');
+      setSubmissions(prev => prev.map(s => s.id === id ? { ...s, submission_status: 'approved' } : s));
+      if (selectedSubmission?.id === id) setSelectedSubmission(s => ({ ...s, submission_status: 'approved' }));
+      setSuccessMessage(`"${d.article.title}" published!`);
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (err) {
-      setError(err.message || 'Failed to publish submission');
+      setError(err.message);
     } finally {
       setPublishingId(null);
     }
   };
 
-  const handleUpdateStatus = async (submissionId, newStatus) => {
+  const handleStatus = async (id, status) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_URL}/api/submissions/${submissionId}/status`, {
+      const r = await fetch(`${API_URL}/api/submissions/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update status');
-      }
-
-      // Update submission status in local state
-      setSubmissions(submissions.map(sub =>
-        sub.id === submissionId
-          ? { ...sub, submission_status: newStatus }
-          : sub
-      ));
-
-      if (selectedSubmission && selectedSubmission.id === submissionId) {
-        setSelectedSubmission({ ...selectedSubmission, submission_status: newStatus });
-      }
-
-      setSuccessMessage('Status updated successfully!');
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.message || 'Failed to update status');
+      setSubmissions(prev => prev.map(s => s.id === id ? { ...s, submission_status: status } : s));
+      if (selectedSubmission?.id === id) setSelectedSubmission(s => ({ ...s, submission_status: status }));
+      setSuccessMessage('Status updated.');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError(err.message || 'Failed to update status');
+      setError(err.message);
     }
   };
 
+  const pending  = submissions.filter(s => s.submission_status === 'pending').length;
+  const approved = submissions.filter(s => s.submission_status === 'approved').length;
+
+  const filtered = filterStatus === 'all'
+    ? submissions
+    : submissions.filter(s => s.submission_status === filterStatus);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white text-xl">Loading submissions...</div>
+      <div className="min-h-screen bg-[#070b12] flex items-center justify-center">
+        <span className="text-xs font-mono text-gray-600 uppercase tracking-widest animate-pulse">Loading…</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white">Music Submissions</h1>
-              <p className="text-gray-400 text-sm mt-1">
-                {submissions.length} total submission{submissions.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => navigate('/')}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                View Site
+    <div className="admin-command-center content-command-center min-h-screen bg-[#070b12] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(59,130,246,.16),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(139,92,246,.14),transparent_30%)]" />
+      <SidePanel />
+
+      <div className="relative ml-[264px] min-h-screen">
+
+        {/* ── Header ── */}
+        <header className="sticky top-0 z-20 border-b border-white/[0.07] bg-[#070b12]/82 px-8 py-3 backdrop-blur-xl">
+          <div className="flex h-8 items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button onClick={() => navigate('/admin/dashboard')}
+                className="text-xs text-slate-500 hover:text-slate-200 uppercase tracking-[.16em] font-semibold transition-colors">
+                ← Dashboard
               </button>
-              <button
-                onClick={() => navigate('/admin/dashboard')}
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors"
-              >
-                Back to Dashboard
-              </button>
+              <span className="text-gray-700">│</span>
+              <span className="text-xs text-sky-300 font-bold uppercase tracking-[.18em]">Submissions</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {pending > 0 && (
+                <span className="text-[10px] font-mono text-amber-400 border border-amber-800/60 px-2.5 py-1">
+                  {pending} pending
+                </span>
+              )}
+              <span className="text-[10px] font-mono text-gray-500 border border-gray-800 px-2.5 py-1">
+                {submissions.length} total
+              </span>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded text-red-400">
-            {error}
-          </div>
-        )}
+        <main className="px-8 py-7">
 
-        {successMessage && (
-          <div className="mb-6 p-4 bg-green-500/20 border border-green-500 rounded text-green-400">
-            {successMessage}
-          </div>
-        )}
+          {/* Notifications */}
+          {error && (
+            <div className="mb-5 border border-red-800/60 bg-red-950/20 px-4 py-2.5 text-xs font-mono text-red-400 uppercase tracking-wider">
+              {error}
+            </div>
+          )}
+          {successMessage && (
+            <div className="mb-5 border border-emerald-800/60 bg-emerald-950/20 px-4 py-2.5 text-xs font-mono text-emerald-400 uppercase tracking-wider">
+              ✓ {successMessage}
+            </div>
+          )}
 
-        {submissions.length === 0 ? (
-          <div className="bg-gray-800 rounded-lg p-12 text-center border border-gray-700">
-            <svg className="mx-auto h-12 w-12 text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-            </svg>
-            <h3 className="text-lg font-medium text-white mb-2">No submissions yet</h3>
-            <p className="text-gray-400">Submissions will appear here once artists submit their music.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {submissions.map((submission) => (
-              <div
-                key={submission.id}
-                className="bg-gray-800 rounded-lg border border-gray-700 hover:border-purple-500 transition-colors overflow-hidden flex flex-col"
-              >
-                {/* Image Preview */}
-                {submission.image_url ? (
-                  <div
-                    className="h-48 overflow-hidden bg-gray-700 cursor-pointer"
-                    onClick={() => setSelectedSubmission(submission)}
-                  >
-                    <img
-                      src={submission.image_url}
-                      alt={`${submission.artist_name} cover`}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform"
-                    />
-                  </div>
-                ) : (
-                  <div className="h-48 bg-gradient-to-br from-purple-900 to-gray-800 flex items-center justify-center">
-                    <svg className="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                    </svg>
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex-1">
-                    {/* Artist & Title */}
-                    <h3 className="text-lg font-bold text-white mb-1 line-clamp-1">
-                      {submission.artist_name}
-                    </h3>
-                    {submission.title && (
-                      <p className="text-purple-400 text-sm font-semibold mb-3 line-clamp-2">
-                        "{submission.title}"
-                      </p>
-                    )}
-
-                    {/* Badges */}
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getSubmissionTypeColor(submission.submission_type)}`}>
-                        {submission.submission_type === 'featured' ? '🏆 Featured' : '📰 Regular'}
-                      </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(submission.submission_status)}`}>
-                        {submission.submission_status.charAt(0).toUpperCase() + submission.submission_status.slice(1)}
-                      </span>
-                    </div>
-
-                    {/* Payment & Date */}
-                    <div className="mb-3">
-                      <div className="text-green-400 font-bold text-xl mb-1">
-                        {formatPrice(submission.payment_amount)}
-                      </div>
-                      <div className="text-gray-400 text-xs">
-                        {new Date(submission.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-
-                    {/* Links Preview */}
-                    <div className="flex gap-2 mb-3">
-                      {submission.youtube_url && (
-                        <span className="px-2 py-1 bg-red-600/20 text-red-400 text-xs rounded">
-                          YouTube
-                        </span>
-                      )}
-                      {submission.spotify_url && (
-                        <span className="px-2 py-1 bg-green-600/20 text-green-400 text-xs rounded">
-                          Spotify
-                        </span>
-                      )}
-                      {submission.document_url && (
-                        <span className="px-2 py-1 bg-blue-600/20 text-blue-400 text-xs rounded">
-                          Document
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="space-y-2 mt-auto">
-                    {submission.submission_status === 'pending' && (
-                      <button
-                        onClick={() => handlePublishSubmission(submission.id)}
-                        disabled={publishingId === submission.id}
-                        className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                      >
-                        {publishingId === submission.id ? (
-                          <>
-                            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Publishing...
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Publish
-                          </>
-                        )}
-                      </button>
-                    )}
-
-                    {submission.submission_status === 'approved' && (
-                      <div className="w-full px-3 py-2 bg-green-600/20 border border-green-600 text-green-400 text-sm font-semibold rounded-lg flex items-center justify-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Published
-                      </div>
-                    )}
-
-                    <div className="flex gap-2">
-                      {submission.submission_status === 'pending' && (
-                        <button
-                          onClick={() => handleUpdateStatus(submission.id, 'rejected')}
-                          className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors"
-                        >
-                          Reject
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setSelectedSubmission(submission)}
-                        className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg transition-colors"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          {/* ── Filter tabs ── */}
+          <div className="flex items-center gap-1 mb-5">
+            {[['all','All'], ['pending','Pending'], ['approved','Published'], ['rejected','Rejected']].map(([val, label]) => (
+              <button key={val} onClick={() => setFilterStatus(val)}
+                className={`text-[10px] font-mono uppercase tracking-wider px-3 py-1.5 border transition-colors ${
+                  filterStatus === val
+                    ? 'border-sky-700/60 bg-sky-950/30 text-sky-300'
+                    : 'border-gray-800 text-gray-600 hover:text-gray-400 hover:border-gray-700'
+                }`}>
+                {label}
+              </button>
             ))}
           </div>
-        )}
-      </main>
 
-      {/* Detail Modal */}
+          {/* ── Empty state ── */}
+          {filtered.length === 0 ? (
+            <div className="border border-gray-800/60 bg-[#0a0e14] px-6 py-16 text-center">
+              <p className="text-xs font-mono text-gray-600 uppercase tracking-widest">
+                {submissions.length === 0 ? 'No submissions yet.' : 'No submissions match this filter.'}
+              </p>
+            </div>
+          ) : (
+            /* ── Table ── */
+            <div className="border border-gray-800/60">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[700px]">
+                  <thead>
+                    <tr className="border-b border-gray-800/60 bg-[#0d1420]">
+                      {['Artist / Track', 'Type', 'Amount', 'Status', 'Submitted', 'Actions'].map(h => (
+                        <th key={h} className="px-4 py-2.5 text-[10px] font-mono text-gray-500 uppercase tracking-widest text-left whitespace-nowrap">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((s, i) => (
+                      <tr key={s.id}
+                        className={`border-b border-gray-800/40 ${i % 2 === 0 ? 'bg-[#0a0e14]' : 'bg-black'} hover:bg-[#111827] transition-colors`}>
+
+                        {/* Artist / track */}
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            {s.image_url ? (
+                              <img src={s.image_url} alt="" className="w-9 h-9 object-cover border border-gray-800 flex-shrink-0" />
+                            ) : (
+                              <div className="w-9 h-9 bg-gray-900 border border-gray-800 flex-shrink-0 flex items-center justify-center">
+                                <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                </svg>
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <div className="text-sm text-gray-200 font-medium truncate max-w-[180px]">{s.artist_name}</div>
+                              {s.title && <div className="text-[11px] text-gray-600 font-mono truncate max-w-[180px]">"{s.title}"</div>}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Type */}
+                        <td className="px-4 py-3">
+                          <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 border ${typeStyle[s.submission_type] || typeStyle.regular}`}>
+                            {s.submission_type === 'featured' ? '🏆 Featured' : '📰 Regular'}
+                          </span>
+                        </td>
+
+                        {/* Amount */}
+                        <td className="px-4 py-3 text-sm font-mono text-emerald-400">{fmtPrice(s.payment_amount)}</td>
+
+                        {/* Status */}
+                        <td className="px-4 py-3">
+                          <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 border ${statusStyle[s.submission_status] || 'text-gray-500 border-gray-800'}`}>
+                            {s.submission_status}
+                          </span>
+                        </td>
+
+                        {/* Date */}
+                        <td className="px-4 py-3 text-[11px] font-mono text-gray-600 whitespace-nowrap">{fmtDate(s.created_at)}</td>
+
+                        {/* Actions */}
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => setSelectedSubmission(s)}
+                              className="text-[10px] font-mono px-2.5 py-1.5 border border-gray-700/60 text-gray-400 hover:border-sky-700/60 hover:text-sky-300 transition-colors whitespace-nowrap">
+                              Details
+                            </button>
+                            {s.submission_status === 'pending' && (
+                              <>
+                                <button onClick={() => handlePublish(s.id)} disabled={publishingId === s.id}
+                                  className="text-[10px] font-mono px-2.5 py-1.5 border border-emerald-700/60 text-emerald-400 hover:bg-emerald-950/30 transition-colors disabled:opacity-40 whitespace-nowrap">
+                                  {publishingId === s.id ? '…' : '✓ Publish'}
+                                </button>
+                                <button onClick={() => handleStatus(s.id, 'rejected')}
+                                  className="text-[10px] font-mono px-2.5 py-1.5 border border-red-800/60 text-red-400 hover:bg-red-950/20 transition-colors whitespace-nowrap">
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ── Detail modal ── */}
       {selectedSubmission && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4 overflow-y-auto py-8">
-          <div className="bg-gray-800 rounded-lg max-w-4xl w-full border border-gray-700 my-8">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-gray-700 flex items-center justify-between sticky top-0 bg-gray-800 z-10">
-              <h2 className="text-2xl font-bold text-white">
-                Submission Details - {selectedSubmission.artist_name}
-              </h2>
-              <button
-                onClick={() => setSelectedSubmission(null)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-8 overflow-y-auto"
+          onClick={e => e.target === e.currentTarget && setSelectedSubmission(null)}>
+          <div className="w-full max-w-2xl border border-gray-800/80 bg-[#0b1019] my-auto">
+
+            {/* Modal header */}
+            <div className="flex items-center justify-between border-b border-gray-800/60 px-6 py-4 sticky top-0 bg-[#0b1019] z-10">
+              <div>
+                <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-0.5">Submission Details</p>
+                <h2 className="text-base font-semibold text-white">{selectedSubmission.artist_name}</h2>
+              </div>
+              <button onClick={() => setSelectedSubmission(null)}
+                className="text-gray-600 hover:text-gray-300 transition-colors p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-              {/* Type and Status */}
-              <div className="flex flex-wrap gap-3">
-                <span className={`px-4 py-2 rounded-lg text-sm font-semibold border ${getSubmissionTypeColor(selectedSubmission.submission_type)}`}>
-                  {getSubmissionTypeLabel(selectedSubmission.submission_type)}
+            {/* Modal body */}
+            <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+
+              {/* Status chips */}
+              <div className="flex flex-wrap gap-2">
+                <span className={`text-[9px] font-mono font-bold uppercase px-2 py-1 border ${typeStyle[selectedSubmission.submission_type] || typeStyle.regular}`}>
+                  {selectedSubmission.submission_type === 'featured' ? '🏆 Featured' : '📰 Regular'}
                 </span>
-                <span className={`px-4 py-2 rounded-lg text-sm font-semibold ${getStatusColor(selectedSubmission.submission_status)}`}>
-                  Status: {selectedSubmission.submission_status.charAt(0).toUpperCase() + selectedSubmission.submission_status.slice(1)}
+                <span className={`text-[9px] font-mono font-bold uppercase px-2 py-1 border ${statusStyle[selectedSubmission.submission_status] || 'text-gray-500 border-gray-800'}`}>
+                  {selectedSubmission.submission_status}
                 </span>
-                <span className="px-4 py-2 rounded-lg text-sm font-semibold bg-green-500/20 text-green-400">
-                  {formatPrice(selectedSubmission.payment_amount)} Paid
+                <span className="text-[9px] font-mono font-bold uppercase px-2 py-1 border text-emerald-400 border-emerald-700/60">
+                  {fmtPrice(selectedSubmission.payment_amount)} paid
                 </span>
               </div>
 
               {/* Contact */}
-              <div>
-                <h3 className="text-lg font-bold text-white mb-2">Contact Information</h3>
-                <div className="p-4 bg-black/30 rounded-lg">
-                  <p className="text-gray-300 mb-2">
-                    <span className="text-gray-400">Artist:</span> <strong>{selectedSubmission.artist_name}</strong>
-                  </p>
-                  <p className="text-gray-300">
-                    <span className="text-gray-400">Email:</span>{' '}
-                    <a href={`mailto:${selectedSubmission.email}`} className="text-purple-400 hover:underline">
-                      {selectedSubmission.email}
-                    </a>
-                  </p>
-                </div>
+              <div className="border border-gray-800/60 bg-[#0a0e14] p-4 space-y-2">
+                <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-2">Contact</p>
+                <p className="text-sm text-gray-300"><span className="text-gray-600">Artist: </span>{selectedSubmission.artist_name}</p>
+                <p className="text-sm text-gray-300">
+                  <span className="text-gray-600">Email: </span>
+                  <a href={`mailto:${selectedSubmission.email}`} className="text-sky-400 hover:underline">{selectedSubmission.email}</a>
+                </p>
               </div>
 
               {/* Title */}
               {selectedSubmission.title && (
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">Article Title</h3>
-                  <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                    <p className="text-purple-300 text-xl font-bold">
-                      {selectedSubmission.title}
-                    </p>
-                  </div>
+                <div className="border border-gray-800/60 bg-[#0a0e14] p-4">
+                  <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-2">Article Title</p>
+                  <p className="text-base font-semibold text-white">"{selectedSubmission.title}"</p>
                 </div>
               )}
 
-              {/* Image */}
+              {/* Cover image */}
               {selectedSubmission.image_url && (
                 <div>
-                  <h3 className="text-lg font-bold text-white mb-2">Cover Image</h3>
-                  <div className="rounded-lg overflow-hidden border border-gray-700">
-                    <img
-                      src={selectedSubmission.image_url}
-                      alt={`${selectedSubmission.artist_name} cover`}
-                      className="w-full object-contain max-h-96"
-                    />
-                  </div>
-                  <a
-                    href={selectedSubmission.image_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-2 text-purple-400 hover:underline text-sm"
-                  >
-                    View full size →
+                  <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-2">Cover Image</p>
+                  <img src={selectedSubmission.image_url} alt="cover" className="w-full max-h-64 object-contain border border-gray-800/60" />
+                  <a href={selectedSubmission.image_url} target="_blank" rel="noopener noreferrer"
+                    className="inline-block mt-2 text-[10px] font-mono text-sky-500 hover:underline">
+                    View full size ↗
                   </a>
                 </div>
               )}
 
               {/* Content */}
               {selectedSubmission.content && (
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">Submission Content</h3>
-                  <div className="p-4 bg-black/30 rounded-lg">
-                    <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
-                      {selectedSubmission.content}
-                    </p>
-                  </div>
+                <div className="border border-gray-800/60 bg-[#0a0e14] p-4">
+                  <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-2">Content</p>
+                  <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">{selectedSubmission.content}</p>
                 </div>
               )}
 
               {/* Document */}
               {selectedSubmission.document_url && (
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">Submitted Document</h3>
-                  <a
-                    href={selectedSubmission.document_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600 text-blue-400 rounded-lg transition-colors"
-                  >
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <div className="flex-1">
-                      <div className="font-semibold text-lg">Download Document</div>
-                      <div className="text-sm text-blue-300">Artist uploaded a document file with their content</div>
-                    </div>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                  </a>
-                </div>
+                <a href={selectedSubmission.document_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 border border-gray-800/60 bg-[#0a0e14] hover:border-sky-800/60 p-4 transition-colors">
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <div>
+                    <p className="text-xs font-mono font-semibold text-gray-300">Download Document</p>
+                    <p className="text-[10px] font-mono text-gray-600">Artist uploaded a document</p>
+                  </div>
+                  <svg className="w-4 h-4 text-gray-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </a>
               )}
 
-              {/* Links */}
+              {/* Music links */}
               {(selectedSubmission.youtube_url || selectedSubmission.spotify_url) && (
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">Music Links</h3>
-                  <div className="space-y-2">
-                    {selectedSubmission.youtube_url && (
-                      <a
-                        href={selectedSubmission.youtube_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-4 bg-red-600/20 hover:bg-red-600/30 border border-red-600 text-red-400 rounded-lg transition-colors"
-                      >
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                        <div className="flex-1">
-                          <div className="font-semibold">YouTube</div>
-                          <div className="text-sm text-red-300 truncate">{selectedSubmission.youtube_url}</div>
-                        </div>
-                      </a>
-                    )}
-                    {selectedSubmission.spotify_url && (
-                      <a
-                        href={selectedSubmission.spotify_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-4 bg-green-600/20 hover:bg-green-600/30 border border-green-600 text-green-400 rounded-lg transition-colors"
-                      >
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-                        </svg>
-                        <div className="flex-1">
-                          <div className="font-semibold">Spotify</div>
-                          <div className="text-sm text-green-300 truncate">{selectedSubmission.spotify_url}</div>
-                        </div>
-                      </a>
-                    )}
-                  </div>
+                <div className="space-y-2">
+                  <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest">Music Links</p>
+                  {selectedSubmission.youtube_url && (
+                    <a href={selectedSubmission.youtube_url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 border border-gray-800/60 bg-[#0a0e14] hover:border-red-800/60 p-3 transition-colors">
+                      <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                      <span className="text-[11px] font-mono text-gray-400 truncate">{selectedSubmission.youtube_url}</span>
+                    </a>
+                  )}
+                  {selectedSubmission.spotify_url && (
+                    <a href={selectedSubmission.spotify_url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 border border-gray-800/60 bg-[#0a0e14] hover:border-green-800/60 p-3 transition-colors">
+                      <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                      </svg>
+                      <span className="text-[11px] font-mono text-gray-400 truncate">{selectedSubmission.spotify_url}</span>
+                    </a>
+                  )}
                 </div>
               )}
 
-              {/* Payment Info */}
-              <div>
-                <h3 className="text-lg font-bold text-white mb-2">Payment Information</h3>
-                <div className="p-4 bg-black/30 rounded-lg space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Amount:</span>
-                    <span className="text-green-400 font-bold">{formatPrice(selectedSubmission.payment_amount)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Payment ID:</span>
-                    <span className="text-gray-300 font-mono text-sm">{selectedSubmission.payment_id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Payment Status:</span>
-                    <span className="text-green-400 font-semibold">{selectedSubmission.payment_status}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Submitted:</span>
-                    <span className="text-gray-300">{formatDate(selectedSubmission.created_at)}</span>
-                  </div>
+              {/* Payment */}
+              <div className="border border-gray-800/60 bg-[#0a0e14] p-4">
+                <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-3">Payment</p>
+                <div className="space-y-2 text-[11px] font-mono">
+                  {[
+                    ['Amount',  <span className="text-emerald-400 font-bold">{fmtPrice(selectedSubmission.payment_amount)}</span>],
+                    ['ID',      <span className="text-gray-400 break-all">{selectedSubmission.payment_id}</span>],
+                    ['Status',  <span className="text-emerald-400">{selectedSubmission.payment_status}</span>],
+                    ['Date',    <span className="text-gray-400">{fmtFull(selectedSubmission.created_at)}</span>],
+                  ].map(([label, val]) => (
+                    <div key={label} className="flex items-start justify-between gap-4">
+                      <span className="text-gray-600 flex-shrink-0">{label}</span>
+                      {val}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-700 sticky bottom-0 bg-gray-800">
-              <div className="flex gap-3">
-                {selectedSubmission.submission_status === 'pending' && (
-                  <>
-                    <button
-                      onClick={() => handlePublishSubmission(selectedSubmission.id)}
-                      disabled={publishingId === selectedSubmission.id}
-                      className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {publishingId === selectedSubmission.id ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Publishing...
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Publish as Article
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => handleUpdateStatus(selectedSubmission.id, 'rejected')}
-                      className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
-                    >
-                      Reject
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={() => setSelectedSubmission(null)}
-                  className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
-                >
-                  Close
-                </button>
-              </div>
+            {/* Modal footer */}
+            <div className="border-t border-gray-800/60 px-6 py-4 flex items-center gap-3 sticky bottom-0 bg-[#0b1019]">
+              {selectedSubmission.submission_status === 'pending' && (
+                <>
+                  <button onClick={() => handlePublish(selectedSubmission.id)} disabled={publishingId === selectedSubmission.id}
+                    className="text-[11px] font-mono px-5 py-2.5 border border-emerald-700/60 text-emerald-400 hover:bg-emerald-950/30 uppercase tracking-wider transition-colors disabled:opacity-40">
+                    {publishingId === selectedSubmission.id ? 'Publishing…' : '✓ Publish as Article'}
+                  </button>
+                  <button onClick={() => handleStatus(selectedSubmission.id, 'rejected')}
+                    className="text-[11px] font-mono px-5 py-2.5 border border-red-800/60 text-red-400 hover:bg-red-950/20 uppercase tracking-wider transition-colors">
+                    Reject
+                  </button>
+                </>
+              )}
+              <button onClick={() => setSelectedSubmission(null)}
+                className="text-[11px] font-mono px-5 py-2.5 border border-gray-700/60 text-gray-500 hover:text-gray-300 hover:border-gray-600 uppercase tracking-wider transition-colors ml-auto">
+                Close
+              </button>
             </div>
           </div>
         </div>
