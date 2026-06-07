@@ -48,12 +48,9 @@ function Sidebar({ admin, stats, onLogout }) {
       ['Submissions', 'inbox', '/admin/submissions', stats.submissions],
     ]],
     ['Business & Config', [
-      ['Finance Hub',     'finance', '/admin/finance'],
-      ['Ad Settings',     'ads',     '/admin/settings'],
-      ['Referral Ads',    'scout',   '/admin/referral-ads'],
-      ['Newsletter',      'pulse',   '/admin/newsletter'],
-      ['Spotify Manager', 'spotify', '/admin/spotify'],
-      ['Amazon Products', 'amazon',  '/admin/amazon-products'],
+      ['Finance Hub', 'finance', '/admin/finance'],
+      ['Ad Settings', 'ads',     '/admin/settings'],
+      ['Newsletter',  'pulse',   '/admin/newsletter'],
     ]],
   ];
 

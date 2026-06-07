@@ -28,10 +28,7 @@ function SidePanel() {
     ['Business & Config', [
       ['Finance Hub',     'M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6',                '/admin/finance'],
       ['Ad Settings',     'M12 4v16M4 12h16M7 7l10 10M17 7 7 17',                             '/admin/settings'],
-      ['Referral Ads',    'M4 5h16v4H4zM4 11h6v8H4zM12 11h8v8h-8z',                          '/admin/referral-ads'],
       ['Newsletter',      'M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z', '/admin/newsletter'],
-      ['Spotify Manager', 'M7 18V6l11 6-11 6Z',                                               '/admin/spotify'],
-      ['Amazon Products', 'M5 7h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7Zm4 0a3 3 0 0 1 6 0',  '/admin/amazon-products'],
     ]],
   ];
 
