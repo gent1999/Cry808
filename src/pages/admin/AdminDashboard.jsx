@@ -17,6 +17,7 @@ const ICONS = {
   chart: 'M4 17l6-6 4 4 6-8',
   search: 'M11 19a8 8 0 1 1 5.7-2.3L21 21',
   pulse: 'M4 12h4l2-7 4 14 2-7h4',
+  cortex: 'M12 2a5 5 0 0 1 5 5c0 2.4-1.7 4.4-4 4.9V21h-2v-9.1C8.7 11.4 7 9.4 7 7a5 5 0 0 1 5-5Z',
   clock: 'M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
   check: 'm5 13 4 4L19 7',
   external: 'M14 4h6v6M20 4l-9 9M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4',
@@ -46,6 +47,9 @@ function Sidebar({ admin, stats, onLogout }) {
       ['New Article', 'add', '/admin/articles/create'],
       ['All Articles', 'list', '/admin/articles', stats.total],
       ['Submissions', 'inbox', '/admin/submissions', stats.submissions],
+    ]],
+    ['Intelligence', [
+      ['Cortex', 'cortex', '/admin/cortex'],
     ]],
     ['Business & Config', [
       ['Finance Hub', 'finance', '/admin/finance'],
