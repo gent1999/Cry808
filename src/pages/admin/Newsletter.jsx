@@ -95,20 +95,28 @@ export default function Newsletter() {
   const [error,      setError]      = useState('');
 
   // Data
-  const [subCount,   setSubCount]   = useState(null);
-  const [sends,      setSends]      = useState([]);
-  const [sendsLoading, setSendsLoading] = useState(true);
+  const [subCount,      setSubCount]      = useState(null);
+  const [sends,         setSends]         = useState([]);
+  const [sendsLoading,  setSendsLoading]  = useState(true);
+  const [subscribers,   setSubscribers]   = useState([]);
+  const [subsLoading,   setSubsLoading]   = useState(true);
+  const [subSearch,     setSubSearch]     = useState('');
+  const [subFilter,     setSubFilter]     = useState('active'); // 'all' | 'active' | 'inactive'
 
   const fileRef = useRef();
   const token   = () => localStorage.getItem('adminToken');
   const hdrs    = () => ({ Authorization: `Bearer ${token()}` });
 
-  // Load subscriber count + send history
+  // Load subscribers + send history
   useEffect(() => {
     fetch(`${API_URL}/api/newsletter/subscribers`, { headers: hdrs() })
       .then(r => r.json())
-      .then(d => setSubCount(d.active_count ?? d.count ?? 0))
-      .catch(() => {});
+      .then(d => {
+        setSubCount(d.active_count ?? d.count ?? 0);
+        setSubscribers(d.subscribers || []);
+      })
+      .catch(() => {})
+      .finally(() => setSubsLoading(false));
 
     fetch(`${API_URL}/api/newsletter/sends`, { headers: hdrs() })
       .then(r => r.json())
@@ -508,6 +516,110 @@ export default function Newsletter() {
               )}
             </div>
           </div>
+
+          {/* ── Subscribers ── */}
+          {(() => {
+            const filtered = subscribers
+              .filter(s => subFilter === 'all' ? true : subFilter === 'active' ? s.is_active : !s.is_active)
+              .filter(s => s.email.toLowerCase().includes(subSearch.toLowerCase()));
+            const totalActive   = subscribers.filter(s => s.is_active).length;
+            const totalInactive = subscribers.filter(s => !s.is_active).length;
+
+            return (
+              <div className="mt-6 max-w-6xl">
+                <div className="border border-gray-800/60">
+
+                  {/* Header */}
+                  <div className="border-b border-gray-800/60 px-5 py-3 flex flex-wrap items-center gap-3">
+                    <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-gray-400 mr-auto">
+                      Subscribers
+                    </h2>
+                    {/* Stats chips */}
+                    <span className="text-[10px] font-mono text-emerald-400 border border-emerald-800/50 px-2 py-0.5">
+                      {totalActive} active
+                    </span>
+                    <span className="text-[10px] font-mono text-gray-600 border border-gray-800 px-2 py-0.5">
+                      {totalInactive} inactive
+                    </span>
+                  </div>
+
+                  {/* Controls */}
+                  <div className="border-b border-gray-800/60 px-5 py-3 flex flex-wrap items-center gap-3">
+                    {/* Search */}
+                    <div className="relative flex-1 min-w-[180px]">
+                      <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        value={subSearch}
+                        onChange={e => setSubSearch(e.target.value)}
+                        placeholder="Search email…"
+                        className="w-full bg-black/40 border border-gray-800 pl-8 pr-3 py-1.5 text-[11px] font-mono text-gray-300 placeholder-gray-700 focus:outline-none focus:border-sky-800"
+                      />
+                    </div>
+                    {/* Filter tabs */}
+                    <div className="flex items-center gap-1">
+                      {[['active','Active'],['inactive','Inactive'],['all','All']].map(([val, label]) => (
+                        <button key={val} onClick={() => setSubFilter(val)}
+                          className={`text-[10px] font-mono uppercase tracking-wider px-3 py-1.5 border transition-colors ${
+                            subFilter === val
+                              ? 'border-sky-700/60 bg-sky-950/30 text-sky-300'
+                              : 'border-gray-800 text-gray-600 hover:text-gray-400 hover:border-gray-700'
+                          }`}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-mono text-gray-700 ml-auto">{filtered.length} shown</span>
+                  </div>
+
+                  {/* Table */}
+                  {subsLoading ? (
+                    <div className="px-5 py-8 text-center text-xs font-mono text-gray-600 uppercase tracking-widest animate-pulse">
+                      Loading…
+                    </div>
+                  ) : filtered.length === 0 ? (
+                    <div className="px-5 py-8 text-center text-xs font-mono text-gray-600 uppercase tracking-widest">
+                      {subscribers.length === 0 ? 'No subscribers yet.' : 'No results.'}
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
+                      <table className="w-full min-w-[480px]">
+                        <thead className="sticky top-0 z-10">
+                          <tr className="border-b border-gray-800/60 bg-[#0d1420]">
+                            {['Email', 'Subscribed', 'Status'].map(h => (
+                              <th key={h} className="px-4 py-2.5 text-[10px] font-mono text-gray-500 uppercase tracking-widest text-left">
+                                {h}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map((s, i) => (
+                            <tr key={s.id}
+                              className={`border-b border-gray-800/40 ${i % 2 === 0 ? 'bg-[#0a0e14]' : 'bg-black'} hover:bg-[#111827] transition-colors`}>
+                              <td className="px-4 py-2.5 text-[12px] font-mono text-gray-300">{s.email}</td>
+                              <td className="px-4 py-2.5 text-[11px] font-mono text-gray-600 whitespace-nowrap">{fmt(s.subscribed_at)}</td>
+                              <td className="px-4 py-2.5">
+                                <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 border ${
+                                  s.is_active
+                                    ? 'text-emerald-400 border-emerald-800/60'
+                                    : 'text-gray-600 border-gray-800'
+                                }`}>
+                                  {s.is_active ? 'Active' : 'Unsubscribed'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
         </main>
       </div>
