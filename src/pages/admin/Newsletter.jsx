@@ -128,21 +128,39 @@ export default function Newsletter() {
     setImageUrl(''); // will be set after upload
   };
 
-  // Upload cover to Cloudinary
+  // Upload cover directly to Cloudinary (browser → Cloudinary, no server proxy)
+  // Step 1: fetch signing params from our server (tiny GET, no file data)
+  // Step 2: POST the file straight to api.cloudinary.com with those params
+  // This avoids Vercel body-size limits and function timeouts entirely.
   const uploadCover = async () => {
     if (!imageFile) return imageUrl; // already uploaded or URL provided
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append('image', imageFile);
-      const r = await fetch(`${API_URL}/api/newsletter/upload-cover`, {
-        method: 'POST', headers: hdrs(), body: fd,
+      // ── 1. Get Cloudinary signing params ─────────────────────────────────
+      const paramsRes = await fetch(`${API_URL}/api/newsletter/upload-params`, {
+        headers: hdrs(),
       });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.message || 'Upload failed');
-      setImageUrl(d.image_url);
+      const params = await paramsRes.json();
+      if (!paramsRes.ok) throw new Error(params.message || 'Could not get upload params');
+
+      // ── 2. Upload file directly to Cloudinary ────────────────────────────
+      const fd = new FormData();
+      fd.append('file',      imageFile);
+      fd.append('api_key',   params.api_key);
+      fd.append('timestamp', params.timestamp);
+      fd.append('signature', params.signature);
+      fd.append('folder',    params.folder);
+
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${params.cloud_name}/image/upload`,
+        { method: 'POST', body: fd }
+      );
+      const data = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(data.error?.message || 'Cloudinary upload failed');
+
+      setImageUrl(data.secure_url);
       setUploading(false);
-      return d.image_url;
+      return data.secure_url;
     } catch (e) {
       setError(e.message);
       setUploading(false);
