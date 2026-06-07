@@ -77,12 +77,12 @@ function ContentSidePanel() {
   );
 }
 
-// ── Tabs ──────────────────────────────────────────────────────────────────────
+// ── Sub-panel tabs ────────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'toggles', label: 'Ad Toggles' },
-  { id: 'referral', label: 'Referral Ads' },
-  { id: 'spotify', label: 'Spotify' },
-  { id: 'amazon', label: 'Amazon Products' },
+  { id: 'toggles', label: 'Ad Toggles',      icon: 'M5 8h14M5 12h9M5 16h5M19 12v6M16 15h6' },
+  { id: 'referral', label: 'Referral Ads',   icon: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' },
+  { id: 'spotify',  label: 'Spotify',        icon: 'M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' },
+  { id: 'amazon',   label: 'Amazon Products', icon: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0' },
 ];
 
 // ── Empty form states ─────────────────────────────────────────────────────────
@@ -531,27 +531,39 @@ export default function AdminSettings() {
           </div>
         </header>
 
-        {/* ── Tab Bar ── */}
-        <div className="border-b border-white/[0.07] px-8 bg-[#070b12]/60">
-          <div className="flex">
-            {TABS.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-5 py-3 text-[11px] font-mono font-bold uppercase tracking-[.14em] border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-sky-400 text-sky-300'
-                    : 'border-transparent text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* ── Body: sub-nav + content ── */}
+        <div className="flex flex-1">
+
+          {/* ── Left sub-nav ── */}
+          <nav className="w-52 flex-shrink-0 border-r border-white/[0.07] px-3 py-5 sticky top-[55px] self-start h-[calc(100vh-55px)] overflow-y-auto">
+            <div className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-[.16em] text-slate-500/70">Sections</div>
+            <div className="space-y-1.5">
+              {TABS.map(tab => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`group flex w-full items-center gap-3 border px-3 py-2.5 text-left text-sm transition duration-200 ${
+                      isActive
+                        ? 'border-sky-300/25 bg-sky-300/10 text-white shadow-[0_16px_44px_rgba(14,165,233,.12)]'
+                        : 'border-transparent text-slate-400 hover:border-white/[0.07] hover:bg-white/[0.04] hover:text-slate-100'
+                    }`}
+                  >
+                    <span className={`grid h-8 w-8 flex-shrink-0 place-items-center ${isActive ? 'bg-sky-500/20 text-sky-200' : 'bg-white/[0.04] text-slate-500 group-hover:text-slate-200'}`}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d={tab.icon} />
+                      </svg>
+                    </span>
+                    <span className="min-w-0 flex-1 font-medium text-[13px]">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
 
         {/* ── Tab Panels ── */}
-        <main className="flex-1 px-8 py-7">
+        <main className="flex-1 px-8 py-7 min-w-0">
 
           {/* ═══════════════════ AD TOGGLES ═══════════════════ */}
           {activeTab === 'toggles' && (
@@ -921,6 +933,7 @@ export default function AdminSettings() {
           )}
 
         </main>
+        </div>{/* end flex body */}
       </div>
 
       {/* ── Amazon Product Modal ── */}
