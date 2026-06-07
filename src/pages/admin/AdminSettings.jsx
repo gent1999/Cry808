@@ -806,10 +806,13 @@ export default function AdminSettings() {
                       onChange={e => setPageType(e.target.value)}
                       className="w-full bg-black/50 border border-gray-700/60 text-sm text-gray-200 px-3 py-2 focus:outline-none focus:border-sky-700/60"
                     >
-                      <option value="home">Home Page</option>
-                      <option value="article">Article Page</option>
+                      <option value="home">Home — Sidebar</option>
+                      <option value="article">Article — Sidebar</option>
+                      <option value="playlist">Home — Playlist Section</option>
                     </select>
-                    <p className="text-[10px] font-mono text-gray-600 mt-1.5">Which page this embed will appear on</p>
+                    <p className="text-[10px] font-mono text-gray-600 mt-1.5">
+                      Sidebar embeds appear in the right rail. Playlist Section embeds appear as a full-width grid on the homepage.
+                    </p>
                   </div>
                   <div>
                     <label className="block text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-1.5">Spotify Link</label>
@@ -824,7 +827,7 @@ export default function AdminSettings() {
                   </div>
                   <button type="submit"
                     className="text-[10px] font-mono px-4 py-2 border border-sky-700/60 text-sky-300 hover:bg-sky-950/30 uppercase tracking-wider transition-colors">
-                    Add to Sidebar
+                    {pageType === 'playlist' ? 'Add to Playlist Section' : 'Add to Sidebar'}
                   </button>
                 </form>
               </section>
@@ -850,8 +853,13 @@ export default function AdminSettings() {
                               embed.is_active ? 'text-emerald-400 border-emerald-800/60' : 'text-gray-600 border-gray-700/40'
                             }`}>{embed.is_active ? 'Active' : 'Inactive'}</span>
                             <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 border border-purple-800/60 text-purple-400">{embed.embed_type}</span>
-                            <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 border border-blue-800/60 text-blue-400">
-                              {embed.page_type === 'article' ? 'Article' : 'Home'}
+                            <span className={`text-[9px] font-mono uppercase px-1.5 py-0.5 border ${
+                              embed.page_type === 'article'  ? 'border-blue-800/60 text-blue-400' :
+                              embed.page_type === 'playlist' ? 'border-green-800/60 text-green-400' :
+                                                               'border-sky-800/60 text-sky-400'
+                            }`}>
+                              {embed.page_type === 'article' ? 'Article Sidebar' :
+                               embed.page_type === 'playlist' ? 'Playlist Section' : 'Home Sidebar'}
                             </span>
                             <span className="text-[10px] font-mono text-gray-600">Order: {embed.display_order}</span>
                           </div>

@@ -10,6 +10,7 @@ import BeatportMobileBanner from "../components/BeatportMobileBanner";
 import { stripMarkdown } from "../utils/markdownUtils";
 import { generateArticleUrl } from "../utils/slugify";
 import ReferralAdWidget from "../components/ReferralAdWidget";
+import SpotifyPlaylistSection from "../components/SpotifyPlaylistSection";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -915,6 +916,9 @@ export default function Home() {
                     </div>
                   </div>
                 )}
+
+                {/* ── NETWORK PLAYLISTS ───────────────────────────────────── */}
+                <SpotifyPlaylistSection />
 
                 {/* ── [NEW] SUBMIT MUSIC FULL CTA ─────────────────────────── */}
                 <div className="mb-10 relative overflow-hidden border border-purple-500/30">
