@@ -205,174 +205,161 @@ function EmbedCard({ embed, onDelete }) {
   const hasAudioFeatures = m?.type === 'track' && (
     m.bpm != null || m.energy != null || m.danceability != null || m.valence != null
   );
-  // Show insights button for all playlists — even if null (server may be mid-deploy)
   const isPlaylist  = m?.type === 'playlist';
   const hasInsights = isPlaylist && m?.insights != null;
 
   return (
-    <div className="border border-white/[0.07] bg-white/[0.02] hover:border-green-500/20 transition-all">
+    <div className="border border-white/[0.07] bg-white/[0.02] hover:border-green-500/20 transition-all overflow-hidden">
 
-      {/* ── Main row ── */}
-      <div className="flex gap-4 p-4">
+      {/* ── Main row: content left | cover right ── */}
+      <div className="flex min-h-[120px]">
 
-        {/* Cover art */}
-        <div className="flex-shrink-0 w-[88px] h-[88px] bg-white/[0.06] overflow-hidden">
-          {m?.image
-            ? <img src={m.image} alt={m?.name} className="w-full h-full object-cover" />
-            : <div className="w-full h-full flex items-center justify-center text-2xl text-white/20">🎵</div>
-          }
-        </div>
+        {/* ── LEFT: all text content ── */}
+        <div className="flex-1 min-w-0 p-4 flex flex-col justify-between">
 
-        {/* Info */}
-        <div className="flex-1 min-w-0">
+          {/* Top section */}
+          <div>
+            {/* Badges */}
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide ${tb.cls}`}>
+                {tb.label}
+              </span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide ${pb.cls}`}>
+                {pb.label}
+              </span>
+              {m?.explicit && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 bg-red-500/20 text-red-300">E</span>
+              )}
+              {isPlaylist && m?.collaborative && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-orange-500/20 text-orange-300">Collab</span>
+              )}
+              {isPlaylist && m?.isPublic === false && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-gray-500/20 text-gray-400">Private</span>
+              )}
+              {m?.type === 'album' && m?.albumType && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-blue-500/15 text-blue-400 capitalize">{m.albumType}</span>
+              )}
+              {!embed.is_active && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-red-500/20 text-red-300">Inactive</span>
+              )}
+            </div>
 
-          {/* Badges */}
-          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide ${tb.cls}`}>
-              {tb.label}
-            </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide ${pb.cls}`}>
-              {pb.label}
-            </span>
-            {m?.explicit && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-red-500/20 text-red-300">E</span>
+            {/* Title */}
+            <p className="text-sm font-semibold text-white leading-tight mb-0.5">
+              {m?.name || embed.title || 'Unknown'}
+            </p>
+
+            {/* Subtitle */}
+            {m?.description && (
+              <p className="text-[11px] text-white/40 truncate">{m.description}</p>
             )}
-            {m?.type === 'playlist' && m?.collaborative && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-orange-500/20 text-orange-300">Collab</span>
+            {m?.type === 'track' && m?.albumName && (
+              <p className="text-[10px] text-white/30 truncate">📀 {m.albumName}</p>
             )}
-            {m?.type === 'playlist' && m?.isPublic === false && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-gray-500/20 text-gray-400">Private</span>
+
+            {/* Stats */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+              {m?.followers != null && (
+                <span className="text-[11px] text-white/50">
+                  <span className="text-white/75 font-medium">{fmt(m.followers)}</span> followers
+                </span>
+              )}
+              {m?.trackCount != null && (
+                <span className="text-[11px] text-white/50">
+                  <span className="text-white/75 font-medium">{m.trackCount}</span> tracks
+                </span>
+              )}
+              {m?.owner && <span className="text-[11px] text-white/35">by {m.owner}</span>}
+              {m?.releaseDate && <span className="text-[11px] text-white/30">{m.releaseDate.slice(0, 4)}</span>}
+              {m?.type === 'track' && m?.durationMs != null && (
+                <span className="text-[11px] text-white/30">{fmtDuration(m.durationMs)}</span>
+              )}
+              {m?.type === 'track' && m?.bpm != null && (
+                <span className="text-[11px] text-white/50"><span className="text-white/75 font-medium">{m.bpm}</span> BPM</span>
+              )}
+              {m?.popularity != null && <Popularity value={m.popularity} />}
+              {m?.label && <span className="text-[11px] text-white/25">{m.label}</span>}
+              {m?.type === 'track' && m?.key != null && m?.mode != null && (
+                <span className="text-[11px] text-white/30 font-mono">{KEY_NAMES[m.key]} {m.mode === 1 ? 'maj' : 'min'}</span>
+              )}
+              {m?.type === 'track' && m?.loudness != null && (
+                <span className="text-[11px] text-white/25 font-mono">{m.loudness} dB</span>
+              )}
+            </div>
+
+            {/* Playlist inline insights */}
+            {isPlaylist && m?.insights && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                {m.insights.avgBpm != null && (
+                  <span className="text-[11px] text-white/50">
+                    <span className="text-green-400 font-semibold font-mono">{m.insights.avgBpm}</span> avg BPM
+                  </span>
+                )}
+                {m.insights.avgPopularity != null && (
+                  <span className="text-[11px] text-white/50">
+                    <span className="text-amber-400 font-semibold">★ {m.insights.avgPopularity}</span> avg pop
+                  </span>
+                )}
+                {m.insights.topGenres?.length > 0 && (
+                  <span className="text-[11px] text-white/30 italic truncate">
+                    {m.insights.topGenres.slice(0, 2).join(', ')}
+                  </span>
+                )}
+              </div>
             )}
-            {m?.type === 'album' && m?.albumType && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-blue-500/15 text-blue-400">{m.albumType}</span>
-            )}
-            {!embed.is_active && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-red-500/20 text-red-300">Inactive</span>
+
+            {/* Genre tags (albums / artists) */}
+            {m?.genres?.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {m.genres.slice(0, 5).map(g => (
+                  <span key={g} className="text-[10px] px-1.5 py-0.5 bg-white/[0.05] text-white/40 border border-white/[0.07]">{g}</span>
+                ))}
+                {m.genres.length > 5 && <span className="text-[10px] text-white/20">+{m.genres.length - 5}</span>}
+              </div>
             )}
           </div>
 
-          {/* Title */}
-          <p className="text-sm font-semibold text-white truncate leading-tight">
-            {m?.name || embed.title || 'Unknown'}
-          </p>
-
-          {/* Subtitle */}
-          {m?.description && (
-            <p className="text-[11px] text-white/40 truncate mt-0.5">{m.description}</p>
-          )}
-          {m?.type === 'track' && m?.albumName && (
-            <p className="text-[10px] text-white/30 truncate mt-0.5">📀 {m.albumName}</p>
-          )}
-
-          {/* Stats row */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
-            {m?.followers != null && (
-              <span className="text-[11px] text-white/50">
-                <span className="text-white/70 font-medium">{fmt(m.followers)}</span> followers
-              </span>
+          {/* Bottom: action links */}
+          <div className="flex items-center gap-3 mt-3 pt-2 border-t border-white/[0.05]">
+            {m?.spotifyUrl && (
+              <a href={m.spotifyUrl} target="_blank" rel="noopener noreferrer"
+                className="text-[11px] text-green-400 hover:text-green-300 transition-colors">
+                Open ↗
+              </a>
             )}
-            {m?.trackCount != null && (
-              <span className="text-[11px] text-white/50">
-                <span className="text-white/70 font-medium">{m.trackCount}</span> tracks
-              </span>
+            {(hasAudioFeatures || isPlaylist) && (
+              <button onClick={() => setExpanded(v => !v)}
+                className="text-[11px] text-white/30 hover:text-white/70 transition-colors">
+                {expanded ? '▲ Less' : isPlaylist ? '▼ Insights' : '▼ Audio'}
+              </button>
             )}
-            {m?.owner && (
-              <span className="text-[11px] text-white/40">by {m.owner}</span>
-            )}
-            {m?.releaseDate && (
-              <span className="text-[11px] text-white/35">{m.releaseDate.slice(0, 4)}</span>
-            )}
-            {m?.type === 'track' && m?.durationMs != null && (
-              <span className="text-[11px] text-white/35">{fmtDuration(m.durationMs)}</span>
-            )}
-            {m?.type === 'track' && m?.bpm != null && (
-              <span className="text-[11px] text-white/50">
-                <span className="text-white/70 font-medium">{m.bpm}</span> BPM
-              </span>
-            )}
-            {m?.popularity != null && <Popularity value={m.popularity} />}
-            {m?.label && (
-              <span className="text-[11px] text-white/30">{m.label}</span>
-            )}
-            {m?.type === 'track' && m?.key != null && m?.mode != null && (
-              <span className="text-[11px] text-white/35 font-mono">
-                {KEY_NAMES[m.key]} {m.mode === 1 ? 'maj' : 'min'}
-              </span>
-            )}
-            {m?.type === 'track' && m?.loudness != null && (
-              <span className="text-[11px] text-white/30 font-mono">{m.loudness} dB</span>
-            )}
-          </div>
-
-          {/* Playlist inline insights summary */}
-          {m?.type === 'playlist' && m?.insights && (
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
-              {m.insights.avgBpm != null && (
-                <span className="text-[11px] text-white/50">
-                  <span className="text-green-400 font-semibold font-mono">{m.insights.avgBpm}</span> avg BPM
-                </span>
-              )}
-              {m.insights.avgPopularity != null && (
-                <span className="text-[11px] text-white/50">
-                  <span className="text-amber-400 font-semibold">★ {m.insights.avgPopularity}</span> avg popularity
-                </span>
-              )}
-              {m.insights.topGenres?.length > 0 && (
-                <span className="text-[11px] text-white/35 italic">
-                  {m.insights.topGenres.slice(0, 2).join(', ')}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Genre tags (non-playlist types) */}
-          {m?.genres?.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {m.genres.slice(0, 5).map(g => (
-                <span key={g} className="text-[10px] px-1.5 py-0.5 bg-white/[0.05] text-white/40 border border-white/[0.07]">
-                  {g}
-                </span>
-              ))}
-              {m.genres.length > 5 && (
-                <span className="text-[10px] text-white/25">+{m.genres.length - 5}</span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col items-end justify-between gap-2 flex-shrink-0">
-          {m?.spotifyUrl && (
-            <a
-              href={m.spotifyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-[11px] text-green-400 hover:text-green-300 transition-colors whitespace-nowrap"
-            >
-              Open ↗
-            </a>
-          )}
-          {(hasAudioFeatures || isPlaylist) && (
-            <button
-              onClick={() => setExpanded(v => !v)}
-              className="text-[11px] text-white/25 hover:text-white/60 transition-colors whitespace-nowrap"
-            >
-              {expanded ? '▲ Less' : isPlaylist ? '▼ Insights' : '▼ Audio'}
+            <button onClick={() => onDelete(embed.id)}
+              className="ml-auto text-[11px] text-white/20 hover:text-red-400 transition-colors px-2 py-0.5 border border-transparent hover:border-red-500/30">
+              Remove
             </button>
+          </div>
+        </div>
+
+        {/* ── RIGHT: cover art filling full card height ── */}
+        <div className="w-[130px] sm:w-[160px] shrink-0 relative bg-white/[0.04] overflow-hidden">
+          {m?.image ? (
+            <img
+              src={m.image}
+              alt={m?.name}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-4xl text-white/10">🎵</div>
           )}
-          <button
-            onClick={() => onDelete(embed.id)}
-            className="text-[11px] text-white/25 hover:text-red-400 transition-colors px-2 py-1 border border-transparent hover:border-red-500/30"
-          >
-            Remove
-          </button>
+          {/* subtle gradient so text on top stays readable if ever needed */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
         </div>
       </div>
 
-      {/* ── Expanded panel: audio features (tracks) or insights (playlists) ── */}
+      {/* ── Expanded panel (full width below main row) ── */}
       {expanded && hasAudioFeatures && (
-        <div className="px-4 pb-4 pt-0 border-t border-white/[0.05]">
-          <p className="text-[10px] font-mono text-white/25 uppercase tracking-widest mb-3 pt-3">Audio Features</p>
+        <div className="px-4 pb-4 pt-3 border-t border-white/[0.05]">
+          <p className="text-[10px] font-mono text-white/25 uppercase tracking-widest mb-3">Audio Features</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
             <FeatureBar label="Energy"       value={m.energy}           color="bg-orange-500" />
             <FeatureBar label="Danceability" value={m.danceability}     color="bg-green-500"  />
@@ -392,12 +379,10 @@ function EmbedCard({ embed, onDelete }) {
       )}
 
       {expanded && isPlaylist && (
-        <div className="px-4 pb-4 pt-0">
-          {m.insights
+        <div className="px-4 pb-4 pt-3 border-t border-white/[0.05]">
+          {hasInsights
             ? <PlaylistInsights ins={m.insights} />
-            : <p className="text-[11px] text-white/25 pt-3 border-t border-white/[0.05]">
-                Insights not available — hit ↺ Refresh to retry.
-              </p>
+            : <p className="text-[11px] text-white/25">Insights loading — hit ↺ Refresh if this persists.</p>
           }
         </div>
       )}
