@@ -196,6 +196,7 @@ function ContentSidePanel() {
       ['Finance Hub', 'M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6', '/admin/finance'],
       ['Ad Settings',  'M12 4v16M4 12h16M7 7l10 10M17 7 7 17',            '/admin/settings'],
       ['Newsletter',   'M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z', '/admin/newsletter'],
+      ['Spotify',      'M9 18V5l12-2v13M9 9l12-2',                                                                                             '/admin/spotify'],
     ]],
   ];
 
