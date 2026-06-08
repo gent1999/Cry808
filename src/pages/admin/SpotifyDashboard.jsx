@@ -239,11 +239,24 @@ export default function SpotifyDashboard() {
   const playlists   = embeds.filter(e => e.page_type === 'playlist');
   const sidebars    = embeds.filter(e => e.page_type !== 'playlist');
 
+  // Deduplicate by Spotify ID before summing followers so the same playlist
+  // added under multiple page_types (e.g. homepage + sidebar) isn't counted twice.
+  const parseId = (url) => url?.match(/\/(playlist|album|track|artist)\/([A-Za-z0-9]+)/)?.[2];
+  const uniqueFollowers = (() => {
+    const seen = new Set();
+    return embeds.reduce((sum, e) => {
+      const id = parseId(e.spotify_url);
+      if (id && seen.has(id)) return sum;
+      if (id) seen.add(id);
+      return sum + (e.metadata?.followers || 0);
+    }, 0);
+  })();
+
   const stats = {
     total:     embeds.length,
     playlists: playlists.length,
     sidebars:  sidebars.length,
-    followers: embeds.reduce((sum, e) => sum + (e.metadata?.followers || 0), 0),
+    followers: uniqueFollowers,
   };
 
   return (
