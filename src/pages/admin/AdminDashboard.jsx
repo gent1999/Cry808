@@ -55,6 +55,7 @@ function Sidebar({ admin, stats, onLogout }) {
       ['Finance Hub', 'finance', '/admin/finance'],
       ['Ad Settings', 'ads',     '/admin/settings'],
       ['Newsletter',  'pulse',   '/admin/newsletter'],
+      ['Spotify',     'spotify', '/admin/spotify'],
     ]],
   ];
 
