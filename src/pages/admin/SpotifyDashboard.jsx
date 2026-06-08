@@ -130,6 +130,71 @@ function Popularity({ value }) {
   );
 }
 
+// ── Playlist insights panel ───────────────────────────────────────────────────
+function PlaylistInsights({ ins }) {
+  if (!ins) return null;
+  return (
+    <div className="mt-3 pt-3 border-t border-white/[0.05]">
+      {/* compact stat chips */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mb-3">
+        {ins.avgBpm != null && (
+          <span className="text-[11px] text-white/50">
+            <span className="text-white/80 font-semibold font-mono">{ins.avgBpm}</span> avg BPM
+          </span>
+        )}
+        {ins.avgPopularity != null && (
+          <span className="text-[11px] text-white/50">
+            <span className="text-amber-400 font-semibold">★ {ins.avgPopularity}</span> avg popularity
+          </span>
+        )}
+        {ins.analyzedCount != null && (
+          <span className="text-[10px] text-white/25 font-mono">
+            from {ins.analyzedCount} tracks
+          </span>
+        )}
+      </div>
+
+      {/* feature bars */}
+      {(ins.avgEnergy != null || ins.avgDanceability != null) && (
+        <div className="grid grid-cols-2 gap-x-8 gap-y-2 mb-3">
+          <FeatureBar label="Energy"       value={ins.avgEnergy}       color="bg-orange-500" />
+          <FeatureBar label="Danceability" value={ins.avgDanceability} color="bg-green-500"  />
+          <FeatureBar label="Mood"         value={ins.avgValence}      color="bg-yellow-400" />
+          <FeatureBar label="Acousticness" value={ins.avgAcousticness} color="bg-sky-500"    />
+        </div>
+      )}
+
+      {/* genre tags */}
+      {ins.topGenres?.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {ins.topGenres.map(g => (
+            <span key={g} className="text-[10px] px-1.5 py-0.5 bg-white/[0.05] text-white/50 border border-white/[0.07]">
+              {g}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* top tracks */}
+      {ins.topTracks?.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-[10px] font-mono text-white/20 uppercase tracking-widest mb-1.5">Top Tracks</p>
+          {ins.topTracks.map((t, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="text-[10px] text-white/20 font-mono w-3">{i + 1}</span>
+              <span className="text-[11px] text-white/60 truncate flex-1">{t.name}</span>
+              {t.artist && <span className="text-[10px] text-white/30 shrink-0">{t.artist}</span>}
+              {t.popularity != null && (
+                <span className="text-[10px] text-amber-400/70 font-mono shrink-0">★{t.popularity}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Embed card ────────────────────────────────────────────────────────────────
 function EmbedCard({ embed, onDelete }) {
   const [expanded, setExpanded] = useState(false);
@@ -140,6 +205,7 @@ function EmbedCard({ embed, onDelete }) {
   const hasAudioFeatures = m?.type === 'track' && (
     m.bpm != null || m.energy != null || m.danceability != null || m.valence != null
   );
+  const hasInsights = m?.type === 'playlist' && m?.insights != null;
 
   return (
     <div className="border border-white/[0.07] bg-white/[0.02] hover:border-green-500/20 transition-all">
@@ -236,7 +302,28 @@ function EmbedCard({ embed, onDelete }) {
             )}
           </div>
 
-          {/* Genre tags */}
+          {/* Playlist inline insights summary */}
+          {m?.type === 'playlist' && m?.insights && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+              {m.insights.avgBpm != null && (
+                <span className="text-[11px] text-white/50">
+                  <span className="text-green-400 font-semibold font-mono">{m.insights.avgBpm}</span> avg BPM
+                </span>
+              )}
+              {m.insights.avgPopularity != null && (
+                <span className="text-[11px] text-white/50">
+                  <span className="text-amber-400 font-semibold">★ {m.insights.avgPopularity}</span> avg popularity
+                </span>
+              )}
+              {m.insights.topGenres?.length > 0 && (
+                <span className="text-[11px] text-white/35 italic">
+                  {m.insights.topGenres.slice(0, 2).join(', ')}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Genre tags (non-playlist types) */}
           {m?.genres?.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {m.genres.slice(0, 5).map(g => (
@@ -263,12 +350,12 @@ function EmbedCard({ embed, onDelete }) {
               Open ↗
             </a>
           )}
-          {hasAudioFeatures && (
+          {(hasAudioFeatures || hasInsights) && (
             <button
               onClick={() => setExpanded(v => !v)}
-              className="text-[11px] text-white/25 hover:text-white/60 transition-colors"
+              className="text-[11px] text-white/25 hover:text-white/60 transition-colors whitespace-nowrap"
             >
-              {expanded ? '▲ Less' : '▼ Audio'}
+              {expanded ? '▲ Less' : hasInsights ? '▼ Insights' : '▼ Audio'}
             </button>
           )}
           <button
@@ -280,7 +367,7 @@ function EmbedCard({ embed, onDelete }) {
         </div>
       </div>
 
-      {/* ── Audio features panel (tracks only) ── */}
+      {/* ── Expanded panel: audio features (tracks) or insights (playlists) ── */}
       {expanded && hasAudioFeatures && (
         <div className="px-4 pb-4 pt-0 border-t border-white/[0.05]">
           <p className="text-[10px] font-mono text-white/25 uppercase tracking-widest mb-3 pt-3">Audio Features</p>
@@ -299,6 +386,12 @@ function EmbedCard({ embed, onDelete }) {
               <audio controls src={m.previewUrl} className="w-full h-8 opacity-70 hover:opacity-100 transition-opacity" />
             </div>
           )}
+        </div>
+      )}
+
+      {expanded && hasInsights && (
+        <div className="px-4 pb-4 pt-0">
+          <PlaylistInsights ins={m.insights} />
         </div>
       )}
     </div>
