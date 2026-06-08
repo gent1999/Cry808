@@ -205,7 +205,9 @@ function EmbedCard({ embed, onDelete }) {
   const hasAudioFeatures = m?.type === 'track' && (
     m.bpm != null || m.energy != null || m.danceability != null || m.valence != null
   );
-  const hasInsights = m?.type === 'playlist' && m?.insights != null;
+  // Show insights button for all playlists — even if null (server may be mid-deploy)
+  const isPlaylist  = m?.type === 'playlist';
+  const hasInsights = isPlaylist && m?.insights != null;
 
   return (
     <div className="border border-white/[0.07] bg-white/[0.02] hover:border-green-500/20 transition-all">
@@ -350,12 +352,12 @@ function EmbedCard({ embed, onDelete }) {
               Open ↗
             </a>
           )}
-          {(hasAudioFeatures || hasInsights) && (
+          {(hasAudioFeatures || isPlaylist) && (
             <button
               onClick={() => setExpanded(v => !v)}
               className="text-[11px] text-white/25 hover:text-white/60 transition-colors whitespace-nowrap"
             >
-              {expanded ? '▲ Less' : hasInsights ? '▼ Insights' : '▼ Audio'}
+              {expanded ? '▲ Less' : isPlaylist ? '▼ Insights' : '▼ Audio'}
             </button>
           )}
           <button
@@ -389,9 +391,14 @@ function EmbedCard({ embed, onDelete }) {
         </div>
       )}
 
-      {expanded && hasInsights && (
+      {expanded && isPlaylist && (
         <div className="px-4 pb-4 pt-0">
-          <PlaylistInsights ins={m.insights} />
+          {m.insights
+            ? <PlaylistInsights ins={m.insights} />
+            : <p className="text-[11px] text-white/25 pt-3 border-t border-white/[0.05]">
+                Insights not available — hit ↺ Refresh to retry.
+              </p>
+          }
         </div>
       )}
     </div>
