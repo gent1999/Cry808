@@ -284,6 +284,7 @@ export default function Home() {
                         className={`w-full h-full object-cover transition-transform duration-700 ${
                           index === currentHeroIndex ? 'scale-105' : 'scale-100'
                         }`}
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/20"></div>

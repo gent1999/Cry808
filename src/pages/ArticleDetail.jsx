@@ -391,11 +391,12 @@ const ArticleDetail = () => {
 
         {/* Article Image */}
         {article.image_url && (
-          <div className="mb-8 rounded-lg overflow-hidden">
+          <div className="mb-8 overflow-hidden bg-gray-900">
             <img
               src={article.image_url}
               alt={article.title}
               className="w-full h-96 object-cover"
+              onError={(e) => { e.currentTarget.parentElement.style.display = 'none'; }}
             />
           </div>
         )}

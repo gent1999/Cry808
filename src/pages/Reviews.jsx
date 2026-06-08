@@ -94,19 +94,24 @@ export default function Reviews() {
                     onClick={() => window.location.href = generateArticleUrl(review.id, review.title)}
                     className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:bg-white/10 hover:border-amber-500/50 transition cursor-pointer group"
                   >
-                    {review.image_url && (
-                      <div className="h-48 overflow-hidden relative">
+                    <div className="h-48 overflow-hidden relative bg-gradient-to-br from-amber-950/40 via-black to-gray-900">
+                      {/* Fallback always sits behind the image */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-4xl opacity-30">⭐</span>
+                      </div>
+                      {review.image_url && (
                         <img
                           src={review.image_url}
                           alt={review.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
-                        <span className="absolute bottom-2 left-2 px-2 py-1 bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider">
-                          ⭐ Review
-                        </span>
-                      </div>
-                    )}
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
+                      <span className="absolute bottom-2 left-2 px-2 py-1 bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider">
+                        ⭐ Review
+                      </span>
+                    </div>
 
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-3">
