@@ -299,7 +299,7 @@ export default function SubmitMusic() {
                   </button>
                 </div>
 
-                {/* ── Skip the Line ── */}
+                {/* ── Skip the Line (temporarily disabled) ──
                 <div className="border-2 border-purple-500/60 bg-gradient-to-b from-purple-950/40 to-black p-7 relative hover:border-purple-400 transition-all flex flex-col">
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
                     ⭐ Popular
@@ -325,8 +325,9 @@ export default function SubmitMusic() {
                     Skip the Line — $5 →
                   </button>
                 </div>
+                */}
 
-                {/* ── Genius Lyrics ── */}
+                {/* ── Genius Lyrics (temporarily disabled) ──
                 <div className="border border-yellow-500/30 bg-gradient-to-b from-yellow-950/15 to-black p-7 hover:border-yellow-400/50 transition-all flex flex-col">
                   <div className="text-4xl mb-4">📝</div>
                   <h3 className="text-xl font-bold mb-1">Genius Lyrics</h3>
@@ -350,6 +351,7 @@ export default function SubmitMusic() {
                     Get Lyrics Posted — $10 →
                   </button>
                 </div>
+                */}
 
               </div>
 
