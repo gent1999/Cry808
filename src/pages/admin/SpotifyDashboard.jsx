@@ -81,6 +81,16 @@ const fmt = (n) => n == null ? '—' : n >= 1_000_000
   : n >= 1_000 ? `${(n / 1_000).toFixed(1)}K`
   : n.toLocaleString();
 
+function fmtDuration(ms) {
+  if (ms == null) return null;
+  const s = Math.round(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+const KEY_NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+
 const TYPE_BADGE = {
   playlist: { label: 'Playlist', cls: 'bg-green-500/20 text-green-300' },
   album:    { label: 'Album',    cls: 'bg-blue-500/20  text-blue-300'  },
@@ -94,81 +104,203 @@ const PAGE_BADGE = {
   article:  { label: 'Article Sidebar',    cls: 'bg-violet-500/20 text-violet-300' },
 };
 
+// ── Feature bar (0–1 value) ───────────────────────────────────────────────────
+function FeatureBar({ label, value, color = 'bg-green-500' }) {
+  if (value == null) return null;
+  const pct = Math.round(value * 100);
+  return (
+    <div className="flex items-center gap-2 min-w-0">
+      <span className="text-[10px] text-white/40 w-[76px] shrink-0 capitalize">{label}</span>
+      <div className="flex-1 h-1 bg-white/10 overflow-hidden rounded-full">
+        <div className={`h-full ${color} rounded-full`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-[10px] font-mono text-white/50 w-5 text-right">{pct}</span>
+    </div>
+  );
+}
+
+// ── Popularity ring ───────────────────────────────────────────────────────────
+function Popularity({ value }) {
+  if (value == null) return null;
+  const color = value >= 70 ? 'text-green-400' : value >= 40 ? 'text-amber-400' : 'text-white/40';
+  return (
+    <span className={`flex items-center gap-1 text-[11px] font-semibold ${color}`} title="Popularity (0–100)">
+      ★ {value}
+    </span>
+  );
+}
+
 // ── Embed card ────────────────────────────────────────────────────────────────
 function EmbedCard({ embed, onDelete }) {
+  const [expanded, setExpanded] = useState(false);
   const m = embed.metadata;
   const tb = TYPE_BADGE[m?.type] || TYPE_BADGE.playlist;
   const pb = PAGE_BADGE[embed.page_type] || PAGE_BADGE.home;
 
+  const hasAudioFeatures = m?.type === 'track' && (
+    m.bpm != null || m.energy != null || m.danceability != null || m.valence != null
+  );
+
   return (
-    <div className="group relative flex gap-4 p-4 border border-white/[0.07] bg-white/[0.02] hover:border-green-500/25 hover:bg-white/[0.04] transition-all">
+    <div className="border border-white/[0.07] bg-white/[0.02] hover:border-green-500/20 transition-all">
 
-      {/* Cover art */}
-      <div className="flex-shrink-0 w-20 h-20 bg-white/[0.06] overflow-hidden">
-        {m?.image
-          ? <img src={m.image} alt={m.name} className="w-full h-full object-cover" />
-          : <div className="w-full h-full flex items-center justify-center text-2xl text-white/20">🎵</div>
-        }
-      </div>
+      {/* ── Main row ── */}
+      <div className="flex gap-4 p-4">
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-1.5 mb-1">
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide ${tb.cls}`}>
-            {tb.label}
-          </span>
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide ${pb.cls}`}>
-            {pb.label}
-          </span>
-          {!embed.is_active && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-red-500/20 text-red-300">Inactive</span>
+        {/* Cover art */}
+        <div className="flex-shrink-0 w-[88px] h-[88px] bg-white/[0.06] overflow-hidden">
+          {m?.image
+            ? <img src={m.image} alt={m?.name} className="w-full h-full object-cover" />
+            : <div className="w-full h-full flex items-center justify-center text-2xl text-white/20">🎵</div>
+          }
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+
+          {/* Badges */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide ${tb.cls}`}>
+              {tb.label}
+            </span>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide ${pb.cls}`}>
+              {pb.label}
+            </span>
+            {m?.explicit && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-red-500/20 text-red-300">E</span>
+            )}
+            {m?.type === 'playlist' && m?.collaborative && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-orange-500/20 text-orange-300">Collab</span>
+            )}
+            {m?.type === 'playlist' && m?.isPublic === false && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-gray-500/20 text-gray-400">Private</span>
+            )}
+            {m?.type === 'album' && m?.albumType && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-blue-500/15 text-blue-400">{m.albumType}</span>
+            )}
+            {!embed.is_active && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wide bg-red-500/20 text-red-300">Inactive</span>
+            )}
+          </div>
+
+          {/* Title */}
+          <p className="text-sm font-semibold text-white truncate leading-tight">
+            {m?.name || embed.title || 'Unknown'}
+          </p>
+
+          {/* Subtitle */}
+          {m?.description && (
+            <p className="text-[11px] text-white/40 truncate mt-0.5">{m.description}</p>
+          )}
+          {m?.type === 'track' && m?.albumName && (
+            <p className="text-[10px] text-white/30 truncate mt-0.5">📀 {m.albumName}</p>
+          )}
+
+          {/* Stats row */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+            {m?.followers != null && (
+              <span className="text-[11px] text-white/50">
+                <span className="text-white/70 font-medium">{fmt(m.followers)}</span> followers
+              </span>
+            )}
+            {m?.trackCount != null && (
+              <span className="text-[11px] text-white/50">
+                <span className="text-white/70 font-medium">{m.trackCount}</span> tracks
+              </span>
+            )}
+            {m?.owner && (
+              <span className="text-[11px] text-white/40">by {m.owner}</span>
+            )}
+            {m?.releaseDate && (
+              <span className="text-[11px] text-white/35">{m.releaseDate.slice(0, 4)}</span>
+            )}
+            {m?.type === 'track' && m?.durationMs != null && (
+              <span className="text-[11px] text-white/35">{fmtDuration(m.durationMs)}</span>
+            )}
+            {m?.type === 'track' && m?.bpm != null && (
+              <span className="text-[11px] text-white/50">
+                <span className="text-white/70 font-medium">{m.bpm}</span> BPM
+              </span>
+            )}
+            {m?.popularity != null && <Popularity value={m.popularity} />}
+            {m?.label && (
+              <span className="text-[11px] text-white/30">{m.label}</span>
+            )}
+            {m?.type === 'track' && m?.key != null && m?.mode != null && (
+              <span className="text-[11px] text-white/35 font-mono">
+                {KEY_NAMES[m.key]} {m.mode === 1 ? 'maj' : 'min'}
+              </span>
+            )}
+            {m?.type === 'track' && m?.loudness != null && (
+              <span className="text-[11px] text-white/30 font-mono">{m.loudness} dB</span>
+            )}
+          </div>
+
+          {/* Genre tags */}
+          {m?.genres?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {m.genres.slice(0, 5).map(g => (
+                <span key={g} className="text-[10px] px-1.5 py-0.5 bg-white/[0.05] text-white/40 border border-white/[0.07]">
+                  {g}
+                </span>
+              ))}
+              {m.genres.length > 5 && (
+                <span className="text-[10px] text-white/25">+{m.genres.length - 5}</span>
+              )}
+            </div>
           )}
         </div>
 
-        <p className="text-sm font-semibold text-white truncate">
-          {m?.name || embed.title || 'Unknown'}
-        </p>
-
-        {m?.description && (
-          <p className="text-[11px] text-white/40 truncate mt-0.5">{m.description}</p>
-        )}
-
-        <div className="flex items-center gap-4 mt-2">
-          {m?.followers != null && (
-            <span className="text-[11px] text-white/50">
-              <span className="text-white/70 font-medium">{fmt(m.followers)}</span> followers
-            </span>
+        {/* Actions */}
+        <div className="flex flex-col items-end justify-between gap-2 flex-shrink-0">
+          {m?.spotifyUrl && (
+            <a
+              href={m.spotifyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-[11px] text-green-400 hover:text-green-300 transition-colors whitespace-nowrap"
+            >
+              Open ↗
+            </a>
           )}
-          {m?.trackCount != null && (
-            <span className="text-[11px] text-white/50">
-              <span className="text-white/70 font-medium">{fmt(m.trackCount)}</span> tracks
-            </span>
+          {hasAudioFeatures && (
+            <button
+              onClick={() => setExpanded(v => !v)}
+              className="text-[11px] text-white/25 hover:text-white/60 transition-colors"
+            >
+              {expanded ? '▲ Less' : '▼ Audio'}
+            </button>
           )}
-          {m?.owner && (
-            <span className="text-[11px] text-white/40">by {m.owner}</span>
-          )}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex flex-col items-end justify-between gap-2 flex-shrink-0">
-        {m?.spotifyUrl && (
-          <a
-            href={m.spotifyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[11px] text-green-400 hover:text-green-300 transition-colors"
+          <button
+            onClick={() => onDelete(embed.id)}
+            className="text-[11px] text-white/25 hover:text-red-400 transition-colors px-2 py-1 border border-transparent hover:border-red-500/30"
           >
-            Open ↗
-          </a>
-        )}
-        <button
-          onClick={() => onDelete(embed.id)}
-          className="text-[11px] text-white/25 hover:text-red-400 transition-colors px-2 py-1 border border-transparent hover:border-red-500/30"
-        >
-          Remove
-        </button>
+            Remove
+          </button>
+        </div>
       </div>
+
+      {/* ── Audio features panel (tracks only) ── */}
+      {expanded && hasAudioFeatures && (
+        <div className="px-4 pb-4 pt-0 border-t border-white/[0.05]">
+          <p className="text-[10px] font-mono text-white/25 uppercase tracking-widest mb-3 pt-3">Audio Features</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+            <FeatureBar label="Energy"       value={m.energy}           color="bg-orange-500" />
+            <FeatureBar label="Danceability" value={m.danceability}     color="bg-green-500"  />
+            <FeatureBar label="Valence"      value={m.valence}          color="bg-yellow-400" />
+            <FeatureBar label="Acousticness" value={m.acousticness}     color="bg-sky-500"    />
+            <FeatureBar label="Speechiness"  value={m.speechiness}      color="bg-purple-500" />
+            <FeatureBar label="Liveness"     value={m.liveness}         color="bg-red-500"    />
+            <FeatureBar label="Instrumental" value={m.instrumentalness} color="bg-teal-500"   />
+          </div>
+          {m?.previewUrl && (
+            <div className="mt-4">
+              <p className="text-[10px] font-mono text-white/25 uppercase tracking-widest mb-2">30-sec Preview</p>
+              <audio controls src={m.previewUrl} className="w-full h-8 opacity-70 hover:opacity-100 transition-opacity" />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -236,11 +368,10 @@ export default function SpotifyDashboard() {
   };
 
   // Group by page_type
-  const playlists   = embeds.filter(e => e.page_type === 'playlist');
-  const sidebars    = embeds.filter(e => e.page_type !== 'playlist');
+  const playlists = embeds.filter(e => e.page_type === 'playlist');
+  const sidebars  = embeds.filter(e => e.page_type !== 'playlist');
 
-  // Deduplicate by Spotify ID before summing followers so the same playlist
-  // added under multiple page_types (e.g. homepage + sidebar) isn't counted twice.
+  // Deduplicate by Spotify ID before summing followers
   const parseId = (url) => url?.match(/\/(playlist|album|track|artist)\/([A-Za-z0-9]+)/)?.[2];
   const uniqueFollowers = (() => {
     const seen = new Set();
@@ -250,6 +381,19 @@ export default function SpotifyDashboard() {
       if (id) seen.add(id);
       return sum + (e.metadata?.followers || 0);
     }, 0);
+  })();
+
+  // Aggregate popularity across all embeds that have it (deduplicated)
+  const avgPopularity = (() => {
+    const seen = new Set();
+    const vals = [];
+    embeds.forEach(e => {
+      const id = parseId(e.spotify_url);
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      if (e.metadata?.popularity != null) vals.push(e.metadata.popularity);
+    });
+    return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
   })();
 
   const stats = {
@@ -289,16 +433,17 @@ export default function SpotifyDashboard() {
         <div className="px-8 py-8 max-w-5xl">
 
           {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
             {[
-              { label: 'Total Embeds',    value: stats.total,     color: 'text-white'    },
-              { label: 'Playlists',       value: stats.playlists, color: 'text-green-400'},
-              { label: 'Sidebar Embeds',  value: stats.sidebars,  color: 'text-sky-400'  },
-              { label: 'Total Followers', value: fmt(stats.followers), color: 'text-green-300' },
+              { label: 'Total Embeds',    value: stats.total,             color: 'text-white'    },
+              { label: 'Playlists',       value: stats.playlists,         color: 'text-green-400'},
+              { label: 'Sidebar Embeds',  value: stats.sidebars,          color: 'text-sky-400'  },
+              { label: 'Total Followers', value: fmt(stats.followers),    color: 'text-green-300'},
+              { label: 'Avg Popularity',  value: avgPopularity != null ? `★ ${avgPopularity}` : '—', color: avgPopularity >= 70 ? 'text-green-400' : avgPopularity >= 40 ? 'text-amber-400' : 'text-white/40' },
             ].map(({ label, value, color }) => (
               <div key={label} className="border border-white/[0.07] bg-white/[0.02] px-4 py-3">
                 <div className="text-[10px] font-mono text-white/35 uppercase tracking-wider mb-1">{label}</div>
-                <div className={`text-2xl font-bold font-mono ${loading ? 'text-white/10' : color}`}>
+                <div className={`text-xl font-bold font-mono ${loading ? 'text-white/10' : color}`}>
                   {loading ? '—' : value}
                 </div>
               </div>
