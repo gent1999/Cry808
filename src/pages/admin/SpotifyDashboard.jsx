@@ -5,22 +5,10 @@ import spotifyLogo from '../../assets/spotify_logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// ── localStorage keys & helpers ───────────────────────────────────────────────
-const LS_SUBS = 'cry808_submissions';
+// ── localStorage keys & helpers (categories only — submissions live in DB) ────
 const LS_CATS = 'cry808_playlist_cats';
 const lsGet   = (k, fb) => { try { return JSON.parse(localStorage.getItem(k)) ?? fb; } catch { return fb; } };
 const lsSet   = (k, v)  => { try { localStorage.setItem(k, JSON.stringify(v)); }    catch {} };
-
-// ── Demo seed data (pre-fills localStorage on first load) ─────────────────────
-const SEED_SUBMISSIONS = [
-  { id: 1, artist: 'Jay Mack',      track: 'City Lights',   url: '', playlist: 'Hip-Hop Rising', source: 'Soundplate', status: 'Approved',         submitted: '2026-06-01', added: null,         notes: 'Great energy, fits perfectly' },
-  { id: 2, artist: 'Kali Uchis',    track: 'Moonrise',      url: '', playlist: 'R&B Elevated',   source: 'MusoSoup',   status: 'Approved',         submitted: '2026-05-28', added: '2026-06-02', notes: '' },
-  { id: 3, artist: 'Lil Durk',      track: 'Midnight Run',  url: '', playlist: 'Drill Sessions', source: 'Direct',     status: 'Pending Review',   submitted: '2026-06-05', added: null,         notes: '' },
-  { id: 4, artist: 'SZA',           track: 'Lavender Haze', url: '', playlist: 'R&B Elevated',   source: 'Soundplate', status: 'Removed from Playlist', submitted: '2026-05-20', added: null, notes: 'Removed after 30 days' },
-  { id: 5, artist: 'Rod Wave',      track: 'Heart on Ice',  url: '', playlist: 'Emotional Trap', source: 'MusoSoup',   status: 'Declined',         submitted: '2026-05-15', added: null,         notes: 'Not the right fit' },
-  { id: 6, artist: 'Fivio Foreign', track: 'Demon Time',    url: '', playlist: 'Drill Sessions', source: 'Soundplate', status: 'Pending Review',   submitted: '2026-06-06', added: null,         notes: '' },
-  { id: 7, artist: 'H.E.R.',        track: 'Damage',        url: '', playlist: 'R&B Elevated',   source: 'Direct',     status: 'Approved',         submitted: '2026-06-03', added: null,         notes: 'Strong candidate' },
-];
 
 // ── Style maps ────────────────────────────────────────────────────────────────
 const CAT_STYLE = {
@@ -515,7 +503,8 @@ export default function SpotifyDashboard() {
   const [showSubForm, setShowSubForm] = useState(false);
   const [subForm, setSubForm] = useState({ artist: '', track: '', url: '', playlist: '', source: 'Soundplate', status: 'Pending Review', notes: '' });
 
-  const [submissions, setSubmissions] = useState(() => lsGet(LS_SUBS, SEED_SUBMISSIONS));
+  const [submissions, setSubmissions] = useState([]);
+  const [subsLoading, setSubsLoading] = useState(true);
   const [categories,  setCategories]  = useState(() => lsGet(LS_CATS, {}));
 
   const token = localStorage.getItem('adminToken');
@@ -532,7 +521,16 @@ export default function SpotifyDashboard() {
     finally     { setLoading(false); }
   };
 
-  useEffect(() => { load(); }, []);
+  const loadSubmissions = async () => {
+    setSubsLoading(true);
+    try {
+      const r = await fetch(`${API_URL}/api/playlist-submissions`, { headers: { Authorization: `Bearer ${token}` } });
+      if (r.ok) { const d = await r.json(); setSubmissions(d.submissions || []); }
+    } catch (_) {}
+    finally { setSubsLoading(false); }
+  };
+
+  useEffect(() => { load(); loadSubmissions(); }, []);
 
   const handleDelete = async (id) => {
     if (!confirm('Remove this Spotify embed?')) return;
@@ -548,22 +546,55 @@ export default function SpotifyDashboard() {
     setCategories(updated); lsSet(LS_CATS, updated);
   };
 
-  // ── Submissions actions ─────────────────────────────────────────────────────
+  // ── Submissions actions (API-backed) ────────────────────────────────────────
   const pf = (field) => (e) => setSubForm(f => ({ ...f, [field]: e.target.value }));
-  const addSub = () => {
-    if (!subForm.artist.trim() || !subForm.track.trim()) return;
-    const updated = [{ id: Date.now(), ...subForm, submitted: new Date().toISOString().slice(0,10), added: null }, ...submissions];
-    setSubmissions(updated); lsSet(LS_SUBS, updated);
+
+  const addSub = async () => {
+    if (!subForm.artist.trim()) return;
+    try {
+      const r = await fetch(`${API_URL}/api/playlist-submissions/import`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          artist:      subForm.artist,
+          track:       subForm.track || null,
+          spotify_url: subForm.url   || null,
+          playlist:    subForm.playlist || 'Press Play',
+          source:      subForm.source,
+          submitted_at: new Date(),
+        }),
+      });
+      if (r.ok) {
+        const d = await r.json();
+        if (d.submission) setSubmissions(prev => [d.submission, ...prev]);
+      }
+    } catch (_) {}
     setSubForm({ artist: '', track: '', url: '', playlist: '', source: 'Soundplate', status: 'Pending Review', notes: '' });
     setShowSubForm(false);
   };
-  const setSubStatus = (id, status) => {
-    const updated = submissions.map(s => s.id === id
-      ? { ...s, status, added: status === 'Approved' && !s.added ? new Date().toISOString().slice(0,10) : s.added }
-      : s);
-    setSubmissions(updated); lsSet(LS_SUBS, updated); setEditStatus(null);
+
+  const setSubStatus = async (id, status) => {
+    setEditStatus(null);
+    try {
+      const r = await fetch(`${API_URL}/api/playlist-submissions/${id}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (r.ok) setSubmissions(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+    } catch (_) {}
   };
-  const removeSub = (id) => { const u = submissions.filter(s => s.id !== id); setSubmissions(u); lsSet(LS_SUBS, u); };
+
+  const removeSub = async (id) => {
+    if (!confirm('Remove this submission?')) return;
+    try {
+      const r = await fetch(`${API_URL}/api/playlist-submissions/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (r.ok) setSubmissions(prev => prev.filter(s => s.id !== id));
+    } catch (_) {}
+  };
 
   // ── Computed stats ──────────────────────────────────────────────────────────
   const parseId   = (url) => url?.match(/\/(playlist|album|track|artist)\/([A-Za-z0-9]+)/)?.[2];
@@ -584,7 +615,7 @@ export default function SpotifyDashboard() {
 
   // Action alerts (compact)
   const alerts = [];
-  const stale = submissions.filter(s => s.status === 'Pending Review' && (Date.now() - new Date(s.submitted)) / 86_400_000 > 7);
+  const stale = submissions.filter(s => s.status === 'Pending Review' && (Date.now() - new Date(s.submitted_at)) / 86_400_000 > 7);
   if (stale.length) alerts.push({ level: 'warning', icon: '🕐', msg: `${stale.length} submission${stale.length > 1 ? 's' : ''} pending 7+ days` });
   const noIns = playlists.filter(e => !e.metadata?.insights);
   if (noIns.length) alerts.push({ level: 'info', icon: '📊', msg: `${noIns.length} playlist${noIns.length > 1 ? 's' : ''} missing insights` });
@@ -653,7 +684,7 @@ export default function SpotifyDashboard() {
                 { label: 'Total Followers',    val: fmt(uniqueFollowers),  color: 'text-green-400'  },
                 { label: 'Playlists',          val: playlists.length,     sub: 'active',    color: 'text-white'      },
                 { label: 'Tracks Curated',     val: totalTracks,          sub: 'total',     color: 'text-sky-400'    },
-                { label: 'Submissions',        val: submissions.length,   sub: `${acceptRate} accepted`, color: 'text-amber-400' },
+                { label: 'Submissions',        val: subsLoading ? '—' : submissions.length,   sub: `${acceptRate} accepted`, color: 'text-amber-400' },
               ].map(({ label, val, growth, sub, color }) => (
                 <div key={label} className="border border-white/[0.07] bg-white/[0.02] px-3 py-2.5 hover:border-green-500/20 transition-all">
                   <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest leading-tight">{label}</p>
@@ -799,9 +830,9 @@ export default function SpotifyDashboard() {
                             <tr key={sub.id} className="group border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
                               <td className="py-1.5 pr-3 pl-2 font-medium text-white/80 whitespace-nowrap">{sub.artist}</td>
                               <td className="py-1.5 pr-3 text-white/50 max-w-[120px] truncate">
-                                {sub.url
-                                  ? <a href={sub.url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400">{sub.track} ↗</a>
-                                  : sub.track}
+                                {sub.spotify_url
+                                  ? <a href={sub.spotify_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400">{sub.track} ↗</a>
+                                  : (sub.track || <span className="text-white/20 italic">Unknown</span>)}
                               </td>
                               <td className="py-1.5 pr-3 text-white/25 whitespace-nowrap truncate max-w-[90px]">{sub.playlist || '—'}</td>
                               <td className="py-1.5 pr-3">
@@ -827,7 +858,7 @@ export default function SpotifyDashboard() {
                                   )}
                                 </div>
                               </td>
-                              <td className="py-1.5 pr-3 text-white/25 font-mono whitespace-nowrap">{sub.submitted}</td>
+                              <td className="py-1.5 pr-3 text-white/25 font-mono whitespace-nowrap">{sub.submitted_at ? new Date(sub.submitted_at).toISOString().slice(0,10) : '—'}</td>
                               <td className="py-1.5 px-2">
                                 <button onClick={() => removeSub(sub.id)}
                                   className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all">✕</button>
@@ -839,8 +870,11 @@ export default function SpotifyDashboard() {
                     </table>
                   )}
                 </div>
-                <div className="shrink-0 px-3 py-1 border-t border-white/[0.04]">
-                  <span className="text-[8px] text-white/15 font-mono">Stored locally · not synced to server</span>
+                <div className="shrink-0 px-3 py-1 border-t border-white/[0.04] flex items-center justify-between">
+                  <span className="text-[8px] text-white/15 font-mono">Synced to server · auto-imported from Soundplate</span>
+                  <button onClick={loadSubmissions} className="text-[8px] text-white/20 hover:text-white/50 transition-colors font-mono">
+                    {subsLoading ? '...' : '↺'}
+                  </button>
                 </div>
               </div>
             </div>
