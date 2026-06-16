@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -406,7 +406,10 @@ const ArticleDetail = () => {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{article.title}</h1>
 
           <div className="flex items-center gap-4 text-white/50 text-sm mb-6">
-            <span>By {article.author}</span>
+            <span>By <Link
+              to={`/artist/${article.author.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-{2,}/g, '-')}`}
+              className="hover:text-purple-400 transition-colors"
+            >{article.author}</Link></span>
             <span>•</span>
             <span>{new Date(article.created_at).toLocaleDateString('en-US', {
               year: 'numeric',

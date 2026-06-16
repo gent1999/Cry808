@@ -29,6 +29,10 @@ import RevenueSources from "./pages/admin/RevenueSources";
 import Cortex from "./pages/admin/Cortex";
 import Newsletter from "./pages/admin/Newsletter";
 import SpotifyDashboard from "./pages/admin/SpotifyDashboard";
+import ArtistPage from "./pages/ArtistPage";
+import ArtistsList from "./pages/admin/ArtistsList";
+import ArtistCreate from "./pages/admin/ArtistCreate";
+import ArtistEdit from "./pages/admin/ArtistEdit";
 
 // Component to track page views
 function AnalyticsTracker() {
@@ -158,6 +162,15 @@ export default function App() {
               </>
             }
           />
+          <Route
+            path="/artist/:slug"
+            element={
+              <>
+                <Navbar />
+                <ArtistPage />
+              </>
+            }
+          />
 
           {/* Admin Routes without Navbar */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -175,6 +188,9 @@ export default function App() {
           <Route path="/admin/cortex" element={<Cortex />} />
           <Route path="/admin/newsletter" element={<Newsletter />} />
           <Route path="/admin/spotify" element={<SpotifyDashboard />} />
+          <Route path="/admin/artists" element={<ArtistsList />} />
+          <Route path="/admin/artists/create" element={<ArtistCreate />} />
+          <Route path="/admin/artists/edit/:id" element={<ArtistEdit />} />
         </Routes>
 
       </div>

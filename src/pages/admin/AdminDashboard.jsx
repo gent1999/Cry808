@@ -44,9 +44,10 @@ function Sidebar({ admin, stats, onLogout }) {
 
   const groups = [
     ['Content', [
-      ['New Article', 'add', '/admin/articles/create'],
-      ['All Articles', 'list', '/admin/articles', stats.total],
-      ['Submissions', 'inbox', '/admin/submissions', stats.submissions],
+      ['New Article', 'add',     '/admin/articles/create'],
+      ['All Articles', 'list',   '/admin/articles', stats.total],
+      ['Artists',      'users',  '/admin/artists'],
+      ['Submissions',  'inbox',  '/admin/submissions', stats.submissions],
     ]],
     ['Intelligence', [
       ['Cortex', 'cortex', '/admin/cortex'],
