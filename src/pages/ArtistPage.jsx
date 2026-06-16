@@ -220,7 +220,7 @@ export default function ArtistPage() {
             </div>
 
             {/* Artist hero */}
-            <div className="relative mb-10 overflow-hidden" style={{ minHeight: '300px' }}>
+            <div className="relative mb-10 overflow-hidden" style={{ minHeight: '420px' }}>
               {artist.profile_image_url ? (
                 <>
                   <img
@@ -236,16 +236,16 @@ export default function ArtistPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,.3),transparent_65%)] bg-[#08080f]" />
               )}
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_0%,rgba(139,92,246,.18),transparent_50%)] pointer-events-none" />
-              <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-black to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black to-transparent" />
 
-              <div className="relative flex flex-col sm:flex-row items-center sm:items-end gap-7 px-6 pt-10 pb-12">
-                <div className="h-44 w-44 flex-shrink-0 overflow-hidden border-2 border-white/25 bg-[#0d0d1a] shadow-[0_24px_80px_rgba(0,0,0,.85)]">
+              <div className="relative flex flex-col sm:flex-row items-end gap-8 px-6 pt-10 pb-14">
+                <div className="w-56 h-56 sm:w-72 sm:h-72 flex-shrink-0 overflow-hidden border-2 border-white/25 bg-[#0d0d1a] shadow-[0_32px_100px_rgba(0,0,0,.9)]">
                   {artist.profile_image_url
                     ? <img src={artist.profile_image_url} alt={artist.name} className="h-full w-full object-cover" />
-                    : <div className="flex h-full w-full items-center justify-center text-6xl">🎤</div>
+                    : <div className="flex h-full w-full items-center justify-center text-8xl">🎤</div>
                   }
                 </div>
-                <div className="text-center sm:text-left pb-1">
+                <div className="sm:text-left pb-1">
                   <div className="text-[11px] font-mono uppercase tracking-[.2em] text-purple-400 mb-2">Artist</div>
                   <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white drop-shadow-[0_2px_16px_rgba(0,0,0,1)]">{artist.name}</h1>
                   {artist.bio && (
