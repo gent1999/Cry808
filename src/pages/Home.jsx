@@ -26,6 +26,7 @@ export default function Home() {
   const [reviewArticles, setReviewArticles] = useState([]);
   const [onTheRadar, setOnTheRadar] = useState([]);
   const [trendingTags, setTrendingTags] = useState([]);
+  const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
@@ -116,6 +117,14 @@ export default function Home() {
     };
 
     fetchArticles();
+  }, []);
+
+  // Fetch artist profiles for the Artists section
+  useEffect(() => {
+    fetch(`${API_URL}/api/artists`)
+      .then(r => r.json())
+      .then(d => setArtists(d.artists || []))
+      .catch(() => {});
   }, []);
 
   // Auto-advance hero carousel
@@ -587,6 +596,41 @@ export default function Home() {
                             </p>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Artists ─────────────────────────────────────────────── */}
+                {artists.length > 0 && (
+                  <div className="mb-10">
+                    <div className="mb-6 flex items-end justify-between">
+                      <div>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-1 bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
+                          Artists
+                        </h2>
+                        <p className="text-white/40 text-xs mb-3">Profiles of artists featured on Cry808</p>
+                        <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-violet-500"></div>
+                      </div>
+                      <a href="/artists" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors whitespace-nowrap">
+                        View All →
+                      </a>
+                    </div>
+                    <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                      {artists.map(artist => (
+                        <a
+                          key={artist.id}
+                          href={`/artist/${artist.slug}`}
+                          className="flex-shrink-0 w-40 md:w-48 group text-center cursor-pointer"
+                        >
+                          <div className="mx-auto mb-3 h-28 w-28 md:h-32 md:w-32 overflow-hidden border-2 border-purple-500/20 group-hover:border-purple-500/60 transition-all duration-300 bg-white/5">
+                            {artist.profile_image_url
+                              ? <img src={artist.profile_image_url} alt={artist.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                              : <div className="flex h-full w-full items-center justify-center text-4xl">🎤</div>
+                            }
+                          </div>
+                          <div className="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors leading-tight">{artist.name}</div>
+                        </a>
                       ))}
                     </div>
                   </div>

@@ -96,6 +96,7 @@ export default function ArtistEdit() {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
   const [artist, setArtist] = useState(null);
+  const [linkedArticles, setLinkedArticles] = useState([]);
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -110,14 +111,21 @@ export default function ArtistEdit() {
   async function loadArtist() {
     setFetching(true);
     try {
-      const res = await fetch(`${API_URL}/api/artists`);
-      const data = await res.json();
-      const found = (data.artists || []).find(a => String(a.id) === String(id));
+      // First get the list to find slug by id
+      const listRes = await fetch(`${API_URL}/api/artists`);
+      const listData = await listRes.json();
+      const found = (listData.artists || []).find(a => String(a.id) === String(id));
       if (!found) { setError('Artist not found'); return; }
-      setArtist(found);
-      setName(found.name);
-      setBio(found.bio || '');
-      setImagePreview(found.profile_image_url || null);
+
+      // Then fetch full profile (includes linked articles)
+      const profileRes = await fetch(`${API_URL}/api/artists/${found.slug}`);
+      const profileData = await profileRes.json();
+
+      setArtist(profileData.artist || found);
+      setLinkedArticles(profileData.articles || []);
+      setName((profileData.artist || found).name);
+      setBio((profileData.artist || found).bio || '');
+      setImagePreview((profileData.artist || found).profile_image_url || null);
     } catch {
       setError('Failed to load artist');
     } finally {
@@ -255,6 +263,51 @@ export default function ArtistEdit() {
                 )}
               </div>
             </form>
+
+            {/* ── Linked Articles ──────────────────────────────────────────── */}
+            <div className="mt-12 border-t border-white/[0.06] pt-8">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-sm font-semibold text-white">Linked Articles</h2>
+                  <p className="text-[11px] text-slate-600 mt-0.5">
+                    Articles where "Author" matches <span className="text-slate-400 font-mono">"{name}"</span> (case-insensitive)
+                  </p>
+                </div>
+                <span className="text-xs text-slate-600">{linkedArticles.length} article{linkedArticles.length !== 1 ? 's' : ''}</span>
+              </div>
+
+              {linkedArticles.length === 0 ? (
+                <div className="border border-white/[0.05] bg-white/[0.02] px-4 py-6 text-center text-xs text-slate-600">
+                  No articles found with author "{name}". Make sure the Author field on articles matches this name exactly.
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {linkedArticles.map(article => (
+                    <div key={article.id} className="flex items-center gap-3 border border-white/[0.05] bg-white/[0.02] px-4 py-3 hover:bg-white/[0.04] transition">
+                      {article.image_url && (
+                        <img src={article.image_url} alt="" className="h-10 w-14 flex-shrink-0 object-cover bg-white/[0.04]" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm text-white truncate">{article.title}</div>
+                        <div className="text-[11px] text-slate-600 mt-0.5">
+                          {article.created_at ? new Date(article.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                          {article.categories?.length > 0 && (
+                            <span className="ml-2 text-slate-700">{article.categories.join(', ')}</span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/articles/edit/${article.id}`)}
+                        className="flex-shrink-0 text-xs text-sky-500 hover:text-sky-400 transition px-2"
+                      >
+                        Edit article →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </main>
       </div>

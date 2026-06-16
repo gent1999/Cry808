@@ -152,6 +152,17 @@ export default function Navbar() {
                 Reviews
               </Link>
               <Link
+                to="/artists"
+                onClick={handleNavClick('/artists')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+                  location.pathname.startsWith('/artist')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Artists
+              </Link>
+              <Link
                 to="/about"
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
                   isActive('/about')
@@ -261,6 +272,17 @@ export default function Navbar() {
                 onClick={handleNavClick('/reviews')}
               >
                 Reviews
+              </Link>
+              <Link
+                to="/artists"
+                className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  location.pathname.startsWith('/artist')
+                    ? 'text-white bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                onClick={handleNavClick('/artists')}
+              >
+                Artists
               </Link>
               <Link
                 to="/about"

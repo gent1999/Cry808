@@ -30,6 +30,7 @@ import Cortex from "./pages/admin/Cortex";
 import Newsletter from "./pages/admin/Newsletter";
 import SpotifyDashboard from "./pages/admin/SpotifyDashboard";
 import ArtistPage from "./pages/ArtistPage";
+import Artists from "./pages/Artists";
 import ArtistsList from "./pages/admin/ArtistsList";
 import ArtistCreate from "./pages/admin/ArtistCreate";
 import ArtistEdit from "./pages/admin/ArtistEdit";
@@ -159,6 +160,15 @@ export default function App() {
               <>
                 <Navbar />
                 <ArticleDetail />
+              </>
+            }
+          />
+          <Route
+            path="/artists"
+            element={
+              <>
+                <Navbar />
+                <Artists />
               </>
             }
           />
