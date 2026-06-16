@@ -332,6 +332,14 @@ export default function ArtistPage() {
                 )}
               </div>
             )}
+
+            {/* Bio 2 — shown below articles */}
+            {artist.bio2 && (
+              <div className="mt-10 border-t border-white/[0.06] pt-8">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mb-3">More on {artist.name}</p>
+                <p className="text-sm leading-relaxed text-white/55 whitespace-pre-line">{artist.bio2}</p>
+              </div>
+            )}
           </div>
 
           {/* Right sidebar */}

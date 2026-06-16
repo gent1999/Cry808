@@ -103,6 +103,7 @@ export default function ArtistEdit() {
   const [unlinking, setUnlinking] = useState(null);
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
+  const [bio2, setBio2] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -133,6 +134,7 @@ export default function ArtistEdit() {
       setAllArticles(articlesData.articles || []);
       setName((profileData.artist || found).name);
       setBio((profileData.artist || found).bio || '');
+      setBio2((profileData.artist || found).bio2 || '');
       setImagePreview((profileData.artist || found).profile_image_url || null);
     } catch {
       setError('Failed to load artist');
@@ -187,6 +189,7 @@ export default function ArtistEdit() {
       const fd = new FormData();
       fd.append('name', name.trim());
       fd.append('bio', bio.trim());
+      fd.append('bio2', bio2.trim());
       if (imageFile) fd.append('profile_image', imageFile);
 
       const res = await fetch(`${API_URL}/api/artists/${id}`, {
@@ -245,13 +248,23 @@ export default function ArtistEdit() {
                 />
               </Field>
 
-              <Field label="Bio">
+              <Field label="Bio" hint="Short paragraph shown in the artist hero header.">
                 <textarea
                   className={`${inputCls} resize-none`}
-                  rows={5}
+                  rows={4}
                   value={bio}
                   onChange={e => setBio(e.target.value)}
                   placeholder="Write a short bio…"
+                />
+              </Field>
+
+              <Field label="Bio 2" hint="Extended text shown below the articles section on the public page.">
+                <textarea
+                  className={`${inputCls} resize-none`}
+                  rows={6}
+                  value={bio2}
+                  onChange={e => setBio2(e.target.value)}
+                  placeholder="More detail, background info, career highlights…"
                 />
               </Field>
 

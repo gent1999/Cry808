@@ -95,6 +95,7 @@ export default function ArtistCreate() {
   const [error, setError] = useState('');
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
+  const [bio2, setBio2] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -119,6 +120,7 @@ export default function ArtistCreate() {
       const fd = new FormData();
       fd.append('name', name.trim());
       fd.append('bio', bio.trim());
+      fd.append('bio2', bio2.trim());
       if (imageFile) fd.append('profile_image', imageFile);
 
       const res = await fetch(`${API_URL}/api/artists`, {
@@ -177,13 +179,23 @@ export default function ArtistCreate() {
               />
             </Field>
 
-            <Field label="Bio" hint="A short paragraph shown on their public profile page.">
+            <Field label="Bio" hint="Short paragraph shown in the artist hero header.">
               <textarea
                 className={`${inputCls} resize-none`}
-                rows={5}
+                rows={4}
                 value={bio}
                 onChange={e => setBio(e.target.value)}
                 placeholder="Write a short bio for this artist…"
+              />
+            </Field>
+
+            <Field label="Bio 2" hint="Extended text shown below the articles section on the public page.">
+              <textarea
+                className={`${inputCls} resize-none`}
+                rows={6}
+                value={bio2}
+                onChange={e => setBio2(e.target.value)}
+                placeholder="More detail, background info, career highlights…"
               />
             </Field>
 
