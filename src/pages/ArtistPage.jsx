@@ -219,23 +219,39 @@ export default function ArtistPage() {
               {HILLTOP_ENABLED && <HilltopMobileBanner />}
             </div>
 
-            {/* Artist header */}
-            <div className="relative mb-10 overflow-hidden border border-white/[0.06] bg-[#08080f]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(139,92,246,.12),transparent_55%)] pointer-events-none" />
-              <div className="relative flex flex-col sm:flex-row items-center sm:items-end gap-6 px-6 py-10">
-                <div className="h-32 w-32 flex-shrink-0 overflow-hidden border-2 border-purple-500/20 bg-white/[0.04] shadow-[0_20px_60px_rgba(0,0,0,.6)]">
+            {/* Artist hero */}
+            <div className="relative mb-10 overflow-hidden" style={{ minHeight: '300px' }}>
+              {artist.profile_image_url ? (
+                <>
+                  <img
+                    src={artist.profile_image_url}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ filter: 'blur(32px)', transform: 'scale(1.18)' }}
+                  />
+                  <div className="absolute inset-0 bg-black/55" />
+                </>
+              ) : (
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,.3),transparent_65%)] bg-[#08080f]" />
+              )}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_0%,rgba(139,92,246,.18),transparent_50%)] pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-black to-transparent" />
+
+              <div className="relative flex flex-col sm:flex-row items-center sm:items-end gap-7 px-6 pt-10 pb-12">
+                <div className="h-44 w-44 flex-shrink-0 overflow-hidden border-2 border-white/25 bg-[#0d0d1a] shadow-[0_24px_80px_rgba(0,0,0,.85)]">
                   {artist.profile_image_url
                     ? <img src={artist.profile_image_url} alt={artist.name} className="h-full w-full object-cover" />
-                    : <div className="flex h-full w-full items-center justify-center text-5xl">🎤</div>
+                    : <div className="flex h-full w-full items-center justify-center text-6xl">🎤</div>
                   }
                 </div>
-                <div className="text-center sm:text-left">
+                <div className="text-center sm:text-left pb-1">
                   <div className="text-[11px] font-mono uppercase tracking-[.2em] text-purple-400 mb-2">Artist</div>
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">{artist.name}</h1>
+                  <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white drop-shadow-[0_2px_16px_rgba(0,0,0,1)]">{artist.name}</h1>
                   {artist.bio && (
-                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/50">{artist.bio}</p>
+                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 drop-shadow-[0_1px_6px_rgba(0,0,0,1)]">{artist.bio}</p>
                   )}
-                  <div className="mt-3 text-xs text-white/25">
+                  <div className="mt-3 text-xs text-white/40">
                     {articles.length} {articles.length === 1 ? 'article' : 'articles'}
                   </div>
                 </div>
