@@ -96,6 +96,7 @@ export default function ArtistCreate() {
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [bio2, setBio2] = useState('');
+  const [links, setLinks] = useState({ spotify_url: '', soundcloud_url: '', youtube_url: '', genius_url: '', apple_music_url: '' });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [galleryFiles, setGalleryFiles] = useState({ 1: null, 2: null, 3: null });
@@ -136,6 +137,7 @@ export default function ArtistCreate() {
       if (galleryFiles[1]) fd.append('gallery_image_1', galleryFiles[1]);
       if (galleryFiles[2]) fd.append('gallery_image_2', galleryFiles[2]);
       if (galleryFiles[3]) fd.append('gallery_image_3', galleryFiles[3]);
+      Object.entries(links).forEach(([k, v]) => fd.append(k, v.trim()));
 
       const res = await fetch(`${API_URL}/api/artists`, {
         method: 'POST',
@@ -211,6 +213,29 @@ export default function ArtistCreate() {
                 onChange={e => setBio2(e.target.value)}
                 placeholder="More detail, background info, career highlights…"
               />
+            </Field>
+
+            <Field label="Platform Links" hint="Paste full URLs. Leave blank to hide. Appear as icons on the artist page.">
+              <div className="space-y-2">
+                {[
+                  { key: 'spotify_url',     label: 'Spotify',      placeholder: 'https://open.spotify.com/artist/…' },
+                  { key: 'soundcloud_url',  label: 'SoundCloud',   placeholder: 'https://soundcloud.com/…' },
+                  { key: 'youtube_url',     label: 'YouTube',      placeholder: 'https://youtube.com/@…' },
+                  { key: 'genius_url',      label: 'Genius',       placeholder: 'https://genius.com/artists/…' },
+                  { key: 'apple_music_url', label: 'Apple Music',  placeholder: 'https://music.apple.com/…' },
+                ].map(({ key, label, placeholder }) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="w-24 flex-shrink-0 text-[11px] font-mono text-gray-500">{label}</span>
+                    <input
+                      className={inputCls}
+                      value={links[key]}
+                      onChange={e => setLinks(prev => ({ ...prev, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      type="url"
+                    />
+                  </div>
+                ))}
+              </div>
             </Field>
 
             <Field label="Profile Photo" hint="Main photo shown in the hero. Square recommended. Max 5MB.">
