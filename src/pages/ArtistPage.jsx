@@ -9,6 +9,11 @@ import SpotifyEmbed from '../components/SpotifyEmbed';
 import BeatportArticleBanner from '../components/BeatportArticleBanner';
 import { HILLTOP_ENABLED } from '../config/ads';
 import { generateArticleUrl } from '../utils/slugify';
+import spotifyLogo     from '../assets/spotify_logo.png';
+import soundcloudLogo  from '../assets/soundcloud_logo.png';
+import youtubeLogo     from '../assets/youtube_logo.png';
+import geniusLogo      from '../assets/genius_logo.png';
+import appleMusicLogo  from '../assets/apple_music_logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -263,17 +268,12 @@ export default function ArtistPage() {
               <div className="mb-8 py-6 border-y border-white/[0.06]">
                 <div className="flex items-center justify-center gap-6 flex-wrap">
                   {[
-                    { key: 'spotify_url', label: 'Spotify', color: '#1DB954',
-                      icon: <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.623.623 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 01-.277-1.215c3.809-.87 7.077-.496 9.712 1.115a.623.623 0 01.207.857zm1.223-2.722a.78.78 0 01-1.072.257c-2.687-1.652-6.785-2.131-9.965-1.166a.78.78 0 01-.453-1.492c3.632-1.102 8.147-.568 11.234 1.329a.78.78 0 01.256 1.072zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71a.937.937 0 11-.543-1.794c3.541-1.073 9.431-.866 13.157 1.42a.937.937 0 01-.997 1.531z"/></svg> },
-                    { key: 'soundcloud_url', label: 'SoundCloud', color: '#FF5500',
-                      icon: <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7"><path d="M11.56 8.87V17h8.76c1.47 0 1.68-1.38 1.68-1.38v-1.33s.04-1.01-.83-1.27c0 0 .15-1.79-1.5-1.79 0 0-.05-1.68-1.5-1.68 0 0-.19-2.69-2.39-2.69s-2.4 1.68-2.4 1.68l.18.33zM.5 15.22v1.4c0 .76.62 1.38 1.38 1.38s1.38-.62 1.38-1.38v-3.1c0-.76-.62-1.38-1.38-1.38S.5 12.76.5 13.52v1.7zm3.12.5v2.73c.07.44.45.78.9.78.5 0 .9-.4.9-.9V9.88c0-.5-.4-.9-.9-.9s-.9.4-.9.9v5.84zm2.78.23v3.06c0 .5.4.9.9.9s.9-.4.9-.9V8.45c0-.5-.4-.9-.9-.9s-.9.4-.9.9v7.5zm2.78-.27v3.32c0 .5.4.9.9.9s.9-.4.9-.9V8.8c0-.5-.4-.9-.9-.9s-.9.4-.9.9v6.88z"/></svg> },
-                    { key: 'youtube_url', label: 'YouTube', color: '#FF0000',
-                      icon: <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7"><path d="M21.543 6.498C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022zM10 15.5l6-3.5-6-3.5v7z"/></svg> },
-                    { key: 'genius_url', label: 'Genius', color: '#FFFF64',
-                      icon: <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7"><path d="M9 21h6v-1H9v1zm0-2h6v-1H9v1zm6.252-3C16.341 14.995 17 13.574 17 12a5 5 0 00-10 0c0 1.574.659 2.995 1.748 4H15.252zM12 5a7 7 0 017 7c0 2.125-.95 4.03-2.452 5.33A1 1 0 0115.8 19H8.2a1 1 0 01-.748-1.67A6.97 6.97 0 015 12a7 7 0 017-7z"/></svg> },
-                    { key: 'apple_music_url', label: 'Apple Music', color: '#FC3C44',
-                      icon: <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></svg> },
-                  ].filter(p => artist[p.key]).map(({ key, label, color, icon }) => (
+                    { key: 'spotify_url',     label: 'Spotify',      logo: spotifyLogo },
+                    { key: 'soundcloud_url',  label: 'SoundCloud',   logo: soundcloudLogo },
+                    { key: 'youtube_url',     label: 'YouTube',      logo: youtubeLogo },
+                    { key: 'genius_url',      label: 'Genius',       logo: geniusLogo },
+                    { key: 'apple_music_url', label: 'Apple Music',  logo: appleMusicLogo },
+                  ].filter(p => artist[p.key]).map(({ key, label, logo }) => (
                     <a
                       key={key}
                       href={artist[key]}
@@ -281,13 +281,8 @@ export default function ArtistPage() {
                       rel="noopener noreferrer"
                       className="group flex flex-col items-center gap-2"
                     >
-                      <div
-                        className="w-14 h-14 flex items-center justify-center transition-all duration-300 group-hover:scale-110"
-                        style={{ color, filter: 'drop-shadow(0 0 0px currentColor)' }}
-                        onMouseEnter={e => e.currentTarget.style.filter = `drop-shadow(0 0 10px ${color}88)`}
-                        onMouseLeave={e => e.currentTarget.style.filter = 'drop-shadow(0 0 0px currentColor)'}
-                      >
-                        {icon}
+                      <div className="w-14 h-14 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:opacity-100 opacity-70">
+                        <img src={logo} alt={label} className="w-full h-full object-contain" />
                       </div>
                       <span className="text-[10px] font-mono uppercase tracking-widest text-white/30 group-hover:text-white/60 transition-colors">{label}</span>
                     </a>
