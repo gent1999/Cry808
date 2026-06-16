@@ -97,6 +97,10 @@ export default function ArtistEdit() {
   const [error, setError] = useState('');
   const [artist, setArtist] = useState(null);
   const [linkedArticles, setLinkedArticles] = useState([]);
+  const [allArticles, setAllArticles] = useState([]);
+  const [articleSearch, setArticleSearch] = useState('');
+  const [linking, setLinking] = useState(null);
+  const [unlinking, setUnlinking] = useState(null);
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -111,18 +115,22 @@ export default function ArtistEdit() {
   async function loadArtist() {
     setFetching(true);
     try {
-      // First get the list to find slug by id
-      const listRes = await fetch(`${API_URL}/api/artists`);
+      const [listRes, articlesRes] = await Promise.all([
+        fetch(`${API_URL}/api/artists`),
+        fetch(`${API_URL}/api/articles`),
+      ]);
       const listData = await listRes.json();
+      const articlesData = await articlesRes.json();
+
       const found = (listData.artists || []).find(a => String(a.id) === String(id));
       if (!found) { setError('Artist not found'); return; }
 
-      // Then fetch full profile (includes linked articles)
       const profileRes = await fetch(`${API_URL}/api/artists/${found.slug}`);
       const profileData = await profileRes.json();
 
       setArtist(profileData.artist || found);
       setLinkedArticles(profileData.articles || []);
+      setAllArticles(articlesData.articles || []);
       setName((profileData.artist || found).name);
       setBio((profileData.artist || found).bio || '');
       setImagePreview((profileData.artist || found).profile_image_url || null);
@@ -131,6 +139,33 @@ export default function ArtistEdit() {
     } finally {
       setFetching(false);
     }
+  }
+
+  async function linkArticle(article) {
+    setLinking(article.id);
+    try {
+      const token = localStorage.getItem('adminToken');
+      await fetch(`${API_URL}/api/artists/${id}/link/${article.id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLinkedArticles(prev => [article, ...prev]);
+      setArticleSearch('');
+    } catch {}
+    setLinking(null);
+  }
+
+  async function unlinkArticle(articleId) {
+    setUnlinking(articleId);
+    try {
+      const token = localStorage.getItem('adminToken');
+      await fetch(`${API_URL}/api/artists/${id}/link/${articleId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLinkedArticles(prev => prev.filter(a => a.id !== articleId));
+    } catch {}
+    setUnlinking(null);
   }
 
   function handleImage(e) {
@@ -267,33 +302,87 @@ export default function ArtistEdit() {
 
             {/* ── Linked Articles ──────────────────────────────────────────── */}
             <div className="mt-12 border-t border-white/[0.06] pt-8">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-5">
                 <div>
                   <h2 className="text-sm font-semibold text-white">Linked Articles</h2>
-                  <p className="text-[11px] text-slate-600 mt-0.5">
-                    Articles where "Author" matches <span className="text-slate-400 font-mono">"{name}"</span> (case-insensitive)
-                  </p>
+                  <p className="text-[11px] text-slate-600 mt-0.5">Articles that feature or mention {name || 'this artist'}</p>
                 </div>
-                <span className="text-xs text-slate-600">{linkedArticles.length} article{linkedArticles.length !== 1 ? 's' : ''}</span>
+                <span className="text-xs text-slate-600">{linkedArticles.length} linked</span>
               </div>
 
+              {/* Search to add articles */}
+              <div className="mb-4 relative">
+                <input
+                  className="w-full bg-black/50 border border-gray-700/60 text-sm text-gray-200 px-3 py-2.5 pr-8 focus:outline-none focus:border-sky-700/60 placeholder-gray-700 transition-colors"
+                  placeholder="Search articles to link…"
+                  value={articleSearch}
+                  onChange={e => setArticleSearch(e.target.value)}
+                />
+                {articleSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setArticleSearch('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 text-lg leading-none"
+                  >×</button>
+                )}
+              </div>
+
+              {/* Search results */}
+              {articleSearch.trim().length >= 1 && (() => {
+                const linkedIds = new Set(linkedArticles.map(a => a.id));
+                const q = articleSearch.toLowerCase();
+                const results = allArticles
+                  .filter(a => !linkedIds.has(a.id) && (
+                    a.title.toLowerCase().includes(q) ||
+                    (a.author || '').toLowerCase().includes(q) ||
+                    (a.tags || []).some(t => t.toLowerCase().includes(q))
+                  ))
+                  .slice(0, 8);
+                return results.length === 0 ? (
+                  <div className="mb-4 border border-white/[0.05] px-4 py-3 text-xs text-slate-600 text-center">No matching articles found</div>
+                ) : (
+                  <div className="mb-4 border border-white/[0.08] divide-y divide-white/[0.04]">
+                    {results.map(article => (
+                      <div key={article.id} className="flex items-center gap-3 bg-white/[0.02] px-4 py-2.5 hover:bg-white/[0.04] transition">
+                        {article.image_url && (
+                          <img src={article.image_url} alt="" className="h-8 w-11 flex-shrink-0 object-cover" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm text-white truncate">{article.title}</div>
+                          <div className="text-[11px] text-slate-600">{article.author}</div>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={linking === article.id}
+                          onClick={() => linkArticle(article)}
+                          className="flex-shrink-0 text-xs bg-sky-600/20 hover:bg-sky-600/40 text-sky-400 border border-sky-600/30 px-3 py-1 transition disabled:opacity-40"
+                        >
+                          {linking === article.id ? '…' : '+ Link'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Currently linked */}
               {linkedArticles.length === 0 ? (
                 <div className="border border-white/[0.05] bg-white/[0.02] px-4 py-6 text-center text-xs text-slate-600">
-                  No articles found with author "{name}". Make sure the Author field on articles matches this name exactly.
+                  No articles linked yet. Search above to add some.
                 </div>
               ) : (
                 <div className="space-y-1.5">
                   {linkedArticles.map(article => (
                     <div key={article.id} className="flex items-center gap-3 border border-white/[0.05] bg-white/[0.02] px-4 py-3 hover:bg-white/[0.04] transition">
                       {article.image_url && (
-                        <img src={article.image_url} alt="" className="h-10 w-14 flex-shrink-0 object-cover bg-white/[0.04]" />
+                        <img src={article.image_url} alt="" className="h-10 w-14 flex-shrink-0 object-cover" />
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="text-sm text-white truncate">{article.title}</div>
                         <div className="text-[11px] text-slate-600 mt-0.5">
-                          {article.created_at ? new Date(article.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                          {article.categories?.length > 0 && (
-                            <span className="ml-2 text-slate-700">{article.categories.join(', ')}</span>
+                          {article.author}
+                          {article.created_at && (
+                            <span className="ml-2">{new Date(article.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           )}
                         </div>
                       </div>
@@ -302,7 +391,15 @@ export default function ArtistEdit() {
                         onClick={() => navigate(`/admin/articles/edit/${article.id}`)}
                         className="flex-shrink-0 text-xs text-sky-500 hover:text-sky-400 transition px-2"
                       >
-                        Edit article →
+                        Edit →
+                      </button>
+                      <button
+                        type="button"
+                        disabled={unlinking === article.id}
+                        onClick={() => unlinkArticle(article.id)}
+                        className="flex-shrink-0 text-xs text-red-500/60 hover:text-red-400 transition disabled:opacity-40"
+                      >
+                        {unlinking === article.id ? '…' : 'Remove'}
                       </button>
                     </div>
                   ))}
