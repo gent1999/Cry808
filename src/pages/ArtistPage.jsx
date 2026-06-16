@@ -259,7 +259,7 @@ export default function ArtistPage() {
             </div>
 
             {/* Articles */}
-            <div className="mb-3">
+            <div className="mb-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mb-1">Features</p>
               <h2 className="text-xl font-bold text-white">Articles featuring {artist.name}</h2>
             </div>
@@ -267,34 +267,69 @@ export default function ArtistPage() {
             {articles.length === 0 ? (
               <p className="text-white/30 text-sm py-8">No articles linked yet.</p>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {articles.map(article => (
-                  <div
-                    key={article.id}
-                    onClick={() => window.location.href = generateArticleUrl(article.id, article.title)}
-                    className="group flex gap-4 border border-white/[0.06] bg-white/[0.02] p-4 hover:bg-white/[0.05] hover:border-purple-500/20 transition cursor-pointer"
-                  >
-                    <div className="h-16 w-20 flex-shrink-0 overflow-hidden bg-white/[0.04]">
-                      {article.image_url
-                        ? <img src={article.image_url} alt={article.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                        : <div className="flex h-full w-full items-center justify-center text-2xl">🎵</div>
-                      }
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-white leading-snug group-hover:text-purple-200 transition line-clamp-2">
-                        {article.title}
-                      </div>
-                      <div className="mt-1 text-[11px] text-white/30">{formatDate(article.created_at)}</div>
-                      {article.categories?.length > 0 && (
-                        <div className="mt-1.5 flex flex-wrap gap-1">
-                          {article.categories.slice(0, 2).map(c => (
-                            <span key={c} className="text-[10px] font-mono uppercase tracking-widest text-purple-400/60 border border-purple-500/20 px-1.5 py-0.5">{c}</span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+              <div className="space-y-3">
+                {/* Featured first article */}
+                <div
+                  onClick={() => window.location.href = generateArticleUrl(articles[0].id, articles[0].title)}
+                  className="group relative overflow-hidden cursor-pointer"
+                  style={{ height: '280px' }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-950/60 to-black" />
+                  {articles[0].image_url && (
+                    <img
+                      src={articles[0].image_url}
+                      alt={articles[0].title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    {articles[0].categories?.length > 0 && (
+                      <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-purple-400 border border-purple-500/30 px-2 py-0.5 mb-2">
+                        {articles[0].categories[0]}
+                      </span>
+                    )}
+                    <h3 className="text-xl font-bold text-white leading-snug group-hover:text-purple-200 transition line-clamp-2">
+                      {articles[0].title}
+                    </h3>
+                    <p className="mt-1 text-xs text-white/40">{formatDate(articles[0].created_at)}</p>
                   </div>
-                ))}
+                </div>
+
+                {/* Remaining articles grid */}
+                {articles.length > 1 && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {articles.slice(1).map(article => (
+                      <div
+                        key={article.id}
+                        onClick={() => window.location.href = generateArticleUrl(article.id, article.title)}
+                        className="group relative overflow-hidden cursor-pointer"
+                        style={{ height: '200px' }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-950/60 to-black" />
+                        {article.image_url && (
+                          <img
+                            src={article.image_url}
+                            alt={article.title}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          {article.categories?.length > 0 && (
+                            <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-purple-400/70 mb-1">
+                              {article.categories[0]}
+                            </span>
+                          )}
+                          <h3 className="text-sm font-semibold text-white leading-snug group-hover:text-purple-200 transition line-clamp-2">
+                            {article.title}
+                          </h3>
+                          <p className="mt-0.5 text-[11px] text-white/35">{formatDate(article.created_at)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
