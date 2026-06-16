@@ -199,6 +199,7 @@ export default function ArtistEdit() {
           {fetching ? (
             <div className="text-slate-500 text-sm">Loading…</div>
           ) : (
+            <>
             <form onSubmit={handleSubmit} className="space-y-6">
               <Field label="Artist Name *" hint="Must match the 'Author' field used on their articles exactly.">
                 <input
@@ -308,6 +309,7 @@ export default function ArtistEdit() {
                 </div>
               )}
             </div>
+            </>
           )}
         </main>
       </div>
