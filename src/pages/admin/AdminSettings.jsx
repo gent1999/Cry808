@@ -21,6 +21,7 @@ function ContentSidePanel() {
     ['Content', [
       ['New Article',  'M12 5v14M5 12h14',       '/admin/articles/create'],
       ['All Articles', 'M5 6h14M5 12h14M5 18h9',  '/admin/articles'],
+      ['Artists',      'M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm-7 9a7 7 0 0 1 14 0', '/admin/artists'],
       ['Submissions',  'M4 13h4l2 3h4l2-3h4M5 5h14l1 8v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5l1-8Z', '/admin/submissions'],
     ]],
     ['Intelligence', [
