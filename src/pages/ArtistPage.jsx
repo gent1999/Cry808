@@ -274,8 +274,10 @@ export default function ArtistPage() {
 
             {/* Bio 2 */}
             {artist.bio2 && (
-              <div className="mb-10 border-t border-white/[0.06] pt-8">
-                <p className="text-sm leading-relaxed text-white/55 whitespace-pre-line">{artist.bio2}</p>
+              <div className="mb-10 relative overflow-hidden bg-gradient-to-br from-purple-950/25 to-black/40 border border-white/[0.05] px-8 py-10">
+                <div className="absolute top-3 left-5 text-[120px] leading-none text-purple-400/8 font-serif select-none pointer-events-none">"</div>
+                <div className="absolute bottom-0 right-0 w-48 h-48 bg-[radial-gradient(circle,rgba(139,92,246,.07),transparent_70%)] pointer-events-none" />
+                <p className="relative text-base md:text-lg leading-[1.9] text-white/65 whitespace-pre-line font-light tracking-wide">{artist.bio2}</p>
               </div>
             )}
 
