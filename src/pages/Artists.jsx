@@ -133,27 +133,38 @@ export default function Artists() {
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="animate-pulse text-center">
-                    <div className="mx-auto mb-3 h-28 w-28 bg-white/[0.05]" />
-                    <div className="h-3 bg-white/[0.05] rounded mx-auto w-20" />
-                  </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="animate-pulse bg-white/[0.04]" style={{ height: '300px' }} />
                 ))}
               </div>
             ) : artists.length === 0 ? (
               <div className="text-center py-24 text-white/20">No artist profiles yet.</div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {artists.map(artist => (
-                  <Link key={artist.id} to={`/artist/${artist.slug}`} className="group text-center">
-                    <div className="mx-auto mb-3 h-28 w-28 overflow-hidden border-2 border-purple-500/20 group-hover:border-purple-500/60 transition-all duration-300 bg-white/[0.04]">
-                      {artist.profile_image_url
-                        ? <img src={artist.profile_image_url} alt={artist.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                        : <div className="flex h-full w-full items-center justify-center text-4xl">🎤</div>
-                      }
+                  <Link
+                    key={artist.id}
+                    to={`/artist/${artist.slug}`}
+                    className="group relative overflow-hidden block"
+                    style={{ height: '300px' }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-950/60 to-black" />
+                    {artist.profile_image_url
+                      ? <img
+                          src={artist.profile_image_url}
+                          alt={artist.name}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      : <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-20">🎤</div>
+                    }
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
+                    <div className="absolute inset-0 border border-white/[0.06] group-hover:border-purple-500/40 transition-colors duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="text-white font-semibold text-base leading-snug group-hover:text-purple-200 transition-colors">
+                        {artist.name}
+                      </div>
                     </div>
-                    <div className="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">{artist.name}</div>
                   </Link>
                 ))}
               </div>
