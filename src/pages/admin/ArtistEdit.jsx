@@ -106,6 +106,8 @@ export default function ArtistEdit() {
   const [bio2, setBio2] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState({ 1: null, 2: null, 3: null });
+  const [galleryPreviews, setGalleryPreviews] = useState({ 1: null, 2: null, 3: null });
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -132,10 +134,16 @@ export default function ArtistEdit() {
       setArtist(profileData.artist || found);
       setLinkedArticles(profileData.articles || []);
       setAllArticles(articlesData.articles || []);
-      setName((profileData.artist || found).name);
-      setBio((profileData.artist || found).bio || '');
-      setBio2((profileData.artist || found).bio2 || '');
-      setImagePreview((profileData.artist || found).profile_image_url || null);
+      const a = profileData.artist || found;
+      setName(a.name);
+      setBio(a.bio || '');
+      setBio2(a.bio2 || '');
+      setImagePreview(a.profile_image_url || null);
+      setGalleryPreviews({
+        1: a.gallery_image_1 || null,
+        2: a.gallery_image_2 || null,
+        3: a.gallery_image_3 || null,
+      });
     } catch {
       setError('Failed to load artist');
     } finally {
@@ -179,6 +187,15 @@ export default function ArtistEdit() {
     reader.readAsDataURL(file);
   }
 
+  function handleGalleryImage(n, e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setGalleryFiles(prev => ({ ...prev, [n]: file }));
+    const reader = new FileReader();
+    reader.onloadend = () => setGalleryPreviews(prev => ({ ...prev, [n]: reader.result }));
+    reader.readAsDataURL(file);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim()) { setError('Name is required'); return; }
@@ -191,6 +208,9 @@ export default function ArtistEdit() {
       fd.append('bio', bio.trim());
       fd.append('bio2', bio2.trim());
       if (imageFile) fd.append('profile_image', imageFile);
+      if (galleryFiles[1]) fd.append('gallery_image_1', galleryFiles[1]);
+      if (galleryFiles[2]) fd.append('gallery_image_2', galleryFiles[2]);
+      if (galleryFiles[3]) fd.append('gallery_image_3', galleryFiles[3]);
 
       const res = await fetch(`${API_URL}/api/artists/${id}`, {
         method: 'PUT',
@@ -268,7 +288,7 @@ export default function ArtistEdit() {
                 />
               </Field>
 
-              <Field label="Profile Photo" hint="Upload a new photo to replace the current one. Max 5MB.">
+              <Field label="Profile Photo" hint="Main photo shown in the hero. Upload to replace. Max 5MB.">
                 <div className="flex items-start gap-4">
                   <div className="h-24 w-24 flex-shrink-0 overflow-hidden border border-white/[0.08] bg-white/[0.04]">
                     {imagePreview
@@ -282,6 +302,25 @@ export default function ArtistEdit() {
                       <input type="file" accept="image/*" onChange={handleImage} className="hidden" />
                     </label>
                   </div>
+                </div>
+              </Field>
+
+              <Field label="Gallery Photos" hint="3 photos shown in a row below the hero. Upload to replace individual slots.">
+                <div className="grid grid-cols-3 gap-3">
+                  {[1, 2, 3].map(n => (
+                    <div key={n}>
+                      <div className="aspect-square overflow-hidden border border-white/[0.08] bg-white/[0.04] mb-2">
+                        {galleryPreviews[n]
+                          ? <img src={galleryPreviews[n]} alt={`gallery ${n}`} className="h-full w-full object-cover" />
+                          : <div className="flex h-full w-full items-center justify-center text-slate-600 text-2xl">+</div>
+                        }
+                      </div>
+                      <label className="cursor-pointer block w-full text-center border border-white/[0.10] bg-white/[0.03] py-1.5 text-xs text-slate-500 hover:bg-white/[0.07] transition">
+                        {galleryFiles[n] ? '✓ Chosen' : `Photo ${n}`}
+                        <input type="file" accept="image/*" onChange={e => handleGalleryImage(n, e)} className="hidden" />
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </Field>
 

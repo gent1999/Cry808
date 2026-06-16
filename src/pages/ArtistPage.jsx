@@ -258,6 +258,27 @@ export default function ArtistPage() {
               </div>
             </div>
 
+            {/* Gallery row — 3 photos */}
+            {(artist.gallery_image_1 || artist.gallery_image_2 || artist.gallery_image_3) && (
+              <div className="grid grid-cols-3 gap-2 mb-10">
+                {[artist.gallery_image_1, artist.gallery_image_2, artist.gallery_image_3].map((url, i) => (
+                  <div key={i} className="aspect-square overflow-hidden bg-white/[0.03]">
+                    {url
+                      ? <img src={url} alt={`${artist.name} photo ${i + 1}`} className="h-full w-full object-cover" />
+                      : <div className="flex h-full w-full items-center justify-center text-white/10 text-3xl">🎤</div>
+                    }
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Bio 2 */}
+            {artist.bio2 && (
+              <div className="mb-10 border-t border-white/[0.06] pt-8">
+                <p className="text-sm leading-relaxed text-white/55 whitespace-pre-line">{artist.bio2}</p>
+              </div>
+            )}
+
             {/* Articles */}
             <div className="mb-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mb-1">Features</p>
@@ -330,14 +351,6 @@ export default function ArtistPage() {
                     ))}
                   </div>
                 )}
-              </div>
-            )}
-
-            {/* Bio 2 — shown below articles */}
-            {artist.bio2 && (
-              <div className="mt-10 border-t border-white/[0.06] pt-8">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mb-3">More on {artist.name}</p>
-                <p className="text-sm leading-relaxed text-white/55 whitespace-pre-line">{artist.bio2}</p>
               </div>
             )}
           </div>

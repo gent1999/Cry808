@@ -98,6 +98,8 @@ export default function ArtistCreate() {
   const [bio2, setBio2] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState({ 1: null, 2: null, 3: null });
+  const [galleryPreviews, setGalleryPreviews] = useState({ 1: null, 2: null, 3: null });
 
   function handleImage(e) {
     const file = e.target.files[0];
@@ -105,6 +107,15 @@ export default function ArtistCreate() {
     setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
+  }
+
+  function handleGalleryImage(n, e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setGalleryFiles(prev => ({ ...prev, [n]: file }));
+    const reader = new FileReader();
+    reader.onloadend = () => setGalleryPreviews(prev => ({ ...prev, [n]: reader.result }));
     reader.readAsDataURL(file);
   }
 
@@ -122,6 +133,9 @@ export default function ArtistCreate() {
       fd.append('bio', bio.trim());
       fd.append('bio2', bio2.trim());
       if (imageFile) fd.append('profile_image', imageFile);
+      if (galleryFiles[1]) fd.append('gallery_image_1', galleryFiles[1]);
+      if (galleryFiles[2]) fd.append('gallery_image_2', galleryFiles[2]);
+      if (galleryFiles[3]) fd.append('gallery_image_3', galleryFiles[3]);
 
       const res = await fetch(`${API_URL}/api/artists`, {
         method: 'POST',
@@ -199,7 +213,7 @@ export default function ArtistCreate() {
               />
             </Field>
 
-            <Field label="Profile Photo" hint="Square image recommended. Max 5MB.">
+            <Field label="Profile Photo" hint="Main photo shown in the hero. Square recommended. Max 5MB.">
               <div className="flex items-start gap-4">
                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden border border-white/[0.08] bg-white/[0.04]">
                   {imagePreview
@@ -213,6 +227,25 @@ export default function ArtistCreate() {
                     <input type="file" accept="image/*" onChange={handleImage} className="hidden" />
                   </label>
                 </div>
+              </div>
+            </Field>
+
+            <Field label="Gallery Photos" hint="3 photos shown in a row below the hero. Square recommended.">
+              <div className="grid grid-cols-3 gap-3">
+                {[1, 2, 3].map(n => (
+                  <div key={n}>
+                    <div className="aspect-square overflow-hidden border border-white/[0.08] bg-white/[0.04] mb-2">
+                      {galleryPreviews[n]
+                        ? <img src={galleryPreviews[n]} alt={`gallery ${n}`} className="h-full w-full object-cover" />
+                        : <div className="flex h-full w-full items-center justify-center text-slate-600 text-2xl">+</div>
+                      }
+                    </div>
+                    <label className="cursor-pointer block w-full text-center border border-white/[0.10] bg-white/[0.03] py-1.5 text-xs text-slate-500 hover:bg-white/[0.07] transition">
+                      {galleryFiles[n] ? '✓ Chosen' : `Photo ${n}`}
+                      <input type="file" accept="image/*" onChange={e => handleGalleryImage(n, e)} className="hidden" />
+                    </label>
+                  </div>
+                ))}
               </div>
             </Field>
 
