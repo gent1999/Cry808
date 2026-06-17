@@ -616,20 +616,23 @@ export default function Home() {
                         View All →
                       </a>
                     </div>
-                    <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                       {artists.map(artist => (
                         <a
                           key={artist.id}
                           href={`/artist/${artist.slug}`}
-                          className="flex-shrink-0 w-40 md:w-48 group text-center cursor-pointer"
+                          className="relative overflow-hidden block group cursor-pointer"
+                          style={{ height: '240px' }}
                         >
-                          <div className="mx-auto mb-3 h-28 w-28 md:h-32 md:w-32 overflow-hidden border-2 border-purple-500/20 group-hover:border-purple-500/60 transition-all duration-300 bg-white/5">
-                            {artist.profile_image_url
-                              ? <img src={artist.profile_image_url} alt={artist.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                              : <div className="flex h-full w-full items-center justify-center text-4xl">🎤</div>
-                            }
+                          {artist.profile_image_url
+                            ? <img src={artist.profile_image_url} alt={artist.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                            : <div className="absolute inset-0 flex items-center justify-center bg-white/5 text-5xl">🎤</div>
+                          }
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                          <div className="absolute inset-0 border border-purple-500/0 group-hover:border-purple-500/40 transition-all duration-300" />
+                          <div className="absolute bottom-0 left-0 right-0 p-4">
+                            <div className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors leading-tight drop-shadow">{artist.name}</div>
                           </div>
-                          <div className="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors leading-tight">{artist.name}</div>
                         </a>
                       ))}
                     </div>
