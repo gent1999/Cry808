@@ -101,6 +101,8 @@ export default function Newsletter() {
   const [subsLoading,   setSubsLoading]   = useState(true);
   const [subSearch,     setSubSearch]     = useState('');
   const [subFilter,     setSubFilter]     = useState('active'); // 'all' | 'active' | 'inactive'
+  const [consents,      setConsents]      = useState([]);
+  const [consentsLoading, setConsentsLoading] = useState(true);
 
   const fileRef = useRef();
   const token   = () => localStorage.getItem('adminToken');
@@ -122,6 +124,12 @@ export default function Newsletter() {
       .then(d => setSends(d.sends || []))
       .catch(() => {})
       .finally(() => setSendsLoading(false));
+
+    fetch(`${API_URL}/api/newsletter/cookie-consents`, { headers: hdrs() })
+      .then(r => r.json())
+      .then(d => setConsents(d.consents || []))
+      .catch(() => {})
+      .finally(() => setConsentsLoading(false));
   }, []);
 
   // Handle image file selection
@@ -619,6 +627,55 @@ export default function Newsletter() {
               </div>
             );
           })()}
+
+          {/* ── Cookie Consents ── */}
+          <div className="mt-6 max-w-6xl">
+            <div className="border border-gray-800/60">
+              <div className="border-b border-gray-800/60 px-5 py-3 flex items-center justify-between">
+                <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-gray-400">
+                  Cookie Consent Log
+                </h2>
+                <span className="text-[10px] font-mono text-gray-600">{consents.length} acceptances</span>
+              </div>
+
+              {consentsLoading ? (
+                <div className="px-5 py-8 text-center text-xs font-mono text-gray-600 uppercase tracking-widest animate-pulse">
+                  Loading…
+                </div>
+              ) : consents.length === 0 ? (
+                <div className="px-5 py-8 text-center text-xs font-mono text-gray-600 uppercase tracking-widest">
+                  No cookie consents recorded yet.
+                </div>
+              ) : (
+                <div className="overflow-x-auto max-h-[360px] overflow-y-auto">
+                  <table className="w-full min-w-[560px]">
+                    <thead className="sticky top-0 z-10">
+                      <tr className="border-b border-gray-800/60 bg-[#0d1420]">
+                        {['#', 'IP Address', 'Browser / Device', 'Accepted At'].map(h => (
+                          <th key={h} className="px-4 py-2.5 text-[10px] font-mono text-gray-500 uppercase tracking-widest text-left">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {consents.map((c, i) => (
+                        <tr key={c.id}
+                          className={`border-b border-gray-800/40 ${i % 2 === 0 ? 'bg-[#0a0e14]' : 'bg-black'} hover:bg-[#111827] transition-colors`}>
+                          <td className="px-4 py-2.5 text-[10px] font-mono text-gray-700">{c.id}</td>
+                          <td className="px-4 py-2.5 text-[11px] font-mono text-sky-400/80">{c.ip_address || '—'}</td>
+                          <td className="px-4 py-2.5 text-[11px] font-mono text-gray-500 max-w-xs truncate" title={c.user_agent}>
+                            {c.user_agent ? c.user_agent.slice(0, 72) + (c.user_agent.length > 72 ? '…' : '') : '—'}
+                          </td>
+                          <td className="px-4 py-2.5 text-[11px] font-mono text-gray-600 whitespace-nowrap">{fmt(c.accepted_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
 
         </main>
       </div>

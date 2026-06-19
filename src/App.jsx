@@ -34,6 +34,8 @@ import Artists from "./pages/Artists";
 import ArtistsList from "./pages/admin/ArtistsList";
 import ArtistCreate from "./pages/admin/ArtistCreate";
 import ArtistEdit from "./pages/admin/ArtistEdit";
+import NewsletterPopup from "./components/NewsletterPopup";
+import CookieBanner from "./components/CookieBanner";
 
 // Component to track page views
 function AnalyticsTracker() {
@@ -44,6 +46,18 @@ function AnalyticsTracker() {
   }, [location]);
 
   return null;
+}
+
+// Only show public overlays on non-admin routes
+function PublicOverlays() {
+  const location = useLocation();
+  if (location.pathname.startsWith('/admin')) return null;
+  return (
+    <>
+      <NewsletterPopup />
+      <CookieBanner />
+    </>
+  );
 }
 
 export default function App() {
@@ -61,6 +75,7 @@ export default function App() {
     <HelmetProvider>
       <Router>
         <AnalyticsTracker />
+        <PublicOverlays />
         <div className="min-h-screen bg-black overflow-x-hidden">
         <Routes>
           {/* Public Routes with Navbar */}
