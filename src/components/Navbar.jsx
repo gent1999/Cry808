@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/cry808_logo.png";
+import { generateArticleUrl } from "../utils/slugify";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -68,7 +69,7 @@ export default function Navbar() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchResults.length > 0) {
-      window.location.href = `/article/${searchResults[0].id}`;
+      window.location.href = generateArticleUrl(searchResults[0].id, searchResults[0].title);
     }
   };
 
@@ -335,7 +336,7 @@ export default function Navbar() {
                   <div
                     key={result.id}
                     onClick={() => {
-                      window.location.href = `/article/${result.id}`;
+                      window.location.href = generateArticleUrl(result.id, result.title);
                     }}
                     className="px-4 py-3 hover:bg-purple-600/20 cursor-pointer border-b border-white/5 last:border-0 transition-colors"
                   >
