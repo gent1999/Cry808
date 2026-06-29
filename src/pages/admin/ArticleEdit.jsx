@@ -249,10 +249,10 @@ const ArticleEdit = () => {
       fd.append('content', formData.content);
       fd.append('tags',    JSON.stringify(tagsArray));
 
-      if (formData.spotify_url)    fd.append('spotify_url',    formData.spotify_url);
-      if (formData.youtube_url)    fd.append('youtube_url',    formData.youtube_url);
-      if (formData.soundcloud_url) fd.append('soundcloud_url', formData.soundcloud_url);
-      if (formData.genius_url)     fd.append('genius_url',     formData.genius_url);
+      fd.append('spotify_url',    formData.spotify_url);
+      fd.append('youtube_url',    formData.youtube_url);
+      fd.append('soundcloud_url', formData.soundcloud_url);
+      fd.append('genius_url',     formData.genius_url);
 
       // Auto-fetch lyrics if Genius URL set but no lyrics
       let lyricsToSave = formData.lyrics;
