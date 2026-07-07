@@ -16,6 +16,19 @@ import { generateArticleUrl } from '../utils/slugify';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+function getYouTubeEmbedUrl(url) {
+  try {
+    const u = new URL(url);
+    const listId  = u.searchParams.get('list');
+    const videoId = u.searchParams.get('v')
+      || (u.hostname === 'youtu.be' ? u.pathname.slice(1) : null);
+    if (listId && !videoId) return `https://www.youtube.com/embed/videoseries?list=${listId}`;
+    if (videoId && listId)  return `https://www.youtube.com/embed/${videoId}?list=${listId}`;
+    if (videoId)            return `https://www.youtube.com/embed/${videoId}`;
+  } catch {}
+  return url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/');
+}
+
 const ArticleDetail = () => {
   const { id: urlId } = useParams();
   const navigate = useNavigate();
@@ -502,7 +515,7 @@ const ArticleDetail = () => {
             <h2 className="text-2xl font-bold mb-4">Watch on YouTube</h2>
             <div className="rounded-lg overflow-hidden aspect-video">
               <iframe
-                src={article.youtube_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                src={getYouTubeEmbedUrl(article.youtube_url)}
                 width="100%"
                 height="100%"
                 frameBorder="0"
