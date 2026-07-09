@@ -9,8 +9,5 @@ Disallow: /api/
 # Sitemap location
 Sitemap: https://cry808.com/sitemap.xml
 
-# RSS feed
-Sitemap: https://cry808.com/rss.xml
-
 # Crawl-delay for polite crawling
 Crawl-delay: 1
