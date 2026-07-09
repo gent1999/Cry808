@@ -5,6 +5,10 @@
       "destination": "/api/sitemap.xml"
     },
     {
+      "source": "/rss.xml",
+      "destination": "/api/rss.xml"
+    },
+    {
       "source": "/article/:slug",
       "destination": "/api/article/:slug"
     },
