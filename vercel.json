@@ -17,6 +17,14 @@
       "destination": "/api/home"
     },
     {
+      "source": "/news",
+      "destination": "/api/news"
+    },
+    {
+      "source": "/interviews",
+      "destination": "/api/interviews"
+    },
+    {
       "source": "/((?!api|ads\\.txt|robots\\.txt).*)",
       "destination": "/index.html"
     }
