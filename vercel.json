@@ -13,6 +13,10 @@
       "destination": "/api/article/:slug"
     },
     {
+      "source": "/",
+      "destination": "/api/home"
+    },
+    {
       "source": "/((?!api|ads\\.txt|robots\\.txt).*)",
       "destination": "/index.html"
     }

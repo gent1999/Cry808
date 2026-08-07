@@ -397,18 +397,27 @@ export default function Home() {
                     </div>
                     <div className="overflow-hidden flex-1 flex items-center">
                       <div className="animate-ticker inline-flex gap-12 whitespace-nowrap py-2.5 md:py-3">
-                        {[...originals, ...mixedContent, ...interviewsSpotlight, ...originals, ...mixedContent, ...interviewsSpotlight]
-                          .slice(0, 20)
-                          .map((item, i) => (
+                        {(() => {
+                          const tickerItems = [...originals, ...mixedContent, ...interviewsSpotlight].slice(0, 10);
+                          const renderItem = (item, i, hidden) => (
                             <span
-                              key={i}
+                              key={`${hidden ? 'dup' : 'real'}-${i}`}
+                              aria-hidden={hidden || undefined}
                               onClick={() => window.location.href = generateArticleUrl(item.id, item.title)}
                               className="text-white/55 hover:text-white text-xs md:text-sm cursor-pointer transition-colors inline-flex items-center gap-2"
                             >
                               <span className="text-purple-400/70">◆</span>
                               {item.title}
                             </span>
-                          ))}
+                          );
+                          return [
+                            ...tickerItems.map((item, i) => renderItem(item, i, false)),
+                            // Visual-only repeat so the CSS marquee loops seamlessly —
+                            // hidden from assistive tech and text-only crawlers so it
+                            // doesn't read as duplicate content.
+                            ...tickerItems.map((item, i) => renderItem(item, i, true)),
+                          ];
+                        })()}
                       </div>
                     </div>
                   </div>

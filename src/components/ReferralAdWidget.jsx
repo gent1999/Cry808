@@ -16,6 +16,7 @@ export default function ReferralAdWidget() {
 
   return (
     <div className="mt-3 space-y-2">
+      <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest">Sponsored</p>
       {ads.map(ad => (
         <a
           key={ad.id}

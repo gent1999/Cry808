@@ -43,25 +43,33 @@ export default function AmazonWidget({ page = 'home' }) {
   }
 
   return (
-    <>
-      {products.map((item) => (
-        <div key={item.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
-          <a
-            href={item.affiliate_link}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
-            className="block hover:opacity-90 transition-opacity"
-          >
-            {item.image_url && (
-              <img
-                src={item.image_url}
-                alt={item.name}
-                className="w-full h-auto"
-              />
-            )}
-          </a>
-        </div>
-      ))}
-    </>
+    <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+      <h3 className="text-sm font-bold mb-1 bg-gradient-to-r from-green-400 to-yellow-400 bg-clip-text text-transparent">
+        🎧 Recommended Gear
+      </h3>
+      <p className="text-white/35 text-[10px] mb-3">
+        Affiliate links — we may earn a commission from qualifying purchases.
+      </p>
+      <div className="space-y-3">
+        {products.map((item) => (
+          <div key={item.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+            <a
+              href={item.affiliate_link}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              className="block hover:opacity-90 transition-opacity"
+            >
+              {item.image_url && (
+                <img
+                  src={item.image_url}
+                  alt={item.name}
+                  className="w-full h-auto"
+                />
+              )}
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
