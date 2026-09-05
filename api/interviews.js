@@ -102,7 +102,7 @@ export default async function handler(req, res) {
   <meta property="og:url" content="https://cry808.com/interviews">
   <meta property="og:title" content="Interviews | Cry808">
   <meta property="og:description" content="Exclusive artist interviews from Cry808.">
-  <meta property="og:image" content="https://cry808.com/og-image.png">
+  <meta property="og:image" content="https://cry808.com/cry808_banner.png">
   <meta property="og:site_name" content="Cry808">
 </head>
 <body>

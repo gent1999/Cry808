@@ -103,13 +103,13 @@ export default async function handler(req, res) {
   <meta property="og:url" content="https://cry808.com/">
   <meta property="og:title" content="Cry808 - Hip-Hop News, Interviews & Album Reviews">
   <meta property="og:description" content="Your source for the latest hip-hop news, exclusive artist interviews, album reviews, and music culture.">
-  <meta property="og:image" content="https://cry808.com/og-image.png">
+  <meta property="og:image" content="https://cry808.com/cry808_banner.png">
   <meta property="og:site_name" content="Cry808">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Cry808 - Hip-Hop News, Interviews & Album Reviews">
   <meta name="twitter:description" content="Your source for the latest hip-hop news, exclusive artist interviews, album reviews, and music culture.">
-  <meta name="twitter:image" content="https://cry808.com/og-image.png">
+  <meta name="twitter:image" content="https://cry808.com/cry808_banner.png">
 </head>
 <body>
   <h1>Cry808 — Hip-Hop News, Interviews &amp; Album Reviews</h1>
