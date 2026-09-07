@@ -10,7 +10,6 @@ const ICONS = {
   inbox: 'M4 13h4l2 3h4l2-3h4M5 5h14l1 8v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5l1-8Z',
   finance: 'M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6',
   ads: 'M12 4v16M4 12h16M7 7l10 10M17 7 7 17',
-  spotify: 'M7 18V6l11 6-11 6Z',
   amazon: 'M5 7h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7Zm4 0a3 3 0 0 1 6 0',
   scout: 'M12 3l2.5 5.4 5.9.7-4.4 4 1.3 5.9L12 16.7 6.7 20 8 14.1l-4.4-4 5.9-.7L12 3Z',
   users: 'M16 19v-1a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v1M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 19v-1a3 3 0 0 0-2-2.83',
@@ -56,7 +55,6 @@ function Sidebar({ admin, stats, onLogout }) {
       ['Finance Hub', 'finance', '/admin/finance'],
       ['Ad Settings', 'ads',     '/admin/settings'],
       ['Newsletter',  'pulse',   '/admin/newsletter'],
-      ['Spotify',     'spotify', '/admin/spotify'],
     ]],
   ];
 

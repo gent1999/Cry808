@@ -28,7 +28,6 @@ import Expenses from "./pages/admin/Expenses";
 import RevenueSources from "./pages/admin/RevenueSources";
 import Cortex from "./pages/admin/Cortex";
 import Newsletter from "./pages/admin/Newsletter";
-import SpotifyDashboard from "./pages/admin/SpotifyDashboard";
 import ArtistPage from "./pages/ArtistPage";
 import Artists from "./pages/Artists";
 import ArtistsList from "./pages/admin/ArtistsList";
@@ -212,7 +211,6 @@ export default function App() {
           <Route path="/admin/finance/sources" element={<RevenueSources />} />
           <Route path="/admin/cortex" element={<Cortex />} />
           <Route path="/admin/newsletter" element={<Newsletter />} />
-          <Route path="/admin/spotify" element={<SpotifyDashboard />} />
           <Route path="/admin/artists" element={<ArtistsList />} />
           <Route path="/admin/artists/create" element={<ArtistCreate />} />
           <Route path="/admin/artists/edit/:id" element={<ArtistEdit />} />
