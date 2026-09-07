@@ -4,6 +4,7 @@ import { FinanceHeader } from './Finance';
 import TransactionModal, { editDataFromTransaction } from './TransactionModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const SITE = 'cry808';
 const fmt = n => `$${Math.abs(+n || 0).toFixed(2)}`;
 
 const TABS = [
@@ -43,10 +44,10 @@ export default function Transactions() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams(Object.entries({ ...filters, type: tab }).filter(([, v]) => v));
+      const params = new URLSearchParams(Object.entries({ ...filters, type: tab, site: SITE }).filter(([, v]) => v));
       const [tRes, sRes] = await Promise.all([
         fetch(`${API_URL}/api/finance/transactions?${params}`, { headers: hdrs() }),
-        fetch(`${API_URL}/api/finance/sources`, { headers: hdrs() }),
+        fetch(`${API_URL}/api/finance/sources?site=${SITE}`, { headers: hdrs() }),
       ]);
       if (tRes.status === 401 || sRes.status === 401) { navigate('/admin/login'); return; }
       const td = await tRes.json();
@@ -80,7 +81,7 @@ export default function Transactions() {
     if (!confirm('Delete this transaction?')) return;
     const key = `${row.kind}-${row.id}`;
     setDeleting(key);
-    await fetch(`${API_URL}/api/finance/${endpoint}/${row.id}`, { method: 'DELETE', headers: hdrs() });
+    await fetch(`${API_URL}/api/finance/${endpoint}/${row.id}?site=${SITE}`, { method: 'DELETE', headers: hdrs() });
     setDeleting(null);
     load();
   };

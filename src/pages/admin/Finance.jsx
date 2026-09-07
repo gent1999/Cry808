@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TransactionModal from './TransactionModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const SITE = 'cry808';
 
 // ── Shared nav (used by all Finance sub-pages) ────────────────────────────────
 const NAV = [
@@ -396,9 +397,9 @@ export default function Finance() {
     try {
       const hdrs = { Authorization: `Bearer ${token}` };
       const [sumRes, srcRes, txRes] = await Promise.all([
-        fetch(`${API_URL}/api/finance/summary`,  { headers: hdrs }),
-        fetch(`${API_URL}/api/finance/sources`,  { headers: hdrs }),
-        fetch(`${API_URL}/api/finance/transactions?limit=5`, { headers: hdrs }),
+        fetch(`${API_URL}/api/finance/summary?site=${SITE}`,  { headers: hdrs }),
+        fetch(`${API_URL}/api/finance/sources?site=${SITE}`,  { headers: hdrs }),
+        fetch(`${API_URL}/api/finance/transactions?site=${SITE}&limit=5`, { headers: hdrs }),
       ]);
 
       if ([sumRes, srcRes, txRes].some(r => r.status === 401)) {
@@ -420,7 +421,7 @@ export default function Finance() {
     const token = localStorage.getItem('adminToken');
     if (!token) return;
     try {
-      const r = await fetch(`${API_URL}/api/finance/monthly-trend?range=${range}`, { headers: { Authorization: `Bearer ${token}` } });
+      const r = await fetch(`${API_URL}/api/finance/monthly-trend?site=${SITE}&range=${range}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!r.ok) return;
       const d = await r.json();
       setTrend(d.trend || []);

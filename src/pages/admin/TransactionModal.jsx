@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const SITE = 'cry808';
 
 const PAYMENT_STATUS = ['pending', 'paid', 'cancelled'];
 const PAYOUT_STATUS  = ['not_ready', 'ready_for_payout', 'paid_out'];
@@ -105,10 +106,10 @@ export default function TransactionModal({ mode, type: initialType, data: initia
     }
     setSaving(true);
     try {
-      const base = `${API_URL}/api/finance/${endpointFor(type)}`;
-      const url    = mode === 'add' ? base : `${base}/${data.id}`;
+      const base   = `${API_URL}/api/finance/${endpointFor(type)}`;
+      const url    = mode === 'add' ? `${base}?site=${SITE}` : `${base}/${data.id}?site=${SITE}`;
       const method = mode === 'add' ? 'POST' : 'PUT';
-      const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify(data) });
+      const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify({ ...data, site: SITE }) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) { setErrorMsg(d.message || `Save failed (${r.status})`); setSaving(false); return; }
       onSaved();

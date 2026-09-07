@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FinanceHeader } from './Finance';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const SITE = 'cry808';
 const fmt = n => `$${(+n || 0).toFixed(2)}`;
 
 const TYPES    = ['article_sale', 'ad_network', 'manual', 'other'];
@@ -31,7 +32,7 @@ export default function RevenueSources() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch(`${API_URL}/api/finance/sources`, { headers: hdrs() });
+      const r = await fetch(`${API_URL}/api/finance/sources?site=${SITE}`, { headers: hdrs() });
       if (r.status === 401) { navigate('/admin/login'); return; }
       const d = await r.json();
       setSources(d.sources || []);
@@ -59,9 +60,10 @@ export default function RevenueSources() {
     setSaving(true);
     try {
       const { mode, data } = modal;
-      const url    = mode === 'add' ? `${API_URL}/api/finance/sources` : `${API_URL}/api/finance/sources/${data.id}`;
+      const base   = `${API_URL}/api/finance/sources`;
+      const url    = mode === 'add' ? `${base}?site=${SITE}` : `${base}/${data.id}?site=${SITE}`;
       const method = mode === 'add' ? 'POST' : 'PUT';
-      const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify(data) });
+      const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify({ ...data, site: SITE }) });
       if (!r.ok) { const d = await r.json(); alert(d.message); }
       setModal(null); load();
     } catch (e) { alert(e.message); }
@@ -71,7 +73,7 @@ export default function RevenueSources() {
   const del = async (id) => {
     if (!confirm('Delete this source? Revenue entries referencing it will keep their data.')) return;
     setDeleting(id);
-    await fetch(`${API_URL}/api/finance/sources/${id}`, { method: 'DELETE', headers: hdrs() });
+    await fetch(`${API_URL}/api/finance/sources/${id}?site=${SITE}`, { method: 'DELETE', headers: hdrs() });
     setDeleting(null); load();
   };
 
