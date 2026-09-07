@@ -120,69 +120,100 @@ function KpiCard({ label, value, accentClass = 'text-white', primary = false }) 
 }
 
 // ── Monthly Overview (revenue vs. expenses, last 6 months) ───────────────────
-// SVG line/area chart — revenue gets the filled area treatment (primary
-// series), expenses is a thin reference line on the same scale.
+// Same visual system as AdminDashboard's TrafficChart: multi-color gradient
+// line, gradient area fill, Y-axis gridlines, and a hover tooltip. Expenses
+// rides along as a thin secondary reference line.
 function MonthlyChart({ data }) {
+  const [hovered, setHovered] = useState(null);
   if (!data || data.length === 0) return null;
 
-  const W = 640, H = 150, PAD_X = 8, PAD_Y = 10;
-  const n    = data.length;
-  const max  = Math.max(1, ...data.flatMap(m => [m.revenue, m.expenses]));
-  const xFor = i => n > 1 ? PAD_X + (i / (n - 1)) * (W - PAD_X * 2) : W / 2;
-  const yFor = v => H - PAD_Y - (v / max) * (H - PAD_Y * 2);
+  const n     = data.length;
+  const max   = Math.max(1, ...data.flatMap(m => [m.revenue, m.expenses]));
+  const chartWidth  = 640;
+  const chartHeight = 220;
+  const left = 48, right = 12, top = 16, bottom = 28;
+  const plotWidth  = chartWidth - left - right;
+  const plotHeight = chartHeight - top - bottom;
+  const divisor = Math.max(n - 1, 1);
 
-  const linePath = key => data.map((m, i) => `${i === 0 ? 'M' : 'L'}${xFor(i).toFixed(1)},${yFor(m[key]).toFixed(1)}`).join(' ');
-  const areaPath = key => `${linePath(key)} L${xFor(n - 1).toFixed(1)},${H - PAD_Y} L${xFor(0).toFixed(1)},${H - PAD_Y} Z`;
+  const pointsFor = key => data.map((m, i) => [
+    left + (i / divisor) * plotWidth,
+    top + plotHeight - (Math.max(0, m[key]) / max) * plotHeight,
+  ]);
+  const revPoints = pointsFor('revenue');
+  const expPoints = pointsFor('expenses');
+  const pathFor   = pts => pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x} ${y}`).join(' ');
+  const revLine   = pathFor(revPoints);
+  const revArea   = `${revLine} L ${revPoints.at(-1)[0]} ${chartHeight - bottom} L ${revPoints[0][0]} ${chartHeight - bottom} Z`;
+  const expLine   = pathFor(expPoints);
 
-  const last = data[n - 1];
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(ratio => ({
+    y: top + plotHeight - ratio * plotHeight,
+    value: Math.round(max * ratio),
+  }));
+  const labelStep = Math.max(1, Math.ceil(n / 9));
 
   return (
     <div className="bg-gray-950 border border-gray-800">
       <div className="px-4 py-2 border-b border-gray-800 flex items-center justify-between">
         <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Monthly Overview</span>
         <div className="flex items-center gap-3 text-[10px] font-mono text-gray-500">
-          <span className="font-bold text-green-400">{fmt(last.revenue)} this month</span>
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 inline-block bg-green-500" />Revenue</span>
-          <span className="flex items-center gap-1.5"><span className="h-0.5 w-2.5 inline-block bg-red-500" />Expenses</span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 inline-block rounded-full" style={{ background: 'linear-gradient(90deg,#38bdf8,#8b5cf6,#34d399)' }} />
+            Revenue
+          </span>
+          <span className="flex items-center gap-1.5"><span className="h-0.5 w-2.5 inline-block bg-red-400/70" />Expenses</span>
         </div>
       </div>
-      <div className="px-4 pb-1 pt-3">
-        {/* Text lives outside the SVG so it never gets non-uniformly
-            stretched/squished by the viewBox scaling to the container width. */}
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: '150px' }} preserveAspectRatio="none">
+      <div className="relative px-3 py-4">
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full overflow-visible" style={{ height: '200px' }}>
           <defs>
-            <linearGradient id="financeRevGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor="#22c55e" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+            <linearGradient id="financeLineGrad" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%"  stopColor="#38bdf8" />
+              <stop offset="55%" stopColor="#8b5cf6" />
+              <stop offset="100%" stopColor="#34d399" />
+            </linearGradient>
+            <linearGradient id="financeAreaGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%"   stopColor="#8b5cf6" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
             </linearGradient>
           </defs>
 
-          {/* horizontal gridlines */}
-          {[0.25, 0.5, 0.75].map(p => (
-            <line key={p} x1={PAD_X} x2={W - PAD_X} y1={H - PAD_Y - p * (H - PAD_Y * 2)} y2={H - PAD_Y - p * (H - PAD_Y * 2)}
-              stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+          {yTicks.map(({ y, value }) => (
+            <g key={y}>
+              <line x1={left} x2={chartWidth - right} y1={y} y2={y} stroke="rgba(148,163,184,.1)" />
+              <text x="0" y={y + 4} fill="rgba(148,163,184,.55)" fontSize="11">{fmt(value)}</text>
+            </g>
           ))}
 
-          {/* revenue — area + line */}
-          <path d={areaPath('revenue')} fill="url(#financeRevGrad)" />
-          <path d={linePath('revenue')} fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+          <path d={revArea} fill="url(#financeAreaGrad)" />
+          <path d={expLine} fill="none" stroke="#f87171" strokeWidth="1.5" strokeDasharray="3 3" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={revLine} fill="none" stroke="url(#financeLineGrad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
 
-          {/* expenses — thin reference line */}
-          <path d={linePath('expenses')} fill="none" stroke="#f87171" strokeWidth="1.5" strokeDasharray="3 3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-
-          {/* point markers */}
-          {data.map((m, i) => (
-            <circle key={m.month} cx={xFor(i)} cy={yFor(m.revenue)} r={i === n - 1 ? 3 : 2}
-              fill="#070b12" stroke="#22c55e" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+          {revPoints.map(([x, y], i) => (
+            <g key={data[i].month}>
+              <circle cx={x} cy={y} r="4" fill="#0f172a" stroke="#a78bfa" strokeWidth="2" />
+              <circle
+                cx={x} cy={y} r="14" fill="transparent" className="cursor-crosshair"
+                onMouseEnter={() => setHovered({ i, left: `${(x / chartWidth) * 100}%`, top: `${(y / chartHeight) * 100}%` })}
+                onMouseLeave={() => setHovered(null)}
+              />
+              {(i % labelStep === 0 || i === n - 1) && (
+                <text x={x} y={chartHeight - 8} textAnchor="middle" fill="rgba(148,163,184,.65)" fontSize="12">{data[i].label}</text>
+              )}
+            </g>
           ))}
         </svg>
-        <div className="flex justify-between px-1">
-          {data.map(m => (
-            <span key={m.month} className="flex-1 text-center text-[9px] font-mono uppercase tracking-wider text-gray-600">
-              {m.label}
-            </span>
-          ))}
-        </div>
+        {hovered && (
+          <div
+            className="pointer-events-none absolute z-10 border border-white/[0.1] bg-[#060b13]/95 px-3 py-2 text-xs shadow-[0_18px_48px_rgba(0,0,0,.42)] backdrop-blur-md"
+            style={{ left: hovered.left, top: hovered.top, transform: 'translate(-50%, calc(-100% - 12px))' }}
+          >
+            <div className="font-semibold text-green-400">{fmt(data[hovered.i].revenue)} revenue</div>
+            <div className="text-red-400">{fmt(data[hovered.i].expenses)} expenses</div>
+            <div className="mt-0.5 text-slate-500">{data[hovered.i].label}</div>
+          </div>
+        )}
       </div>
     </div>
   );
