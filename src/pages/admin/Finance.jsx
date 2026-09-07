@@ -119,6 +119,43 @@ function KpiCard({ label, value, accentClass = 'text-white', primary = false }) 
   );
 }
 
+// ── Monthly Overview (revenue vs. expenses, last 6 months) ───────────────────
+function MonthlyChart({ data }) {
+  if (!data || data.length === 0) return null;
+  const max = Math.max(1, ...data.flatMap(m => [m.revenue, m.expenses]));
+
+  return (
+    <div className="bg-gray-950 border border-gray-800">
+      <div className="px-4 py-2 border-b border-gray-800 flex items-center justify-between">
+        <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Monthly Overview</span>
+        <div className="flex items-center gap-3 text-[10px] font-mono text-gray-500">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 inline-block bg-green-500" />Revenue</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 inline-block bg-red-500" />Expenses</span>
+        </div>
+      </div>
+      <div className="flex items-end justify-between gap-2 px-4 pb-3 pt-4" style={{ height: '170px' }}>
+        {data.map(m => (
+          <div key={m.month} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
+            <div className="flex w-full flex-1 items-end justify-center gap-1">
+              <div
+                className="w-2.5 bg-green-500/80 sm:w-3"
+                style={{ height: `${(m.revenue / max) * 100}%`, minHeight: m.revenue > 0 ? '2px' : 0 }}
+                title={`Revenue: ${fmt(m.revenue)}`}
+              />
+              <div
+                className="w-2.5 bg-red-500/80 sm:w-3"
+                style={{ height: `${(m.expenses / max) * 100}%`, minHeight: m.expenses > 0 ? '2px' : 0 }}
+                title={`Expenses: ${fmt(m.expenses)}`}
+              />
+            </div>
+            <span className="text-[9px] font-mono uppercase tracking-wider text-gray-600">{m.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Balances (only sources that actually have money waiting) ─────────────────
 function Balances({ balances, onNavigate }) {
   return (
@@ -305,15 +342,19 @@ export default function Finance() {
 
         <main className="finance-main px-4 py-7 space-y-5 sm:px-8">
 
-          {/* KPI Grid — 4 cards, Lifetime Profit primary */}
+          {/* KPI Grid — Lifetime Profit primary */}
           <section>
-            <div className="grid grid-cols-2 gap-px bg-gray-800 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-px bg-gray-800 sm:grid-cols-3 lg:grid-cols-5">
               <KpiCard label="Lifetime Profit" value={fmt(s.lifetimeProfit)} accentClass={profitPositive ? 'text-green-400' : 'text-red-400'} primary />
+              <KpiCard label="Gross Income"    value={fmt(s.totalGrossRevenue)} accentClass="text-white" />
               <KpiCard label="Net Revenue"     value={fmt(s.totalNetRevenue)} accentClass="text-green-400" />
               <KpiCard label="Expenses"        value={fmt(s.totalExpenses)}   accentClass="text-red-400" />
               <KpiCard label="This Month"      value={`${monthPositive ? '+' : '-'}${fmt(Math.abs(s.currentMonthProfit))}`} accentClass={monthPositive ? 'text-green-400' : 'text-red-400'} />
             </div>
           </section>
+
+          {/* Monthly Overview chart */}
+          <MonthlyChart data={s.monthlyTrend} />
 
           {/* Balances + Upcoming Costs */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
