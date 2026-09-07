@@ -22,9 +22,7 @@ import ArticleEdit from "./pages/admin/ArticleEdit";
 import ArticlesList from "./pages/admin/ArticlesList";
 import SubmissionsList from "./pages/admin/SubmissionsList";
 import Finance from "./pages/admin/Finance";
-import RevenueLog from "./pages/admin/RevenueLog";
-import Payouts from "./pages/admin/Payouts";
-import Expenses from "./pages/admin/Expenses";
+import Transactions from "./pages/admin/Transactions";
 import RevenueSources from "./pages/admin/RevenueSources";
 import Cortex from "./pages/admin/Cortex";
 import Newsletter from "./pages/admin/Newsletter";
@@ -205,9 +203,7 @@ export default function App() {
           <Route path="/admin/articles/edit/:id" element={<ArticleEdit />} />
           <Route path="/admin/submissions" element={<SubmissionsList />} />
           <Route path="/admin/finance" element={<Finance />} />
-          <Route path="/admin/finance/revenue" element={<RevenueLog />} />
-          <Route path="/admin/finance/payouts" element={<Payouts />} />
-          <Route path="/admin/finance/expenses" element={<Expenses />} />
+          <Route path="/admin/finance/transactions" element={<Transactions />} />
           <Route path="/admin/finance/sources" element={<RevenueSources />} />
           <Route path="/admin/cortex" element={<Cortex />} />
           <Route path="/admin/newsletter" element={<Newsletter />} />

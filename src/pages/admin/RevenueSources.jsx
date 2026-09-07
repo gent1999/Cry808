@@ -81,8 +81,8 @@ export default function RevenueSources() {
   return (
     <div className="admin-command-center finance-command-center finance-subpage min-h-screen bg-[#070b12] text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_25%_0%,rgba(16,185,129,.12),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,.12),transparent_30%),linear-gradient(180deg,#070b12_0%,#0a0f1a_48%,#070b12_100%)]" />
-      <FinanceHeader active="Sources" />
-      <main className="finance-main relative ml-[264px] px-8 py-7 space-y-4">
+      <FinanceHeader active="Sources" sources={sources} />
+      <main className="finance-main relative px-4 py-7 space-y-4 sm:px-8 lg:ml-[264px]">
 
         <div className="flex justify-end">
           <button onClick={openAdd} className="bg-blue-700 hover:bg-blue-600 text-white text-sm px-4 py-2 transition-colors">
@@ -95,53 +95,41 @@ export default function RevenueSources() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-700">
             {sources.map(s => {
-              const net = parseFloat(s.default_gross) - (
-                s.fee_type === 'percentage' ? parseFloat(s.default_gross) * (parseFloat(s.fee_value) / 100) :
-                s.fee_type === 'fixed' ? parseFloat(s.fee_value) : 0
-              );
+              const lines = [];
+              const isNew = s.status === 'pending' && +s.entry_count === 0;
+              if (isNew) {
+                lines.push({ text: s.notes || 'Waiting for approval', muted: true });
+              } else {
+                if (+s.lifetime_net > 0) lines.push({ text: `${fmt(s.lifetime_net)} earned` });
+                if (s.fee_type === 'percentage') lines.push({ text: `${+s.fee_value}% fee`, dim: true });
+                else if (s.fee_type === 'fixed' && +s.fee_value > 0) lines.push({ text: `${fmt(s.fee_value)} flat fee`, dim: true });
+                if (+s.current_balance > 0) lines.push({ text: `${fmt(s.current_balance)} waiting for payout`, warn: true });
+                if (lines.length === 0) lines.push({ text: 'No activity yet', muted: true });
+              }
               return (
                 <div key={s.id} className="bg-gray-800 px-4 py-4">
                   <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-semibold text-white text-sm">{s.name}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusBadge[s.status]}`}>{s.status}</span>
+                    <span className="font-semibold text-white text-sm">{s.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium uppercase tracking-wide ${statusBadge[s.status]}`}>{s.status}</span>
+                  </div>
+
+                  <div className="space-y-0.5">
+                    {lines.map((l, i) => (
+                      <div key={i} className={`text-sm ${l.muted ? 'text-gray-500 italic' : l.warn ? 'text-yellow-400' : l.dim ? 'text-gray-400' : 'text-white font-medium'}`}>
+                        {l.text}
                       </div>
-                      <div className="text-xs text-gray-500 capitalize">{s.type?.replace(/_/g,' ')}</div>
-                    </div>
-                    <div className="flex gap-2">
+                    ))}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-xs text-gray-600">{+s.entry_count > 0 ? `${s.entry_count} entries` : ''}</span>
+                    <div className="flex gap-3">
                       <button onClick={() => openEdit(s)} className="text-xs text-gray-500 hover:text-white transition-colors">Edit</button>
                       <button onClick={() => del(s.id)} disabled={deleting === s.id} className="text-xs text-gray-600 hover:text-red-400 transition-colors disabled:opacity-50">
                         {deleting === s.id ? '...' : 'Del'}
                       </button>
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-                    <div className="bg-gray-900/60 rounded px-2 py-1.5">
-                      <div className="text-xs text-gray-500 mb-0.5">Gross</div>
-                      <div className="text-sm font-medium text-white">{parseFloat(s.default_gross) > 0 ? fmt(s.default_gross) : '—'}</div>
-                    </div>
-                    <div className="bg-gray-900/60 rounded px-2 py-1.5">
-                      <div className="text-xs text-gray-500 mb-0.5">Fee</div>
-                      <div className="text-sm font-medium text-red-400">
-                        {s.fee_type === 'none' ? 'None' :
-                         s.fee_type === 'percentage' ? `${s.fee_value}%` :
-                         fmt(s.fee_value)}
-                      </div>
-                    </div>
-                    <div className="bg-gray-900/60 rounded px-2 py-1.5">
-                      <div className="text-xs text-gray-500 mb-0.5">Net</div>
-                      <div className="text-sm font-medium text-green-400">{parseFloat(s.default_gross) > 0 ? fmt(net) : '—'}</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 flex gap-4 text-xs text-gray-500">
-                    {parseFloat(s.payout_threshold) > 0 && <span>Threshold: <span className="text-gray-300">{fmt(s.payout_threshold)}</span></span>}
-                    {parseFloat(s.current_balance) > 0 && <span>Balance: <span className="text-yellow-400">{fmt(s.current_balance)}</span></span>}
-                    <span className="ml-auto">{s.entry_count} entries</span>
-                  </div>
-                  {s.notes && <div className="mt-1.5 text-xs text-gray-600 italic">{s.notes}</div>}
                 </div>
               );
             })}

@@ -378,8 +378,10 @@ html, body {
   border-radius: 0 !important;
 }
 
-.finance-subpage .finance-subpage-topbar {
-  margin-left: 264px;
+@media (min-width: 1024px) {
+  .finance-subpage .finance-subpage-topbar {
+    margin-left: 264px;
+  }
 }
 
 .finance-subpage .finance-main {
