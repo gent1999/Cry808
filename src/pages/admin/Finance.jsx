@@ -229,6 +229,48 @@ function MonthlyChart({ data, range, availableYears, onRangeChange }) {
   );
 }
 
+// ── Revenue by Source (where the money actually comes from) ──────────────────
+// Reuses the same sources list already fetched for the sidebar/Balances —
+// no extra request. Only sources with real lifetime earnings show up.
+function RevenueBySource({ sources, onNavigate }) {
+  const ranked = (sources || [])
+    .filter(s => +s.lifetime_net > 0)
+    .sort((a, b) => +b.lifetime_net - +a.lifetime_net);
+  const total = ranked.reduce((sum, s) => sum + +s.lifetime_net, 0) || 1;
+  const BAR_COLORS = ['#34d399', '#38bdf8', '#a78bfa', '#f59e0b', '#f87171', '#22d3ee'];
+
+  return (
+    <div className="bg-gray-950 border border-gray-800">
+      <div className="px-4 py-2 border-b border-gray-800 flex items-center justify-between">
+        <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Revenue by Source</span>
+        <button onClick={onNavigate} className="text-[10px] font-mono text-gray-700 hover:text-gray-400 transition-colors uppercase tracking-wider">
+          Sources →
+        </button>
+      </div>
+      {ranked.length === 0 ? (
+        <div className="px-4 py-5 text-[10px] font-mono text-gray-700 uppercase tracking-wider">No revenue logged yet</div>
+      ) : (
+        <div className="divide-y divide-gray-800/60">
+          {ranked.map((s, i) => {
+            const pct = Math.round((+s.lifetime_net / total) * 100);
+            return (
+              <div key={s.id} className="px-4 py-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-mono font-medium text-white">{s.name}</span>
+                  <span className="text-xs font-mono text-gray-400">{fmt(s.lifetime_net)} <span className="text-gray-700">· {pct}%</span></span>
+                </div>
+                <div className="h-1 bg-gray-800 overflow-hidden">
+                  <div className="h-full" style={{ width: `${pct}%`, backgroundColor: BAR_COLORS[i % BAR_COLORS.length] }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Balances (only sources that actually have money waiting) ─────────────────
 function Balances({ balances, onNavigate }) {
   return (
@@ -444,8 +486,11 @@ export default function Finance() {
             </div>
           </section>
 
-          {/* Monthly Overview chart */}
-          <MonthlyChart data={trend} range={trendRange} availableYears={trendYears} onRangeChange={setTrendRange} />
+          {/* Monthly Overview chart + Revenue by Source */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <MonthlyChart data={trend} range={trendRange} availableYears={trendYears} onRangeChange={setTrendRange} />
+            <RevenueBySource sources={sources} onNavigate={() => navigate('/admin/finance/sources')} />
+          </div>
 
           {/* Balances + Upcoming Costs */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
