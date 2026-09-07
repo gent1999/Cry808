@@ -120,37 +120,69 @@ function KpiCard({ label, value, accentClass = 'text-white', primary = false }) 
 }
 
 // ── Monthly Overview (revenue vs. expenses, last 6 months) ───────────────────
+// SVG line/area chart — revenue gets the filled area treatment (primary
+// series), expenses is a thin reference line on the same scale.
 function MonthlyChart({ data }) {
   if (!data || data.length === 0) return null;
-  const max = Math.max(1, ...data.flatMap(m => [m.revenue, m.expenses]));
+
+  const W = 640, H = 150, PAD_X = 8, PAD_Y = 10;
+  const n    = data.length;
+  const max  = Math.max(1, ...data.flatMap(m => [m.revenue, m.expenses]));
+  const xFor = i => n > 1 ? PAD_X + (i / (n - 1)) * (W - PAD_X * 2) : W / 2;
+  const yFor = v => H - PAD_Y - (v / max) * (H - PAD_Y * 2);
+
+  const linePath = key => data.map((m, i) => `${i === 0 ? 'M' : 'L'}${xFor(i).toFixed(1)},${yFor(m[key]).toFixed(1)}`).join(' ');
+  const areaPath = key => `${linePath(key)} L${xFor(n - 1).toFixed(1)},${H - PAD_Y} L${xFor(0).toFixed(1)},${H - PAD_Y} Z`;
+
+  const last = data[n - 1];
 
   return (
     <div className="bg-gray-950 border border-gray-800">
       <div className="px-4 py-2 border-b border-gray-800 flex items-center justify-between">
         <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Monthly Overview</span>
         <div className="flex items-center gap-3 text-[10px] font-mono text-gray-500">
+          <span className="font-bold text-green-400">{fmt(last.revenue)} this month</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 inline-block bg-green-500" />Revenue</span>
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 inline-block bg-red-500" />Expenses</span>
+          <span className="flex items-center gap-1.5"><span className="h-0.5 w-2.5 inline-block bg-red-500" />Expenses</span>
         </div>
       </div>
-      <div className="flex items-end justify-between gap-2 px-4 pb-3 pt-4" style={{ height: '170px' }}>
-        {data.map(m => (
-          <div key={m.month} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
-            <div className="flex w-full flex-1 items-end justify-center gap-1">
-              <div
-                className="w-2.5 bg-green-500/80 sm:w-3"
-                style={{ height: `${(m.revenue / max) * 100}%`, minHeight: m.revenue > 0 ? '2px' : 0 }}
-                title={`Revenue: ${fmt(m.revenue)}`}
-              />
-              <div
-                className="w-2.5 bg-red-500/80 sm:w-3"
-                style={{ height: `${(m.expenses / max) * 100}%`, minHeight: m.expenses > 0 ? '2px' : 0 }}
-                title={`Expenses: ${fmt(m.expenses)}`}
-              />
-            </div>
-            <span className="text-[9px] font-mono uppercase tracking-wider text-gray-600">{m.label}</span>
-          </div>
-        ))}
+      <div className="px-4 pb-1 pt-3">
+        {/* Text lives outside the SVG so it never gets non-uniformly
+            stretched/squished by the viewBox scaling to the container width. */}
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: '150px' }} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="financeRevGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#22c55e" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+
+          {/* horizontal gridlines */}
+          {[0.25, 0.5, 0.75].map(p => (
+            <line key={p} x1={PAD_X} x2={W - PAD_X} y1={H - PAD_Y - p * (H - PAD_Y * 2)} y2={H - PAD_Y - p * (H - PAD_Y * 2)}
+              stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+          ))}
+
+          {/* revenue — area + line */}
+          <path d={areaPath('revenue')} fill="url(#financeRevGrad)" />
+          <path d={linePath('revenue')} fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+
+          {/* expenses — thin reference line */}
+          <path d={linePath('expenses')} fill="none" stroke="#f87171" strokeWidth="1.5" strokeDasharray="3 3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+
+          {/* point markers */}
+          {data.map((m, i) => (
+            <circle key={m.month} cx={xFor(i)} cy={yFor(m.revenue)} r={i === n - 1 ? 3 : 2}
+              fill="#070b12" stroke="#22c55e" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+          ))}
+        </svg>
+        <div className="flex justify-between px-1">
+          {data.map(m => (
+            <span key={m.month} className="flex-1 text-center text-[9px] font-mono uppercase tracking-wider text-gray-600">
+              {m.label}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
