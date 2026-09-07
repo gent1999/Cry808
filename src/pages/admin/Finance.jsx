@@ -119,11 +119,13 @@ function KpiCard({ label, value, accentClass = 'text-white', primary = false }) 
   );
 }
 
-// ── Monthly Overview (revenue vs. expenses, last 6 months) ───────────────────
+// ── Monthly Overview (revenue vs. expenses, 12-month window) ─────────────────
 // Same visual system as AdminDashboard's TrafficChart: multi-color gradient
 // line, gradient area fill, Y-axis gridlines, and a hover tooltip. Expenses
-// rides along as a thin secondary reference line.
-function MonthlyChart({ data }) {
+// rides along as a thin secondary reference line. Range selector top-right
+// switches between a rolling last-12-months view and any calendar year that
+// actually has data (new years appear on their own once they start).
+function MonthlyChart({ data, range, availableYears, onRangeChange }) {
   const [hovered, setHovered] = useState(null);
   if (!data || data.length === 0) return null;
 
@@ -155,7 +157,7 @@ function MonthlyChart({ data }) {
 
   return (
     <div className="bg-gray-950 border border-gray-800">
-      <div className="px-4 py-2 border-b border-gray-800 flex items-center justify-between">
+      <div className="px-4 py-2 border-b border-gray-800 flex flex-wrap items-center justify-between gap-2">
         <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Monthly Overview</span>
         <div className="flex items-center gap-3 text-[10px] font-mono text-gray-500">
           <span className="flex items-center gap-1.5">
@@ -163,6 +165,14 @@ function MonthlyChart({ data }) {
             Revenue
           </span>
           <span className="flex items-center gap-1.5"><span className="h-0.5 w-2.5 inline-block bg-red-400/70" />Expenses</span>
+          <select
+            value={range}
+            onChange={e => onRangeChange(e.target.value)}
+            className="bg-gray-900 border border-gray-700 text-gray-300 text-[10px] font-mono uppercase tracking-wider px-2 py-1 cursor-pointer focus:outline-none focus:border-gray-500"
+          >
+            <option value="last12">Last 12 Months</option>
+            {availableYears.map(y => <option key={y} value={y}>{y} · 12 Months</option>)}
+          </select>
         </div>
       </div>
       <div className="relative px-3 py-4">
@@ -333,6 +343,10 @@ export default function Finance() {
   const [error,    setError]    = useState('');
   const [addOpen,  setAddOpen]  = useState(false);
 
+  const [trendRange, setTrendRange] = useState('last12');
+  const [trend,       setTrend]       = useState([]);
+  const [trendYears,  setTrendYears]  = useState([]);
+
   const load = useCallback(async () => {
     const token = localStorage.getItem('adminToken');
     if (!token) { navigate('/admin/login'); return; }
@@ -359,6 +373,20 @@ export default function Finance() {
   }, [navigate]);
 
   useEffect(() => { load(); }, [load]);
+
+  const loadTrend = useCallback(async (range) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) return;
+    try {
+      const r = await fetch(`${API_URL}/api/finance/monthly-trend?range=${range}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!r.ok) return;
+      const d = await r.json();
+      setTrend(d.trend || []);
+      setTrendYears(d.availableYears || []);
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => { loadTrend(trendRange); }, [trendRange, loadTrend]);
 
   if (loading) return (
     <div className="admin-command-center grid min-h-screen place-items-center bg-[#070b12] text-white">
@@ -417,7 +445,7 @@ export default function Finance() {
           </section>
 
           {/* Monthly Overview chart */}
-          <MonthlyChart data={s.monthlyTrend} />
+          <MonthlyChart data={trend} range={trendRange} availableYears={trendYears} onRangeChange={setTrendRange} />
 
           {/* Balances + Upcoming Costs */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
