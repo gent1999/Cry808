@@ -43,7 +43,8 @@ export function editDataFromTransaction(row) {
     return {
       id: row.id, name: row.description || '', category: row.category || 'other',
       amount: row.net_amount ?? '', billing_cycle: row.billing_cycle || 'one_time',
-      vendor: row.vendor || '', renewal_date: row.renewal_date?.slice(0, 10) || '',
+      vendor: row.vendor || '', date: row.date?.slice(0, 10) || today(),
+      renewal_date: row.renewal_date?.slice(0, 10) || '',
       payment_status: row.payment_status || 'paid', notes: row.notes || '',
     };
   }
@@ -205,16 +206,19 @@ export default function TransactionModal({ mode, type: initialType, data: initia
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
+                <Field label="Date"><input type="date" className={inp} value={data.date} onChange={e => set({ date: e.target.value })} /></Field>
                 <Field label="Amount ($)"><input type="number" step="0.01" min="0" className={inp} value={data.amount} onChange={e => set({ amount: e.target.value })} /></Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <Field label="Payment Status">
                   <select className={sel} value={data.payment_status} onChange={e => set({ payment_status: e.target.value })}>
                     {EXPENSE_PAYMENT.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </Field>
+                <Field label="Renewal Date (optional)">
+                  <input type="date" className={inp} value={data.renewal_date} onChange={e => set({ renewal_date: e.target.value })} />
+                </Field>
               </div>
-              <Field label="Renewal Date (optional)">
-                <input type="date" className={inp} value={data.renewal_date} onChange={e => set({ renewal_date: e.target.value })} />
-              </Field>
               <Field label="Notes"><textarea className={inp + ' resize-none'} rows={2} value={data.notes} onChange={e => set({ notes: e.target.value })} /></Field>
             </>
           )}
