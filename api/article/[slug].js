@@ -15,12 +15,13 @@ function escapeHtml(str) {
 
 export default async function handler(req, res) {
   const { slug } = req.query; // Now receives "123-drake-new-album"
-  const userAgent = req.headers['user-agent'] || '';
 
   // Extract numeric ID from slug (e.g., "123-drake-new-album" -> "123")
   const articleId = slug ? slug.split('-')[0] : null;
 
-  // Helper to serve the SPA index.html
+  // Helper to serve the SPA index.html — only used as an error fallback now;
+  // middleware.js already routes crawler user agents here specifically, and
+  // humans never reach this function at all.
   const serveIndex = async () => {
     try {
       const indexResponse = await fetch(`https://${req.headers.host}/index.html`);
@@ -35,16 +36,6 @@ export default async function handler(req, res) {
   };
 
   if (!articleId) {
-    return serveIndex();
-  }
-
-  // Social media preview bots + search/ad crawlers (Googlebot, and critically
-  // Mediapartners-Google — the AdSense review bot — which does not reliably
-  // execute client JS and was previously falling through to the empty SPA shell).
-  const isCrawler = /facebookexternalhit|twitterbot|slackbot|telegrambot|whatsapp|linkedinbot|discordbot|pinterestbot|googlebot|mediapartners-google|adsbot-google|apis-google|storebot-google/i.test(userAgent);
-
-  // If not a recognized bot, serve the React SPA
-  if (!isCrawler) {
     return serveIndex();
   }
 
@@ -182,6 +173,9 @@ export default async function handler(req, res) {
 </html>`;
 
     res.setHeader('Content-Type', 'text/html');
+    // Article content is effectively immutable once published — long ceiling,
+    // with edits/deletes purging this URL on-demand (see cloudflarePurge).
+    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
     res.status(200).send(html);
   } catch (error) {
     console.error('Error fetching article for crawler:', error);

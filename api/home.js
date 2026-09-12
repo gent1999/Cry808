@@ -1,11 +1,7 @@
 // api/home.js
 // Serves a lightweight but substantive server-rendered homepage to search
-// and ad-review crawlers. Human visitors and unrecognized user agents get
-// the normal React SPA (index.html), unchanged.
-//
-// Same problem as api/article/[slug].js: the homepage previously had zero
-// bot handling at all — Googlebot and Mediapartners-Google (AdSense's
-// reviewer) got the empty JS-shell, which reads as "insufficient content."
+// and ad-review crawlers. middleware.js rewrites only crawler user agents
+// here — humans never reach this function, so there's no UA check needed.
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -37,8 +33,6 @@ function stripMarkdown(text) {
 }
 
 export default async function handler(req, res) {
-  const userAgent = req.headers['user-agent'] || '';
-
   const serveIndex = async () => {
     try {
       const indexResponse = await fetch(`https://${req.headers.host}/index.html`);
@@ -51,12 +45,6 @@ export default async function handler(req, res) {
       return res.status(200).send('<html><body><script>window.location.href="/"</script></body></html>');
     }
   };
-
-  const isCrawler = /facebookexternalhit|twitterbot|slackbot|telegrambot|whatsapp|linkedinbot|discordbot|pinterestbot|googlebot|mediapartners-google|adsbot-google|apis-google|storebot-google/i.test(userAgent);
-
-  if (!isCrawler) {
-    return serveIndex();
-  }
 
   try {
     const apiUrl = process.env.VITE_API_URL || 'https://server808.vercel.app';
@@ -119,6 +107,10 @@ export default async function handler(req, res) {
 </html>`;
 
     res.setHeader('Content-Type', 'text/html');
+    // Public, unauthenticated, identical for every crawler — safe to cache
+    // at Vercel's edge. Real purges on publish/edit come later; this is the
+    // safety-net ceiling.
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
     res.status(200).send(html);
   } catch (error) {
     console.error('Error rendering homepage for crawler:', error.message);
