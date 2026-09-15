@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { compressImage } from '../../utils/compressImage';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -55,9 +56,10 @@ const AmazonProducts = () => {
     verifyAdminAndFetch();
   }, [navigate]);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  const handleImageChange = async (e) => {
+    const rawFile = e.target.files[0];
+    if (rawFile) {
+      const file = await compressImage(rawFile);
       setImageFile(file);
       // Create preview URL
       const reader = new FileReader();

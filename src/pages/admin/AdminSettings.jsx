@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/cry808_logo.png';
+import { compressImage } from '../../utils/compressImage';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -234,9 +235,10 @@ export default function AdminSettings() {
     setAdsLoading(false);
   };
 
-  const handleAdFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleAdFile = async (e) => {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    const file = await compressImage(rawFile);
     setAdImageFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => setAdPreview(ev.target.result);
@@ -369,9 +371,10 @@ export default function AdminSettings() {
     setProductsLoading(false);
   };
 
-  const handleProductImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleProductImageChange = async (e) => {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    const file = await compressImage(rawFile);
     setProductImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setProductImagePreview(reader.result);

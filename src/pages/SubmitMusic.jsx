@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import Footer from "../components/Footer";
+import { compressImage } from "../utils/compressImage";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -108,11 +109,16 @@ export default function SubmitMusic() {
   };
   const handle = (e) => set(e.target.name, e.target.value);
 
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { setErrors(p => ({ ...p, image: 'Max 5MB' })); return; }
-    if (!file.type.startsWith('image/')) { setErrors(p => ({ ...p, image: 'Images only' })); return; }
+  const handleImage = async (e) => {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    if (!rawFile.type.startsWith('image/')) { setErrors(p => ({ ...p, image: 'Images only' })); return; }
+    const file = await compressImage(rawFile);
+    // Server808 runs on Vercel, whose serverless functions hard-cap request
+    // bodies at 4.5MB -- checked after compression since that's what
+    // actually gets uploaded.
+    if (file.size > 4 * 1024 * 1024) { setErrors(p => ({ ...p, image: 'Image too large even after compression -- try a smaller photo' })); return; }
+    setErrors(p => ({ ...p, image: undefined }));
     set('image', file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result);

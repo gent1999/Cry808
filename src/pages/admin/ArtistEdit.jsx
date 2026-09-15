@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import logo from '../../assets/cry808_logo.png';
+import { compressImage } from '../../utils/compressImage';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -185,18 +186,20 @@ export default function ArtistEdit() {
     setUnlinking(null);
   }
 
-  function handleImage(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  async function handleImage(e) {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    const file = await compressImage(rawFile);
     setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
   }
 
-  function handleGalleryImage(n, e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  async function handleGalleryImage(n, e) {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    const file = await compressImage(rawFile);
     setGalleryFiles(prev => ({ ...prev, [n]: file }));
     const reader = new FileReader();
     reader.onloadend = () => setGalleryPreviews(prev => ({ ...prev, [n]: reader.result }));

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/cry808_logo.png';
+import { compressImage } from '../../utils/compressImage';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -118,9 +119,10 @@ export default function ReferralAds() {
   useEffect(() => { load(); }, []);
 
   // ── Image picker ───────────────────────────────────────────────────────────
-  const handleFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleFile = async (e) => {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    const file = await compressImage(rawFile);
     setImageFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => setPreview(ev.target.result);

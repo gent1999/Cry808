@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import SimpleMDE from 'react-simplemde-editor';
 import 'easymde/dist/easymde.min.css';
 import logo from '../../assets/cry808_logo.png';
+import { compressImage } from '../../utils/compressImage';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -206,18 +207,20 @@ const ArticleEdit = () => {
     setError('');
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleImageChange = async (e) => {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    const file = await compressImage(rawFile);
     setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
   };
 
-  const handleAdditionalImageChange = (e, n) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleAdditionalImageChange = async (e, n) => {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    const file = await compressImage(rawFile);
     const reader = new FileReader();
     reader.onloadend = () => {
       if (n === 1) { setAdditionalImage1(file); setAdditionalPreview1(reader.result); setRemoveAdditionalImage1(false); }
