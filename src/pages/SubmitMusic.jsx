@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import Footer from "../components/Footer";
 import { compressImage } from "../utils/compressImage";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-const PRICE = { priority: 5, genius: 10 };
+const PRICE = { priority: 5, genius: 10, guaranteed_article: 10 };
 
 // ── Stripe checkout form ───────────────────────────────────────────────────────
 function CheckoutForm({ form, service, onSuccess }) {
@@ -73,6 +74,102 @@ function CheckoutForm({ form, service, onSuccess }) {
   );
 }
 
+// ── PayPal checkout (Guaranteed Article) ────────────────────────────────────────
+// Server-verified end to end: this component never decides payment succeeded
+// on its own. createOrder asks Server808 to create a $10.00 USD order
+// (amount is server-fixed, never sent from here); onApprove hands the
+// approved order ID back to Server808, which captures/verifies it directly
+// with PayPal and only then saves the submission.
+function PayPalScriptStatus() {
+  const [{ isRejected }] = usePayPalScriptReducer();
+  if (!isRejected) return null;
+  return (
+    <div className="p-4 mb-4 bg-red-500/20 border border-red-500/40 text-red-400 text-sm">
+      PayPal failed to load. Check your connection and refresh the page.
+    </div>
+  );
+}
+
+function PayPalCheckout({ form, onSuccess }) {
+  const [msg, setMsg] = useState(null);
+  const [processing, setProcessing] = useState(false);
+
+  const createOrder = async () => {
+    setMsg(null);
+    try {
+      const r = await fetch(`${API_URL}/api/submissions/paypal/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          artist_name: form.artist_name,
+          email: form.email,
+          content: form.description,
+        }),
+      });
+      const d = await r.json();
+      if (!r.ok || !d.orderId) throw new Error(d.message || 'Failed to start payment');
+      return d.orderId;
+    } catch (err) {
+      setMsg(err.message || 'Failed to start payment. Please try again.');
+      throw err;
+    }
+  };
+
+  const onApprove = async (data) => {
+    setProcessing(true);
+    setMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append('artist_name',    form.artist_name);
+      fd.append('email',          form.email);
+      fd.append('title',          form.title);
+      fd.append('content',        form.description);
+      fd.append('paypal_order_id', data.orderID);
+      if (form.youtube_url)     fd.append('youtube_url',     form.youtube_url);
+      if (form.spotify_url)     fd.append('spotify_url',     form.spotify_url);
+      if (form.soundcloud_url)  fd.append('soundcloud_url',  form.soundcloud_url);
+      if (form.apple_music_url) fd.append('apple_music_url', form.apple_music_url);
+      if (form.instagram_url)   fd.append('instagram_url',   form.instagram_url);
+      if (form.genre)           fd.append('genre',           form.genre);
+      if (form.image)           fd.append('image',           form.image);
+
+      const r = await fetch(`${API_URL}/api/submissions/paypal/capture-order`, { method: 'POST', body: fd });
+      const d = await r.json();
+      if (!r.ok) {
+        // Payment may have already been captured by PayPal even though our
+        // save failed -- surface the order ID rather than a generic error
+        // so the user can reference it if they contact support.
+        setMsg(d.orderId
+          ? `${d.message} (Order ID: ${d.orderId})`
+          : (d.message || 'Payment could not be verified. Please try again.'));
+        return;
+      }
+      onSuccess(data.orderID);
+    } catch {
+      setMsg('Network error while confirming your payment. If PayPal already charged you, contact support with your order confirmation.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <div>
+      <PayPalScriptStatus />
+      {msg && <div className="p-4 mb-4 bg-red-500/20 border border-red-500/40 text-red-400 text-sm">{msg}</div>}
+      {processing && <div className="text-white/50 text-xs mb-3">Finalizing your submission…</div>}
+      <PayPalButtons
+        style={{ layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' }}
+        disabled={processing}
+        forceReRender={[form.artist_name, form.email]}
+        createOrder={createOrder}
+        onApprove={onApprove}
+        onCancel={() => setMsg('Payment cancelled — you have not been charged.')}
+        onError={() => setMsg('PayPal encountered an error. Please try again.')}
+      />
+    </div>
+  );
+}
+
 // ── Shared styles ──────────────────────────────────────────────────────────────
 const inputCls = "w-full px-4 py-3 bg-black/50 border border-white/15 text-white placeholder-white/25 focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/20 transition-colors text-sm";
 const labelCls = "block text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-2";
@@ -88,6 +185,7 @@ export default function SubmitMusic() {
   const [step, setStep]       = useState(1); // 1 select | 2 form | 3 payment | 4 success
   const [service, setService] = useState('');
   const [clientSecret, setClientSecret] = useState('');
+  const [paypalOrderId, setPaypalOrderId] = useState('');
   const [isLoading,    setIsLoading]    = useState(false);
   const [errors,       setErrors]       = useState({});
   const [imagePreview, setImagePreview] = useState(null);
@@ -183,6 +281,12 @@ export default function SubmitMusic() {
   const handleProceedToPayment = async () => {
     const valid = service === 'genius' ? validateGenius() : validateArticle();
     if (!valid) return;
+
+    // PayPal's order is created lazily by PayPalCheckout's own createOrder
+    // callback (only when the button is actually clicked) -- no Stripe
+    // PaymentIntent step needed here.
+    if (service === 'guaranteed_article') { setStep(3); return; }
+
     setIsLoading(true);
     try {
       const r = await fetch(`${API_URL}/api/submissions/create-payment-intent`, {
@@ -205,9 +309,10 @@ export default function SubmitMusic() {
   // ── Step 4: Success ───────────────────────────────────────────────────────
   if (step === 4) {
     const msgs = {
-      free:     { icon: '📬', title: 'Submission Received!',           body: "We'll review your music and write your article. Expect to hear from us within 5–7 days." },
-      priority: { icon: '⚡', title: 'Priority Submission Received!',  body: "You're at the top of the queue. Expect to hear from us within 1–2 days." },
-      genius:   { icon: '📝', title: 'Lyrics Submission Received!',    body: "We'll post your lyrics to Genius.com within 2–3 business days." },
+      free:               { icon: '📬', title: 'Submission Received!',           body: "We'll review your music and write your article. Expect to hear from us within 5–7 days." },
+      priority:           { icon: '⚡', title: 'Priority Submission Received!',  body: "You're at the top of the queue. Expect to hear from us within 1–2 days." },
+      genius:             { icon: '📝', title: 'Lyrics Submission Received!',    body: "We'll post your lyrics to Genius.com within 2–3 business days." },
+      guaranteed_article: { icon: '🎯', title: 'Payment Successful.',            body: "Your guaranteed Cry808 article submission has been received. We'll begin reviewing your submission shortly." },
     };
     const m = msgs[service] || msgs.free;
     return (
@@ -219,6 +324,11 @@ export default function SubmitMusic() {
               {m.title}
             </h1>
             <p className="text-white/60 text-sm leading-relaxed mb-2">{m.body}</p>
+            {service === 'guaranteed_article' && paypalOrderId && (
+              <p className="text-white/35 text-xs mb-2 font-mono">
+                Order ID: <span className="text-white/55">{paypalOrderId}</span>
+              </p>
+            )}
             <p className="text-white/35 text-xs mb-10">
               Confirmation sent to <span className="text-white/60">{form.email}</span>
             </p>
@@ -279,7 +389,7 @@ export default function SubmitMusic() {
               <h2 className="text-2xl font-bold mb-2">Choose Your Package</h2>
               <p className="text-white/40 text-sm mb-8">All submissions are reviewed by our editorial team</p>
 
-              <div className="grid md:grid-cols-3 gap-5">
+              <div className="grid md:grid-cols-2 gap-5">
 
                 {/* ── Free ── */}
                 <div className="border border-white/10 bg-white/[0.02] p-7 hover:border-white/25 transition-all flex flex-col">
@@ -302,6 +412,34 @@ export default function SubmitMusic() {
                     className="w-full py-3 border border-white/20 hover:border-white/50 text-white/60 hover:text-white font-medium transition-all text-sm"
                   >
                     Submit Free →
+                  </button>
+                </div>
+
+                {/* ── Guaranteed Article ── */}
+                <div className="border-2 border-purple-500/60 bg-gradient-to-b from-purple-950/40 to-black p-7 relative hover:border-purple-400 transition-all flex flex-col">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
+                    Guaranteed
+                  </div>
+                  <div className="text-4xl mb-4">🎯</div>
+                  <h3 className="text-xl font-bold mb-1">Guaranteed Article</h3>
+                  <div className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-1">$10</div>
+                  <p className="text-white/35 text-xs mb-5">Guaranteed placement on Cry808</p>
+                  <ul className="space-y-2.5 mb-7 text-sm flex-1">
+                    {[
+                      'Guaranteed published article on Cry808',
+                      'Editorial written by our team',
+                      'Streaming and social links embedded',
+                      'Priority review',
+                      '2–3 day turnaround',
+                    ].map(f => (
+                      <li key={f} className="flex items-start gap-2.5 text-white/65"><Check />{f}</li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => { setService('guaranteed_article'); setStep(2); }}
+                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all transform hover:scale-[1.02] shadow-lg shadow-purple-500/20 text-sm"
+                  >
+                    Get Guaranteed Coverage →
                   </button>
                 </div>
 
@@ -362,10 +500,14 @@ export default function SubmitMusic() {
               </div>
 
               {/* Fine print */}
-              <div className="mt-10 px-5 py-4 border border-white/[0.07] bg-white/[0.02]">
+              <div className="mt-10 px-5 py-4 border border-white/[0.07] bg-white/[0.02] space-y-3">
                 <p className="text-white/30 text-xs leading-relaxed">
-                  <span className="text-white/50 font-semibold">📋 Important: </span>
-                  Cry808 editors write all articles — your submission serves as a creative brief. We reserve the right to decline any submission that doesn't align with our platform. Paid submissions are non-refundable regardless of outcome. For Genius Lyrics, your artist name must exist on Genius.com or we'll create an entry for the song.
+                  <span className="text-white/50 font-semibold">📋 Free submissions: </span>
+                  Cry808 editors write all articles — your submission serves as a creative brief. We reserve the right to decline any free submission that doesn't align with our platform. For Genius Lyrics, your artist name must exist on Genius.com or we'll create an entry for the song.
+                </p>
+                <p className="text-white/30 text-xs leading-relaxed">
+                  <span className="text-white/50 font-semibold">🎯 Guaranteed Article: </span>
+                  Paid submissions guarantee article placement, not positive coverage. Cry808 editors maintain full editorial control over the article. Paid submissions are non-refundable once editorial work has begun.
                 </p>
               </div>
             </div>
@@ -377,16 +519,24 @@ export default function SubmitMusic() {
 
               {/* Service banner */}
               <div className={`flex items-center justify-between px-5 py-3.5 mb-7 border ${
-                service === 'genius'   ? 'border-yellow-500/25 bg-yellow-950/10' :
-                service === 'priority' ? 'border-purple-500/25 bg-purple-950/10' :
-                                         'border-white/10 bg-white/[0.02]'
+                service === 'genius'             ? 'border-yellow-500/25 bg-yellow-950/10' :
+                service === 'priority'           ? 'border-purple-500/25 bg-purple-950/10' :
+                service === 'guaranteed_article' ? 'border-purple-500/25 bg-purple-950/10' :
+                                                    'border-white/10 bg-white/[0.02]'
               }`}>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-bold text-white">
-                    {service === 'free' ? '📬 Free Submission' : service === 'priority' ? '⚡ Skip the Line' : '📝 Genius Lyrics'}
+                    {service === 'free'               ? '📬 Free Submission' :
+                     service === 'priority'           ? '⚡ Skip the Line' :
+                     service === 'guaranteed_article'  ? '🎯 Guaranteed Article' :
+                                                          '📝 Genius Lyrics'}
                   </span>
-                  <span className={`text-sm font-bold ${service === 'genius' ? 'text-yellow-400' : service === 'priority' ? 'text-purple-400' : 'text-white/35'}`}>
-                    {service === 'free' ? 'Free' : service === 'priority' ? '$5' : '$10'}
+                  <span className={`text-sm font-bold ${
+                    service === 'genius'                                    ? 'text-yellow-400' :
+                    service === 'priority' || service === 'guaranteed_article' ? 'text-purple-400' :
+                                                                                 'text-white/35'
+                  }`}>
+                    {service === 'free' ? 'Free' : `$${PRICE[service]}`}
                   </span>
                 </div>
                 <button onClick={() => { setStep(1); setErrors({}); }} className="text-xs text-white/30 hover:text-white/60 underline transition-colors">
@@ -494,7 +644,7 @@ export default function SubmitMusic() {
                   ) : (
                     <button onClick={handleProceedToPayment} disabled={isLoading}
                       className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all transform hover:scale-[1.01] shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none text-sm">
-                      {isLoading ? 'Processing…' : 'Continue to Payment — $5 →'}
+                      {isLoading ? 'Processing…' : `Continue to Payment — $${PRICE[service]} →`}
                     </button>
                   )}
                 </div>
@@ -562,8 +712,40 @@ export default function SubmitMusic() {
             </div>
           )}
 
-          {/* ═══════════ STEP 3: PAYMENT ═══════════ */}
-          {step === 3 && clientSecret && (
+          {/* ═══════════ STEP 3: PAYMENT (PayPal — Guaranteed Article) ═══════════ */}
+          {step === 3 && service === 'guaranteed_article' && (
+            <div className="max-w-md">
+              <button onClick={() => setStep(2)}
+                className="flex items-center gap-2 text-white/35 hover:text-white/65 text-sm mb-6 transition-colors">
+                ← Back to Details
+              </button>
+
+              <div className="border border-white/10 bg-white/[0.02] p-7">
+                {/* Order summary — shown before the PayPal button so the user
+                    knows exactly what they're purchasing before paying */}
+                <div className="flex items-center justify-between pb-5 mb-5 border-b border-white/[0.07]">
+                  <div>
+                    <p className="text-sm font-bold text-white">🎯 Guaranteed Article</p>
+                    <p className="text-white/30 text-xs mt-0.5">Secure payment via PayPal</p>
+                  </div>
+                  <span className="text-2xl font-black text-white">$10.00 USD</span>
+                </div>
+
+                {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
+                  <PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: 'USD', intent: 'capture' }}>
+                    <PayPalCheckout form={form} onSuccess={(orderId) => { setPaypalOrderId(orderId); setStep(4); }} />
+                  </PayPalScriptProvider>
+                ) : (
+                  <div className="p-4 bg-red-500/20 border border-red-500/40 text-red-400 text-sm">
+                    Payments are temporarily unavailable. Please try again later.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════ STEP 3: PAYMENT (Stripe — legacy paid tiers) ═══════════ */}
+          {step === 3 && service !== 'guaranteed_article' && clientSecret && (
             <div className="max-w-md">
               <button onClick={() => setStep(2)}
                 className="flex items-center gap-2 text-white/35 hover:text-white/65 text-sm mb-6 transition-colors">

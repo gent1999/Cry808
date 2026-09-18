@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@paypal/react-paypal-js": "^10.5.0",
     "@stripe/react-stripe-js": "^3.2.0",
     "@stripe/stripe-js": "^5.7.0",
     "@vercel/functions": "^3.9.7",

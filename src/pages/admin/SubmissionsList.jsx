@@ -86,10 +86,20 @@ const statusStyle = {
   rejected: 'text-red-400 border-red-800/60',
 };
 
-const typeStyle = {
-  featured: 'text-yellow-400 border-yellow-700/60',
-  regular:  'text-sky-400 border-sky-800/60',
+// Label + style per submission_type. guaranteed_article gets the site's
+// paid-tier purple/pink accent so it's visually distinct from regular/free
+// submissions at a glance. Previously only 'featured'/'regular' were mapped
+// here and everything else (free/priority/genius) silently fell back to a
+// "📰 Regular" label -- fixed while touching this anyway.
+const TYPE_META = {
+  guaranteed_article: { label: '🎯 Guaranteed Article', className: 'text-purple-400 border-purple-700/60' },
+  featured:           { label: '🏆 Featured',            className: 'text-yellow-400 border-yellow-700/60' },
+  priority:           { label: '⚡ Priority',             className: 'text-purple-400 border-purple-700/60' },
+  genius:             { label: '📝 Genius Lyrics',        className: 'text-yellow-400 border-yellow-700/60' },
+  free:               { label: '📬 Free',                 className: 'text-gray-400 border-gray-700/60' },
+  regular:            { label: '📰 Regular',              className: 'text-sky-400 border-sky-800/60' },
 };
+const typeMeta = (type) => TYPE_META[type] || TYPE_META.regular;
 
 // ── Main component ─────────────────────────────────────────────────────────────
 const SubmissionsList = () => {
@@ -279,8 +289,8 @@ const SubmissionsList = () => {
 
                         {/* Type */}
                         <td className="px-4 py-3">
-                          <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 border ${typeStyle[s.submission_type] || typeStyle.regular}`}>
-                            {s.submission_type === 'featured' ? '🏆 Featured' : '📰 Regular'}
+                          <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 border ${typeMeta(s.submission_type).className}`}>
+                            {typeMeta(s.submission_type).label}
                           </span>
                         </td>
 
@@ -353,8 +363,8 @@ const SubmissionsList = () => {
 
               {/* Status chips */}
               <div className="flex flex-wrap gap-2">
-                <span className={`text-[9px] font-mono font-bold uppercase px-2 py-1 border ${typeStyle[selectedSubmission.submission_type] || typeStyle.regular}`}>
-                  {selectedSubmission.submission_type === 'featured' ? '🏆 Featured' : '📰 Regular'}
+                <span className={`text-[9px] font-mono font-bold uppercase px-2 py-1 border ${typeMeta(selectedSubmission.submission_type).className}`}>
+                  {typeMeta(selectedSubmission.submission_type).label}
                 </span>
                 <span className={`text-[9px] font-mono font-bold uppercase px-2 py-1 border ${statusStyle[selectedSubmission.submission_status] || 'text-gray-500 border-gray-800'}`}>
                   {selectedSubmission.submission_status}
@@ -449,8 +459,14 @@ const SubmissionsList = () => {
                 <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-3">Payment</p>
                 <div className="space-y-2 text-[11px] font-mono">
                   {[
-                    ['Amount',  <span className="text-emerald-400 font-bold">{fmtPrice(selectedSubmission.payment_amount)}</span>],
-                    ['ID',      <span className="text-gray-400 break-all">{selectedSubmission.payment_id}</span>],
+                    ['Amount',   <span className="text-emerald-400 font-bold">{fmtPrice(selectedSubmission.payment_amount)}</span>],
+                    ['Provider', <span className="text-gray-400 uppercase">{selectedSubmission.payment_provider || '—'}</span>],
+                    ...(selectedSubmission.payment_provider === 'paypal'
+                      ? [
+                          ['PayPal Order ID',   <span className="text-gray-400 break-all">{selectedSubmission.paypal_order_id}</span>],
+                          ['PayPal Capture ID', <span className="text-gray-400 break-all">{selectedSubmission.paypal_capture_id}</span>],
+                        ]
+                      : [['ID', <span className="text-gray-400 break-all">{selectedSubmission.payment_id}</span>]]),
                     ['Status',  <span className="text-emerald-400">{selectedSubmission.payment_status}</span>],
                     ['Date',    <span className="text-gray-400">{fmtFull(selectedSubmission.created_at)}</span>],
                   ].map(([label, val]) => (
