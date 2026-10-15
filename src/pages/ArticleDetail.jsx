@@ -356,6 +356,13 @@ const ArticleDetail = () => {
                 </div>
               </div>
 
+              {/* Amazon Recommended Gear — underneath Submit Music */}
+              {(adSettings.amazon_article_enabled !== false && adSettings.amazon_article_enabled !== 'false') && (
+                <div className="mt-3">
+                  <AmazonWidget page="article" />
+                </div>
+              )}
+
               {/* Lyrics — shown below Submit Music when article has them */}
               {article.lyrics && (
                 <div className="mt-3 bg-gradient-to-b from-gray-900/80 to-black border border-white/10 overflow-hidden">
@@ -617,13 +624,6 @@ const ArticleDetail = () => {
                     order: parseInt(adSettings.hilltop_article_order || '1'),
                     key: 'hilltop',
                     component: HILLTOP_ENABLED && <HilltopAdSidebar key="hilltop" />
-                  },
-                  {
-                    order: parseInt(adSettings.amazon_article_order || '2'),
-                    key: 'amazon',
-                    component: adSettings.amazon_article_enabled !== false && adSettings.amazon_article_enabled !== 'false'
-                      ? <AmazonWidget key="amazon" page="article" />
-                      : null
                   },
                   {
                     order: parseInt(adSettings.spotify_article_order || '3'),
