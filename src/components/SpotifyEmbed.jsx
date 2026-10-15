@@ -29,15 +29,7 @@ const SpotifyEmbed = ({ pageType = 'home' }) => {
   }, [pageType]);
 
   if (loading) {
-    return (
-      <div className="w-full space-y-4">
-        {[...Array(1)].map((_, i) => (
-          <div key={i} className="bg-white/5 rounded-none p-4 animate-pulse">
-            <div className="h-80 bg-white/10 rounded-none"></div>
-          </div>
-        ))}
-      </div>
-    );
+    return null;
   }
 
   // Don't show if no embeds exist for this page type
@@ -48,20 +40,18 @@ const SpotifyEmbed = ({ pageType = 'home' }) => {
   return (
     <div className="w-full space-y-4">
       {embeds.map((embed) => (
-        <div key={embed.id} className="bg-white/5 border border-white/10 rounded-none p-4">
-          <h3 className="text-white font-semibold mb-3 text-sm">{embed.title}</h3>
-          <iframe
-            style={{ borderRadius: '0px' }}
-            src={embed.spotify_url}
-            width="100%"
-            height="352"
-            frameBorder="0"
-            allowFullScreen=""
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-            title={embed.title}
-          ></iframe>
-        </div>
+        <iframe
+          key={embed.id}
+          style={{ borderRadius: '0px' }}
+          src={embed.spotify_url}
+          width="100%"
+          height="352"
+          frameBorder="0"
+          allowFullScreen=""
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          title={embed.title}
+        ></iframe>
       ))}
     </div>
   );
