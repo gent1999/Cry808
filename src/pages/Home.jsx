@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import SpotifyEmbed from "../components/SpotifyEmbed";
@@ -27,6 +27,9 @@ export default function Home() {
   const [onTheRadar, setOnTheRadar] = useState([]);
   const [trendingTags, setTrendingTags] = useState([]);
   const [artists, setArtists] = useState([]);
+  const artistsRowRef = useRef(null);
+  const [artistsCanScrollLeft, setArtistsCanScrollLeft] = useState(false);
+  const [artistsCanScrollRight, setArtistsCanScrollRight] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
@@ -126,6 +129,34 @@ export default function Home() {
       .then(d => setArtists(d.artists || []))
       .catch(() => {});
   }, []);
+
+  // Keep the Artists row's arrow buttons in sync with actual scroll position —
+  // the row is overflow-hidden (no native scroll/swipe) so the arrows are the
+  // only way to page through, and must disable themselves at each end.
+  function updateArtistsScrollButtons() {
+    const el = artistsRowRef.current;
+    if (!el) return;
+    setArtistsCanScrollLeft(el.scrollLeft > 4);
+    setArtistsCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }
+
+  // A plain useEffect([artists]) fires too early here: this section only
+  // mounts once `artists` is non-empty, so on the very render where that
+  // happens the effect and the ref attachment race, and the ref can still
+  // read null. A callback ref fires exactly when the node is actually
+  // attached, so it's used instead (below, on the row's ref prop).
+  useEffect(() => {
+    window.addEventListener('resize', updateArtistsScrollButtons);
+    return () => window.removeEventListener('resize', updateArtistsScrollButtons);
+  }, []);
+
+  function scrollArtistsRow(direction) {
+    const el = artistsRowRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * el.clientWidth, behavior: 'smooth' });
+    // scrollBy is smooth/async — re-check button state shortly after it settles.
+    setTimeout(updateArtistsScrollButtons, 400);
+  }
 
   // Auto-advance hero carousel
   useEffect(() => {
@@ -621,16 +652,45 @@ export default function Home() {
                         <p className="text-white/40 text-xs mb-3">Profiles of artists featured on Cry808</p>
                         <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-violet-500"></div>
                       </div>
-                      <a href="/artists" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors whitespace-nowrap">
-                        View All →
-                      </a>
+                      <div className="flex items-center gap-3">
+                        {artists.length > 2 && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => scrollArtistsRow(-1)}
+                              disabled={!artistsCanScrollLeft}
+                              aria-label="Previous artists"
+                              className="w-8 h-8 flex items-center justify-center border border-white/10 text-white/60 hover:text-white hover:border-purple-500/40 transition-colors disabled:opacity-30 disabled:hover:text-white/60 disabled:hover:border-white/10"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M15 18l-6-6 6-6" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => scrollArtistsRow(1)}
+                              disabled={!artistsCanScrollRight}
+                              aria-label="Next artists"
+                              className="w-8 h-8 flex items-center justify-center border border-white/10 text-white/60 hover:text-white hover:border-purple-500/40 transition-colors disabled:opacity-30 disabled:hover:text-white/60 disabled:hover:border-white/10"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9 18l6-6-6-6" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                        <a href="/artists" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors whitespace-nowrap">
+                          View All →
+                        </a>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    <div
+                      ref={node => { artistsRowRef.current = node; if (node) updateArtistsScrollButtons(); }}
+                      className="flex gap-3 overflow-x-hidden"
+                    >
                       {artists.map(artist => (
                         <a
                           key={artist.id}
                           href={`/artist/${artist.slug}`}
-                          className="relative overflow-hidden block group cursor-pointer"
+                          className="relative overflow-hidden block group cursor-pointer flex-shrink-0 w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)]"
                           style={{ height: '240px' }}
                         >
                           {artist.profile_image_url

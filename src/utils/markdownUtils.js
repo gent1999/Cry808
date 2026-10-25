@@ -56,3 +56,25 @@ export const stripMarkdown = (markdown) => {
 
   return text;
 };
+
+/**
+ * Prepare freeform markdown (e.g. an artist bio) for react-markdown rendering
+ * while preserving single line breaks as real breaks.
+ *
+ * Standard markdown collapses a single "\n" into a space — fine for prose
+ * written with blank-line-separated paragraphs, but admin bios historically
+ * relied on CSS (`whitespace-pre-line`) to keep every line break exactly as
+ * typed. This converts each single newline within a paragraph into a
+ * CommonMark hard break (trailing double-space + newline) so switching to
+ * real markdown rendering doesn't reflow text that's already been written.
+ * @param {string} markdown
+ * @returns {string}
+ */
+export const markdownWithLineBreaks = (markdown) => {
+  if (!markdown) return '';
+  return markdown
+    .replace(/\n{2,}/g, '\n\n')
+    .split('\n\n')
+    .map(block => block.split('\n').join('  \n'))
+    .join('\n\n');
+};

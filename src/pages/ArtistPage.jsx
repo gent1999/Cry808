@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Footer from '../components/Footer';
 import HilltopAdSidebar from '../components/HilltopAdSidebar';
 import HilltopMobileBanner from '../components/HilltopMobileBanner';
@@ -9,6 +11,13 @@ import SpotifyEmbed from '../components/SpotifyEmbed';
 import BeatportArticleBanner from '../components/BeatportArticleBanner';
 import { HILLTOP_ENABLED } from '../config/ads';
 import { generateArticleUrl } from '../utils/slugify';
+import { markdownWithLineBreaks, stripMarkdown } from '../utils/markdownUtils';
+
+const markdownLinkComponent = {
+  a: ({ node, ...props }) => (
+    <a {...props} target="_blank" rel="noopener noreferrer" className="underline hover:text-purple-300 transition-colors" />
+  ),
+};
 import spotifyLogo     from '../assets/spotify_logo.png';
 import soundcloudLogo  from '../assets/soundcloud_logo.png';
 import youtubeLogo     from '../assets/youtube_logo.png';
@@ -113,7 +122,7 @@ export default function ArtistPage() {
   ];
 
   const artistDescription = artist.bio
-    ? artist.bio.slice(0, 160)
+    ? stripMarkdown(artist.bio).slice(0, 160)
     : `Read all ${artist.name} articles on Cry808.`;
   const artistUrl = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -274,7 +283,17 @@ export default function ArtistPage() {
                   <div className="text-[11px] font-mono uppercase tracking-[.2em] text-purple-400 mb-2">Artist</div>
                   <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white drop-shadow-[0_2px_16px_rgba(0,0,0,1)]">{artist.name}</h1>
                   {artist.bio && (
-                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 drop-shadow-[0_1px_6px_rgba(0,0,0,1)]">{artist.bio}</p>
+                    <div className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 drop-shadow-[0_1px_6px_rgba(0,0,0,1)]">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                          ...markdownLinkComponent,
+                        }}
+                      >
+                        {markdownWithLineBreaks(artist.bio)}
+                      </ReactMarkdown>
+                    </div>
                   )}
                   <div className="mt-3 text-xs text-white/40">
                     {articles.length} {articles.length === 1 ? 'article' : 'articles'}
@@ -337,7 +356,17 @@ export default function ArtistPage() {
               <div className="mb-10 relative overflow-hidden bg-gradient-to-br from-purple-950/25 to-black/40 border border-white/[0.05] px-8 py-10">
                 <div className="absolute top-3 left-5 text-[120px] leading-none text-purple-400/8 font-serif select-none pointer-events-none">"</div>
                 <div className="absolute bottom-0 right-0 w-48 h-48 bg-[radial-gradient(circle,rgba(139,92,246,.07),transparent_70%)] pointer-events-none" />
-                <p className="relative text-base md:text-lg leading-[1.9] text-white/65 whitespace-pre-line font-light tracking-wide">{artist.bio2}</p>
+                <div className="relative text-base md:text-lg leading-[1.9] text-white/65 font-light tracking-wide">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ node, ...props }) => <p className="mb-5 last:mb-0" {...props} />,
+                      ...markdownLinkComponent,
+                    }}
+                  >
+                    {markdownWithLineBreaks(artist.bio2)}
+                  </ReactMarkdown>
+                </div>
               </div>
             )}
 

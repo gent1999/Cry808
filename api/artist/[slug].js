@@ -8,6 +8,24 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// Bios are stored as raw markdown; strip the syntax for the plain-text
+// meta description so crawlers don't see literal ** or * characters.
+function stripMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/_(.+?)_/g, '$1')
+    .replace(/~~(.+?)~~/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^>\s+/gm, '')
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/^\s*\d+\.\s+/gm, '');
+}
+
 export default async function handler(req, res) {
   const { slug } = req.query;
 
@@ -58,7 +76,7 @@ export default async function handler(req, res) {
     const articles = data.articles || [];
 
     const description = artist.bio
-      ? artist.bio.replace(/\s+/g, ' ').trim().substring(0, 160) + '...'
+      ? stripMarkdown(artist.bio).replace(/\s+/g, ' ').trim().substring(0, 160) + '...'
       : `Read all ${artist.name} articles, interviews, and releases on Cry808.`;
     const url = `https://cry808.com/artist/${slug}`;
 
