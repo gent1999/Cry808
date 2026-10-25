@@ -68,7 +68,7 @@ export default async function handler(req, res) {
       ogImage = `https://images.weserv.nl/?url=${encodeURIComponent(artist.profile_image_url)}&w=1200&h=630&fit=cover&output=jpg`;
     }
 
-    const sameAs = [artist.spotify_url, artist.soundcloud_url, artist.youtube_url, artist.genius_url, artist.apple_music_url]
+    const sameAs = [artist.spotify_url, artist.soundcloud_url, artist.youtube_url, artist.genius_url, artist.instagram_url, artist.apple_music_url]
       .filter(Boolean);
 
     // Generate JSON-LD structured data for rich search results

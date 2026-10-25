@@ -96,7 +96,7 @@ export default function ArtistCreate() {
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [bio2, setBio2] = useState('');
-  const [links, setLinks] = useState({ spotify_url: '', soundcloud_url: '', youtube_url: '', genius_url: '', apple_music_url: '' });
+  const [links, setLinks] = useState({ spotify_url: '', soundcloud_url: '', youtube_url: '', genius_url: '', instagram_url: '', apple_music_url: '' });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [galleryFiles, setGalleryFiles] = useState({ 1: null, 2: null, 3: null });
@@ -224,6 +224,7 @@ export default function ArtistCreate() {
                   { key: 'soundcloud_url',  label: 'SoundCloud',   placeholder: 'https://soundcloud.com/…' },
                   { key: 'youtube_url',     label: 'YouTube',      placeholder: 'https://youtube.com/@…' },
                   { key: 'genius_url',      label: 'Genius',       placeholder: 'https://genius.com/artists/…' },
+                  { key: 'instagram_url',   label: 'Instagram',    placeholder: 'https://instagram.com/…' },
                   { key: 'apple_music_url', label: 'Apple Music',  placeholder: 'https://music.apple.com/…' },
                 ].map(({ key, label, placeholder }) => (
                   <div key={key} className="flex items-center gap-2">
