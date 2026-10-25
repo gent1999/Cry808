@@ -43,6 +43,8 @@ export default function Artists() {
   const sidebarComponents = [
     { order: parseInt(adSettings.hilltop_article_order || '1'), key: 'hilltop', component: HILLTOP_ENABLED && <HilltopAdSidebar key="hilltop" /> },
     { order: parseInt(adSettings.spotify_article_order  || '3'), key: 'spotify', component: <SpotifyEmbed key="spotify" pageType="article" /> },
+    // Always last — this page's ad widget sits under the playlist, not in the left panel.
+    { order: 99, key: 'amazon', component: adSettings.amazon_article_enabled !== false && adSettings.amazon_article_enabled !== 'false' ? <AmazonWidget key="amazon" page="article" /> : null },
   ];
 
   const handleNewsletterSubmit = async (e) => {
@@ -143,13 +145,6 @@ export default function Artists() {
                   </a>
                 </div>
               </div>
-
-              {/* Amazon Recommended Gear — underneath Submit Music */}
-              {(adSettings.amazon_article_enabled !== false && adSettings.amazon_article_enabled !== 'false') && (
-                <div className="mt-3">
-                  <AmazonWidget page="article" />
-                </div>
-              )}
             </div>
           </div>
 
