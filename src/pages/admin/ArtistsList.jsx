@@ -79,6 +79,7 @@ export default function ArtistsList() {
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
+  const [reordering, setReordering] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -94,6 +95,26 @@ export default function ArtistsList() {
       setArtists(data.artists || []);
     } catch {}
     setLoading(false);
+  }
+
+  async function moveArtist(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= artists.length || reordering) return;
+
+    const reordered = [...artists];
+    [reordered[index], reordered[newIndex]] = [reordered[newIndex], reordered[index]];
+    setArtists(reordered);
+
+    setReordering(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      await fetch(`${API_URL}/api/artists/reorder`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: reordered.map(a => a.id) }),
+      });
+    } catch {}
+    setReordering(false);
   }
 
   async function handleDelete(artist) {
@@ -138,7 +159,7 @@ export default function ArtistsList() {
         <main className="px-8 py-8">
           <div className="mb-6">
             <h1 className="text-2xl font-bold tracking-tight text-white">Artist Profiles</h1>
-            <p className="mt-1 text-sm text-slate-500">Profiles for artists featured across multiple articles.</p>
+            <p className="mt-1 text-sm text-slate-500">Profiles for artists featured across multiple articles. Use the arrows to set the order they appear in on the public site.</p>
           </div>
 
           {loading ? (
@@ -155,8 +176,32 @@ export default function ArtistsList() {
             </div>
           ) : (
             <div className="space-y-2">
-              {artists.map(artist => (
+              {artists.map((artist, index) => (
                 <div key={artist.id} className="flex items-center gap-4 border border-white/[0.06] bg-white/[0.02] px-5 py-4 hover:bg-white/[0.04] transition">
+                  {/* Reorder */}
+                  <div className="flex flex-col gap-0.5 flex-shrink-0">
+                    <button
+                      onClick={() => moveArtist(index, -1)}
+                      disabled={index === 0 || reordering}
+                      className="text-slate-500 hover:text-white disabled:opacity-20 disabled:hover:text-slate-500 transition"
+                      title="Move up"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 15l-6-6-6 6" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => moveArtist(index, 1)}
+                      disabled={index === artists.length - 1 || reordering}
+                      className="text-slate-500 hover:text-white disabled:opacity-20 disabled:hover:text-slate-500 transition"
+                      title="Move down"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                  </div>
+
                   {/* Avatar */}
                   <div className="h-12 w-12 flex-shrink-0 overflow-hidden bg-white/[0.05]">
                     {artist.profile_image_url
