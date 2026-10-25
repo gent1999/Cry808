@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Footer from '../components/Footer';
 import BeatportArticleBanner from '../components/BeatportArticleBanner';
+import HilltopAdSidebar from '../components/HilltopAdSidebar';
+import AmazonWidget from '../components/AmazonWidget';
+import SpotifyEmbed from '../components/SpotifyEmbed';
+import { HILLTOP_ENABLED } from '../config/ads';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -12,6 +16,7 @@ export default function Artists() {
   const [email, setEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [adSettings, setAdSettings] = useState({});
 
   useEffect(() => {
     fetch(`${API_URL}/api/artists`)
@@ -20,6 +25,25 @@ export default function Artists() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/settings/public`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.settings) return;
+        const converted = {};
+        Object.entries(data.settings).forEach(([k, v]) => {
+          converted[k] = v === 'true' ? true : v === 'false' ? false : v;
+        });
+        setAdSettings(converted);
+      })
+      .catch(() => {});
+  }, []);
+
+  const sidebarComponents = [
+    { order: parseInt(adSettings.hilltop_article_order || '1'), key: 'hilltop', component: HILLTOP_ENABLED && <HilltopAdSidebar key="hilltop" /> },
+    { order: parseInt(adSettings.spotify_article_order  || '3'), key: 'spotify', component: <SpotifyEmbed key="spotify" pageType="article" /> },
+  ];
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
@@ -119,6 +143,13 @@ export default function Artists() {
                   </a>
                 </div>
               </div>
+
+              {/* Amazon Recommended Gear — underneath Submit Music */}
+              {(adSettings.amazon_article_enabled !== false && adSettings.amazon_article_enabled !== 'false') && (
+                <div className="mt-3">
+                  <AmazonWidget page="article" />
+                </div>
+              )}
             </div>
           </div>
 
@@ -171,8 +202,15 @@ export default function Artists() {
             )}
           </div>
 
-          {/* Right sidebar placeholder — keeps layout consistent on xl+ */}
-          <div className="hidden xl:block w-80 flex-shrink-0" />
+          {/* Right sidebar */}
+          <div className="hidden xl:block w-80 flex-shrink-0">
+            <div className="sticky top-24 space-y-6">
+              {sidebarComponents
+                .sort((a, b) => a.order - b.order)
+                .map(item => item.component)
+                .filter(Boolean)}
+            </div>
+          </div>
 
         </div>
 
