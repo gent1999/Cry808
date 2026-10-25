@@ -15,7 +15,7 @@ import { rewrite, next } from '@vercel/functions';
 const CRAWLER_RE = /facebookexternalhit|twitterbot|slackbot|telegrambot|whatsapp|linkedinbot|discordbot|pinterestbot|googlebot|mediapartners-google|adsbot-google|apis-google|storebot-google/i;
 
 export const config = {
-  matcher: ['/', '/news', '/interviews', '/article/:slug'],
+  matcher: ['/', '/news', '/interviews', '/article/:slug', '/artist/:slug'],
 };
 
 export default function middleware(request) {
@@ -30,6 +30,10 @@ export default function middleware(request) {
   if (url.pathname.startsWith('/article/')) {
     const slug = url.pathname.slice('/article/'.length);
     return rewrite(new URL(`/api/article/${slug}`, request.url));
+  }
+  if (url.pathname.startsWith('/artist/')) {
+    const slug = url.pathname.slice('/artist/'.length);
+    return rewrite(new URL(`/api/artist/${slug}`, request.url));
   }
 
   return next();

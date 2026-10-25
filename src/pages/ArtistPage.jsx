@@ -112,11 +112,31 @@ export default function ArtistPage() {
     { order: parseInt(adSettings.spotify_article_order  || '3'), key: 'spotify', component: <SpotifyEmbed key="spotify" pageType="article" /> },
   ];
 
+  const artistDescription = artist.bio
+    ? artist.bio.slice(0, 160)
+    : `Read all ${artist.name} articles on Cry808.`;
+  const artistUrl = typeof window !== 'undefined' ? window.location.href : '';
+
   return (
     <>
       <Helmet>
         <title>{artist.name} — Cry808</title>
-        <meta name="description" content={artist.bio ? artist.bio.slice(0, 160) : `Read all ${artist.name} articles on Cry808.`} />
+        <meta name="description" content={artistDescription} />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="profile" />
+        <meta property="og:url" content={artistUrl} />
+        <meta property="og:title" content={artist.name} />
+        <meta property="og:description" content={artistDescription} />
+        {artist.profile_image_url && <meta property="og:image" content={artist.profile_image_url} />}
+        <meta property="og:site_name" content="Cry808" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={artistUrl} />
+        <meta name="twitter:title" content={artist.name} />
+        <meta name="twitter:description" content={artistDescription} />
+        {artist.profile_image_url && <meta name="twitter:image" content={artist.profile_image_url} />}
       </Helmet>
 
       <div className="min-h-screen bg-black text-white overflow-x-hidden">
